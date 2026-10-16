@@ -141,10 +141,10 @@ footer button { background: none; border: 0; color: var(--muted); text-decoratio
   "use strict";
 
   /* ============ CONFIGURAZIONE ============
-     Metti la tua chiave TMDB qui sotto oppure lasciala vuota: il sito te la chiederà alla prima apertura
-     e la salverà solo nel tuo browser (consigliato se il repository è pubblico).
-*/
-  var CONFIG = { TMDB_KEY: "" };
+      Inserisci qui la tua chiave API TMDB.
+      ATTENZIONE: in un repository pubblico la chiave sarà visibile a tutti.
+   */
+  var CONFIG = { TMDB_KEY: "c849280bb84203160df0f58c92090716" };
 
   var REGION = "IT";
   var IMG = "https://image.tmdb.org/t/p/w500";
@@ -202,36 +202,9 @@ footer button { background: none; border: 0; color: var(--muted); text-decoratio
   function setProgress(n, label) { fill.style.width = (n / TOTAL * 100) + "%"; barwrap.setAttribute("aria-valuenow", n); countEl.textContent = label || ""; }
   function swap(html) { stage.classList.remove("stage"); void stage.offsetWidth; stage.classList.add("stage"); stage.innerHTML = html; }
 
-  /* ---------- Chiave API ---------- */
-  function getKey() {
-    if (CONFIG.TMDB_KEY) return CONFIG.TMDB_KEY;
-    try { return localStorage.getItem("tmdb_key") || ""; } catch (e) { return ""; }
-  }
-  function saveKey(k) { try { localStorage.setItem("tmdb_key", k); } catch (e) {} }
-  function clearKey() { try { localStorage.removeItem("tmdb_key"); } catch (e) {} }
-
-  function renderSetup(msg) {
-    setProgress(0, "");
-    swap('<h1 class="q">Collega il database dei film</h1>' +
-      '<div class="setup">' + (msg ? '<p style="margin:0;color:var(--red)">' + esc(msg) + "</p>" : "") +
-      "<p style=\"margin:0\">Il sito usa TMDB, un database gratuito con trame e locandine in italiano. Serve una chiave personale, gratis:</p>" +
-      '<ol><li>Registrati su <a href="https://www.themoviedb.org/signup" target="_blank" rel="noopener">themoviedb.org</a></li>' +
-      '<li>Vai in Impostazioni → <a href="https://www.themoviedb.org/settings/api" target="_blank" rel="noopener">API</a> e richiedi una chiave (uso personale)</li>' +
-      "<li>Copia la «Chiave API» oppure il «Token di lettura API» e incollala qui sotto</li></ol>" +
-      '<input class="field" id="keyin" type="password" autocomplete="off" spellcheck="false" placeholder="Incolla qui la chiave" aria-label="Chiave API TMDB">' +
-      '<button type="button" class="btn primary cta" id="keysave">Salva e inizia</button>' +
-      '<p style="margin:0;color:var(--muted);font-size:13px">La chiave resta salvata solo in questo browser.</p></div>');
-    document.getElementById("keysave").onclick = function () {
-      var v = document.getElementById("keyin").value.trim();
-      if (v.length < 20) { renderSetup("La chiave sembra troppo corta. Controlla di averla copiata tutta."); return; }
-      saveKey(v); S.step = 0; renderStep();
-    };
-  }
-
   /* ---------- Quiz ---------- */
   function renderStep() {
-    if (!getKey()) { renderSetup(); return; }
-    var st = STEPS[S.step];
+        var st = STEPS[S.step];
     setProgress(S.step + 1, (S.step + 1) + "/" + TOTAL);
     var h = '<h1 class="q">' + esc(st.q) + "</h1>";
     if (st.slider) {
@@ -296,29 +269,37 @@ footer button { background: none; border: 0; color: var(--muted); text-decoratio
     return function () { clearInterval(iv); };
   }
   function showError(err) {
-    var key = err && err.message === "KEY";
-    var msg = key ? "TMDB ha rifiutato la chiave. Controlla di averla copiata bene."
-      : err && err.message === "EMPTY" ? "Nessun film trovato con queste regole. Prova a togliere qualche esclusione."
+    var msg = err && err.message === "EMPTY" ? "Nessun film trovato con queste regole. Prova a togliere qualche esclusione."
+      : err && err.message === "RATE_LIMIT" ? "Troppe richieste in poco tempo. Aspetta qualche secondo e riprova."
+      : err && err.message === "CONFIG" ? "Inserisci la tua chiave API TMDB nella variabile CONFIG.TMDB_KEY all'inizio del codice."
+      : err && err.message === "KEY" ? "TMDB ha rifiutato la chiave. Controlla che sia corretta."
       : "Non riesco a contattare il database dei film. Controlla la connessione e riprova.";
     setProgress(TOTAL, "");
     swap('<div class="errbox"><h2>Qualcosa non va</h2><p style="margin:0">' + esc(msg) + '</p><div class="nav" style="margin-top:0">' +
-      '<button type="button" class="btn primary" id="retry">Riprova</button>' + (key ? '<button type="button" class="btn" id="newkey">Cambia chiave</button>' : "") +
+      '<button type="button" class="btn primary" id="retry">Riprova</button>' +
       '<button type="button" class="btn ghost" id="toquiz">Torna al quiz</button></div></div>');
     document.getElementById("retry").onclick = startSearch;
-    var nk = document.getElementById("newkey"); if (nk) nk.onclick = function () { clearKey(); renderSetup(); };
     document.getElementById("toquiz").onclick = function () { S.step = TOTAL - 1; renderStep(); };
   }
 
   /* ---------- TMDB ---------- */
   function tmdb(path, params) {
-    var key = getKey();
+    var key = CONFIG.TMDB_KEY.trim();
+    if (!key || key === "INCOLLA_LA_TUA_CHIAVE_TMDB_QUI") {
+      return Promise.reject(new Error("CONFIG"));
+    }
     var url = new URL("https://api.themoviedb.org/3" + path);
     var headers = {};
-    if (key.indexOf("eyJ") === 0) headers.Authorization = "Bearer " + key; else url.searchParams.set("api_key", key);
+    if (key.indexOf("eyJ") === 0) headers.Authorization = "Bearer " + key;
+    else url.searchParams.set("api_key", key);
     url.searchParams.set("language", "it-IT");
-    Object.keys(params || {}).forEach(function (k) { var v = params[k]; if (v !== undefined && v !== null && v !== "") url.searchParams.set(k, v); });
+    Object.keys(params || {}).forEach(function (k) {
+      var v = params[k];
+      if (v !== undefined && v !== null && v !== "") url.searchParams.set(k, v);
+    });
     return fetch(url.toString(), { headers: headers }).then(function (r) {
       if (r.status === 401) throw new Error("KEY");
+      if (r.status === 429) throw new Error("RATE_LIMIT");
       if (!r.ok) throw new Error("HTTP " + r.status);
       return r.json();
     });
