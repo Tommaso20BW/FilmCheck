@@ -11,6 +11,7 @@
 <meta name="color-scheme" content="dark">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
+<meta name="format-detection" content="telephone=no">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Stasera">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,13 +21,15 @@
 :root{--bg:#0c0a11;--s:#16121e;--s2:#1f1929;--line:#2f2740;--fg:#f4effa;--mut:#a89fba;--red:#ff3d52;--vio:#9061f9;--gold:#f5c451;
 --fd:"Bricolage Grotesque","Arial Narrow",Arial,sans-serif;--fb:"Instrument Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color-scheme:dark}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{height:100%}
-body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 var(--fb);overscroll-behavior:none;-webkit-user-select:none;user-select:none;
-background-image:radial-gradient(900px 500px at 85% -10%,rgba(144,97,249,.16),transparent 60%),radial-gradient(700px 420px at -10% 0,rgba(255,61,82,.12),transparent 60%);background-repeat:no-repeat;background-attachment:fixed;
+html{background:#0c0a11;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{margin:0;min-height:100vh;min-height:100dvh;color:var(--fg);font:16px/1.5 var(--fb);overscroll-behavior:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-font-smoothing:antialiased;
 padding:max(20px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(40px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(900px 500px at 85% -10%,rgba(144,97,249,.16),transparent 60%),radial-gradient(700px 420px at -10% 0,rgba(255,61,82,.12),transparent 60%),#0c0a11}
+img{-webkit-user-drag:none;-webkit-touch-callout:none}
 .wrap{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
 h1,h2,h3{font-family:var(--fd);margin:0;line-height:1.1;text-wrap:balance}
-button{font:inherit;color:inherit;cursor:pointer;-webkit-appearance:none;appearance:none}
+button{font:inherit;color:inherit;cursor:pointer;-webkit-appearance:none;appearance:none;touch-action:manipulation;margin:0;text-align:left;-webkit-text-fill-color:currentColor}
+.btn,.card{text-align:center}.card{text-align:left}
 :focus-visible{outline:2px solid var(--gold);outline-offset:3px}
 .brand{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;font-family:var(--fd);font-weight:800;font-size:14px;letter-spacing:.14em;text-transform:uppercase}
 .brand i{font-style:normal;color:var(--red)}
@@ -42,7 +45,7 @@ button{font:inherit;color:inherit;cursor:pointer;-webkit-appearance:none;appeara
 .card,.opt{background:var(--s);border:1.5px solid var(--line);border-radius:16px;text-align:left;transition:border-color .15s,transform .15s}
 .card{padding:22px 18px;display:flex;flex-direction:column;gap:8px}
 .card .ic{font-size:34px;line-height:1}.card strong{font:800 19px var(--fd)}.card small{color:var(--mut);font-size:13.5px}
-.card:hover{border-color:var(--c)}
+@media(hover:hover){.card:hover{border-color:var(--c)}}
 .opts{display:grid;gap:10px}
 .opts.two{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
 .opt{display:flex;align-items:center;gap:14px;padding:16px;min-height:64px}
@@ -64,7 +67,7 @@ input[type=range]{width:100%;accent-color:var(--red);height:32px;margin:0}
 .ends{display:flex;justify-content:space-between;color:var(--mut);font-size:13px}
 .loading{min-height:340px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;text-align:center}
 .loading p{font:700 22px var(--fd);margin:0}
-.clap{width:110px;height:110px}.clap .arm{transform-origin:14px 38px;animation:clap .9s ease-in-out infinite}
+.clap{width:110px;height:110px}.clap .arm{transform-box:view-box;transform-origin:14px 38px;animation:clap .9s ease-in-out infinite}
 @keyframes clap{0%,55%,100%{transform:rotate(-22deg)}70%{transform:rotate(0)}}
 .err{background:var(--s);border:1.5px solid rgba(255,61,82,.5);border-radius:16px;padding:20px 18px;display:flex;flex-direction:column;gap:12px}
 .err small{color:var(--mut);font-size:12px;word-break:break-all}
@@ -164,7 +167,7 @@ const S={cat:null,step:0,a:null,cands:[],seen:[],cur:null};
 const resetA=()=>({mood:null,effort:null,time:null,who:null,risk:50,avoid:[]});
 const stage=$("stage");
 function setProg(n,l){$("bf").style.width=(n/TOTAL*100)+"%";$("bw").setAttribute("aria-valuenow",n);$("count").textContent=l||""}
-function swap(h){stage.classList.remove("stage");void stage.offsetWidth;stage.classList.add("stage");stage.innerHTML=h}
+function swap(h){stage.classList.remove("stage");void stage.offsetWidth;stage.classList.add("stage");stage.innerHTML=h;scrollTo(0,0)}
 
 function fj(url,ms,opts){
   const c=new AbortController(),t=setTimeout(()=>c.abort(),ms||12000);
@@ -406,6 +409,8 @@ let dp=null;const ib=$("ib");
 addEventListener("beforeinstallprompt",e=>{e.preventDefault();dp=e;try{if(!localStorage.getItem("stasera_ix"))ib.hidden=false}catch(x){ib.hidden=false}});
 $("ibtn").onclick=()=>{ib.hidden=true;if(dp){dp.prompt();dp=null}};
 $("ix").onclick=()=>{ib.hidden=true;try{localStorage.setItem("stasera_ix","1")}catch(x){}};
+try{const ios=/iphone|ipad|ipod/i.test(navigator.userAgent),stand=navigator.standalone===true||matchMedia("(display-mode: standalone)").matches;
+if(ios&&!stand&&!localStorage.getItem("stasera_ix")){ib.querySelector("p").innerHTML="Per usarla come app: tocca <b>Condividi</b> ⬆️ e poi <b>Aggiungi a Home</b>.";$("ibtn").hidden=true;ib.hidden=false}}catch(x){}
 addEventListener("appinstalled",()=>{ib.hidden=true});
 })();
 </script>
