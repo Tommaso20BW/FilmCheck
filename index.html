@@ -1,736 +1,399 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
 <title>Stasera Cosa Guardo</title>
-<meta name="claude:viewport-fit-sides" content="cover">
-<style>
-:root{
-  /* palette: sala cinema buia, velluto rosso, neon viola, titoli dorati */
-  --bg:#0c0a11; --surface:#16121e; --surface-2:#1f1929; --line:#2f2740;
-  --fg:#f4effa; --muted:#a89fba; --red:#ff3d52; --violet:#9061f9; --gold:#f5c451;
-  --film:#ff3d52; --serie:#5ec8ff; --anime:#9061f9;
-  --font-display:"Bricolage Grotesque","Arial Narrow","Helvetica Neue",Arial,sans-serif;
-  --font-body:"Instrument Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-  color-scheme:dark;
-}
-*{box-sizing:border-box;}
-html,body{min-height:100%;}
-body{
-  margin:0; background:var(--bg); color:var(--fg); font-family:var(--font-body); font-size:16px; line-height:1.5;
-  background-image:radial-gradient(900px 500px at 85% -10%, rgba(144,97,249,.16), transparent 60%), radial-gradient(700px 420px at -10% 0%, rgba(255,61,82,.12), transparent 60%);
-  background-repeat:no-repeat;
-  padding-block:20px 40px;
-  padding-left:max(16px, env(safe-area-inset-left,0px)); padding-right:max(16px, env(safe-area-inset-right,0px));
-}
-.wrap{max-width:640px; margin:0 auto; display:flex; flex-direction:column; gap:20px;}
-h1,h2,h3{font-family:var(--font-display); text-wrap:balance; margin:0; line-height:1.1;}
-button,input{font:inherit; color:inherit;}
-button{cursor:pointer;}
-:focus-visible{outline:2px solid var(--gold); outline-offset:3px;}
-a{color:var(--gold);}
-
-.top{display:flex; flex-direction:column; gap:12px;}
-.brand{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;}
-.brand b{font-family:var(--font-display); font-weight:800; font-size:14px; letter-spacing:.14em; text-transform:uppercase;}
-.brand b i{font-style:normal; color:var(--red);}
-.catpill{display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--muted); letter-spacing:.06em;}
-.catpill span.dot{width:8px; height:8px; border-radius:50%; background:var(--accent, var(--red));}
-.count{font-variant-numeric:tabular-nums; color:var(--muted); font-size:14px; letter-spacing:.06em;}
-.bar{height:6px; border-radius:99px; background:var(--surface-2); overflow:hidden;}
-.bar>span{display:block; height:100%; width:0; border-radius:99px; background:linear-gradient(90deg, var(--red), var(--violet)); transition:width .4s ease;}
-
-.stage{animation:rise .35s ease both;}
-@keyframes rise{from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:none;}}
-.q{font-size:clamp(26px,6.5vw,38px); font-weight:800; letter-spacing:-.02em; margin-bottom:8px;}
-.hint{color:var(--muted); margin:0 0 18px;}
-
-.catgrid{display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px;}
-.catcard{background:var(--surface); border:1.5px solid var(--line); border-radius:18px; padding:22px 18px; display:flex; flex-direction:column; gap:10px; text-align:left; transition:border-color .15s, transform .15s;}
-.catcard:hover{transform:translateY(-2px);}
-.catcard .ic{font-size:34px; line-height:1;}
-.catcard strong{font-family:var(--font-display); font-size:19px; font-weight:800;}
-.catcard small{color:var(--muted); font-size:13.5px;}
-.catcard.film:hover, .catcard.film[aria-pressed="true"]{border-color:var(--film); background:linear-gradient(135deg, rgba(255,61,82,.14), transparent);}
-.catcard.serie:hover, .catcard.serie[aria-pressed="true"]{border-color:var(--serie); background:linear-gradient(135deg, rgba(94,200,255,.14), transparent);}
-.catcard.anime:hover, .catcard.anime[aria-pressed="true"]{border-color:var(--anime); background:linear-gradient(135deg, rgba(144,97,249,.16), transparent);}
-
-.opts{display:grid; gap:10px; grid-template-columns:minmax(0,1fr);}
-.opts.two{grid-template-columns:repeat(auto-fit,minmax(160px,1fr));}
-.opt{display:flex; align-items:center; gap:14px; text-align:left; min-width:0; background:var(--surface); border:1.5px solid var(--line); border-radius:16px; padding:16px; min-height:64px; transition:border-color .15s, background .15s, transform .15s;}
-.opts.two .opt{flex-direction:column; align-items:flex-start; gap:10px; padding:18px 16px;}
-.opt:hover{border-color:var(--violet); transform:translateY(-1px);}
-.opt[aria-pressed="true"]{border-color:var(--red); background:linear-gradient(135deg, rgba(255,61,82,.16), rgba(144,97,249,.14));}
-.emo{font-size:28px; line-height:1; flex:none;}
-.opts.two .emo{font-size:32px;}
-.lab{min-width:0; overflow-wrap:anywhere;}
-.lab strong{display:block; font-weight:600;}
-.lab small{display:block; color:var(--muted); font-size:14px; margin-top:2px;}
-.nav{display:flex; gap:10px; margin-top:18px; align-items:center; flex-wrap:wrap;}
-.btn{border-radius:14px; padding:14px 20px; font-weight:600; min-height:48px; background:var(--surface-2); border:1.5px solid var(--line); transition:transform .15s, border-color .15s;}
-.btn:hover{border-color:var(--violet); transform:translateY(-1px);}
-.btn.primary{background:linear-gradient(135deg, var(--red), #c42ddb 120%); border-color:transparent; color:#fff;}
-.btn.primary:hover{border-color:transparent; filter:brightness(1.08);}
-.btn.cta{flex:1 1 220px; font-family:var(--font-display); font-weight:800; letter-spacing:.08em; text-transform:uppercase;}
-.btn.ghost{background:transparent;}
-
-.slider-box{background:var(--surface); border:1.5px solid var(--line); border-radius:16px; padding:22px 18px; display:flex; flex-direction:column; gap:16px;}
-.risk-num{font-family:var(--font-display); font-weight:800; font-size:56px; line-height:1; font-variant-numeric:tabular-nums;}
-.risk-num sup{font-size:22px; color:var(--muted); vertical-align:top; margin-left:2px;}
-.risk-txt{color:var(--gold); font-weight:600; min-height:3em;}
-input[type=range]{width:100%; accent-color:var(--red); height:32px; margin:0;}
-.ends{display:flex; justify-content:space-between; gap:12px; color:var(--muted); font-size:13px;}
-
-.loading{min-height:340px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:22px; text-align:center;}
-.loading p{font-family:var(--font-display); font-size:22px; font-weight:700; margin:0; min-height:1.4em;}
-.clap{width:110px; height:110px;}
-.clap .arm{transform-origin:14px 38px; animation:clap .9s ease-in-out infinite;}
-@keyframes clap{0%,55%,100%{transform:rotate(-22deg);} 70%{transform:rotate(0deg);}}
-
-.errbox{background:var(--surface); border:1.5px solid rgba(255,61,82,.5); border-radius:16px; padding:20px 18px; display:flex; flex-direction:column; gap:14px;}
-
-.res{display:flex; flex-direction:column; gap:18px;}
-.tag{align-self:flex-start; font-size:13px; letter-spacing:.1em; text-transform:uppercase; font-weight:600; color:var(--gold); border:1px solid rgba(245,196,81,.4); border-radius:99px; padding:4px 12px;}
-.hero{display:grid; grid-template-columns:minmax(0,190px) minmax(0,1fr); gap:18px; align-items:start;}
-.poster{position:relative; width:100%; aspect-ratio:2/3; border-radius:12px; overflow:hidden; box-shadow:0 18px 40px rgba(0,0,0,.5), inset 0 0 0 1px rgba(255,255,255,.12); background:var(--surface-2);}
-.poster img{width:100%; height:100%; object-fit:cover; display:block;}
-.poster.fallback{display:flex; flex-direction:column; justify-content:space-between; padding:14px 12px;}
-.poster.fallback small{font-size:10px; letter-spacing:.3em; text-transform:uppercase; opacity:.8;}
-.poster.fallback h3{font-size:clamp(18px,5vw,24px); font-weight:800; text-transform:uppercase; line-height:1; overflow-wrap:anywhere;}
-.poster.fallback em{font-style:normal; font-family:var(--font-display); font-weight:700; font-size:18px; opacity:.9;}
-.meta{display:flex; flex-direction:column; gap:10px; min-width:0;}
-.meta h2{font-size:clamp(24px,6vw,32px); font-weight:800; letter-spacing:-.02em; overflow-wrap:anywhere;}
-.chips{display:flex; flex-wrap:wrap; gap:8px;}
-.chip{background:var(--surface-2); border:1px solid var(--line); border-radius:99px; padding:4px 12px; font-size:14px; font-variant-numeric:tabular-nums;}
-.chip.rating{color:var(--gold); border-color:rgba(245,196,81,.35);}
-.compat{display:flex; flex-direction:column; gap:6px;}
-.compat b{font-family:var(--font-display); font-size:15px; letter-spacing:.1em; text-transform:uppercase; color:var(--gold);}
-.compat .meter{height:8px; background:var(--surface-2); border-radius:99px; overflow:hidden;}
-.compat .meter span{display:block; height:100%; background:linear-gradient(90deg, var(--gold), var(--red)); border-radius:99px;}
-.block{background:var(--surface); border:1.5px solid var(--line); border-radius:16px; padding:16px 18px;}
-.block h3{font-size:13px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); font-weight:700; margin-bottom:8px;}
-.block p{margin:0; max-width:65ch;}
-.block.verdict{background:linear-gradient(135deg, rgba(255,61,82,.14), rgba(144,97,249,.16)); border-color:rgba(255,61,82,.4);}
-.block.verdict p{font-family:var(--font-display); font-size:19px; font-weight:700; line-height:1.3;}
-.src{display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--muted);}
-.actions{display:flex; flex-direction:column; gap:10px;}
-.actions .row{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px;}
-footer{color:var(--muted); font-size:12.5px; text-align:center; display:flex; flex-direction:column; gap:6px; margin-top:8px;}
-footer button{background:none; border:0; color:var(--muted); text-decoration:underline; padding:0; font-size:12.5px;}
-
-@media (max-width:520px){
-  .hero{grid-template-columns:minmax(0,130px) minmax(0,1fr); gap:14px;}
-  .poster.fallback{padding:10px 9px;}
-  .poster.fallback h3{font-size:15px;}
-}
-@media (prefers-reduced-motion:reduce){
-  .stage{animation:none;}
-  .clap .arm{animation:none; transform:rotate(-12deg);}
-  .bar>span, .opt, .btn, .catcard{transition:none;}
-}
-</style>
+<meta name="description" content="Quiz per scegliere film, serie TV o anime da guardare stasera. Fonti pubbliche, senza API key.">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<link id="fav" rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23ff3d52'/%3E%3Cpath d='M24 18l24 14-24 14z' fill='%23fff'/%3E%3C/svg%3E">
+<link id="apple" rel="apple-touch-icon" href="">
+<meta name="theme-color" content="#0c0a11">
+<meta name="color-scheme" content="dark">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Stasera">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&display=swap">
-
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&display=swap">
+<style>
+:root{--bg:#0c0a11;--s:#16121e;--s2:#1f1929;--line:#2f2740;--fg:#f4effa;--mut:#a89fba;--red:#ff3d52;--vio:#9061f9;--gold:#f5c451;
+--fd:"Bricolage Grotesque","Arial Narrow",Arial,sans-serif;--fb:"Instrument Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color-scheme:dark}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 var(--fb);overscroll-behavior:none;-webkit-user-select:none;user-select:none;
+background-image:radial-gradient(900px 500px at 85% -10%,rgba(144,97,249,.16),transparent 60%),radial-gradient(700px 420px at -10% 0,rgba(255,61,82,.12),transparent 60%);background-repeat:no-repeat;background-attachment:fixed;
+padding:max(20px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(40px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.wrap{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+h1,h2,h3{font-family:var(--fd);margin:0;line-height:1.1;text-wrap:balance}
+button{font:inherit;color:inherit;cursor:pointer;-webkit-appearance:none;appearance:none}
+:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+.brand{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;font-family:var(--fd);font-weight:800;font-size:14px;letter-spacing:.14em;text-transform:uppercase}
+.brand i{font-style:normal;color:var(--red)}
+.pill{font:12.5px var(--fb);color:var(--mut);letter-spacing:.06em;display:flex;align-items:center;gap:6px;text-transform:none}
+.pill b{width:8px;height:8px;border-radius:50%;display:inline-block}
+.bar{height:6px;border-radius:99px;background:var(--s2);overflow:hidden;margin-top:12px}
+.bar span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--red),var(--vio));transition:width .4s}
+.stage{animation:rise .35s both}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.q{font-size:clamp(26px,6.5vw,38px);font-weight:800;letter-spacing:-.02em;margin-bottom:8px}
+.hint{color:var(--mut);margin:0 0 18px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+.card,.opt{background:var(--s);border:1.5px solid var(--line);border-radius:16px;text-align:left;transition:border-color .15s,transform .15s}
+.card{padding:22px 18px;display:flex;flex-direction:column;gap:8px}
+.card .ic{font-size:34px;line-height:1}.card strong{font:800 19px var(--fd)}.card small{color:var(--mut);font-size:13.5px}
+.card:hover{border-color:var(--c)}
+.opts{display:grid;gap:10px}
+.opts.two{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.opt{display:flex;align-items:center;gap:14px;padding:16px;min-height:64px}
+.opts.two .opt{flex-direction:column;align-items:flex-start;gap:8px}
+.opt:active,.card:active{transform:scale(.98)}
+.opt[aria-pressed=true]{border-color:var(--red);background:linear-gradient(135deg,rgba(255,61,82,.16),rgba(144,97,249,.14))}
+.emo{font-size:28px;line-height:1;flex:none}
+.lab{min-width:0;overflow-wrap:anywhere}.lab strong{display:block;font-weight:600}.lab small{display:block;color:var(--mut);font-size:14px}
+.nav{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap;align-items:center}
+.btn{border-radius:14px;padding:14px 20px;font-weight:600;min-height:48px;background:var(--s2);border:1.5px solid var(--line)}
+.btn:active{transform:scale(.97)}
+.btn.p{background:linear-gradient(135deg,var(--red),#c42ddb 120%);border-color:transparent;color:#fff}
+.btn.cta{flex:1 1 220px;font-family:var(--fd);font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.btn.g{background:transparent}
+.sl{background:var(--s);border:1.5px solid var(--line);border-radius:16px;padding:22px 18px;display:flex;flex-direction:column;gap:14px}
+.rn{font:800 56px/1 var(--fd)}.rn sup{font-size:22px;color:var(--mut)}
+.rt{color:var(--gold);font-weight:600;min-height:3em}
+input[type=range]{width:100%;accent-color:var(--red);height:32px;margin:0}
+.ends{display:flex;justify-content:space-between;color:var(--mut);font-size:13px}
+.loading{min-height:340px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;text-align:center}
+.loading p{font:700 22px var(--fd);margin:0}
+.clap{width:110px;height:110px}.clap .arm{transform-origin:14px 38px;animation:clap .9s ease-in-out infinite}
+@keyframes clap{0%,55%,100%{transform:rotate(-22deg)}70%{transform:rotate(0)}}
+.err{background:var(--s);border:1.5px solid rgba(255,61,82,.5);border-radius:16px;padding:20px 18px;display:flex;flex-direction:column;gap:12px}
+.err small{color:var(--mut);font-size:12px;word-break:break-all}
+.res{display:flex;flex-direction:column;gap:16px}
+.tag{align-self:flex-start;font-size:13px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;color:var(--gold);border:1px solid rgba(245,196,81,.4);border-radius:99px;padding:4px 12px}
+.hero{display:grid;grid-template-columns:minmax(0,170px) minmax(0,1fr);gap:16px;align-items:start}
+.poster{aspect-ratio:2/3;border-radius:12px;overflow:hidden;box-shadow:0 18px 40px rgba(0,0,0,.5),inset 0 0 0 1px rgba(255,255,255,.12);background:var(--s2)}
+.poster img{width:100%;height:100%;object-fit:cover;display:block}
+.poster.fb{display:flex;flex-direction:column;justify-content:space-between;padding:12px}
+.poster.fb small{font-size:10px;letter-spacing:.3em;text-transform:uppercase;opacity:.8}
+.poster.fb h3{font-size:clamp(15px,4.5vw,22px);text-transform:uppercase;overflow-wrap:anywhere}
+.meta{display:flex;flex-direction:column;gap:10px;min-width:0}
+.meta h2{font-size:clamp(24px,6vw,32px);font-weight:800;overflow-wrap:anywhere}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{background:var(--s2);border:1px solid var(--line);border-radius:99px;padding:4px 12px;font-size:14px}
+.chip.r{color:var(--gold);border-color:rgba(245,196,81,.35)}
+.compat b{font:15px var(--fd);letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
+.meter{height:8px;background:var(--s2);border-radius:99px;overflow:hidden;margin-top:6px}
+.meter span{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--red))}
+.block{background:var(--s);border:1.5px solid var(--line);border-radius:16px;padding:16px 18px}
+.block h3{font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--mut);margin-bottom:8px}
+.block p{margin:0;max-width:65ch}.block .src{font-size:12.5px;color:var(--mut);margin-top:8px}
+.block.v{background:linear-gradient(135deg,rgba(255,61,82,.14),rgba(144,97,249,.16));border-color:rgba(255,61,82,.4)}
+.block.v p{font:700 19px/1.3 var(--fd)}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+footer{color:var(--mut);font-size:12.5px;text-align:center}
+.ib{position:fixed;left:16px;right:16px;bottom:max(16px,env(safe-area-inset-bottom,0px));z-index:20;background:var(--s);border:1.5px solid var(--vio);border-radius:16px;padding:12px 14px;display:flex;align-items:center;gap:12px;max-width:640px;margin:0 auto}
+.ib p{margin:0;font-size:13.5px;flex:1}.ib .btn{padding:8px 14px;min-height:40px}.ib[hidden]{display:none}
+@media(max-width:520px){.hero{grid-template-columns:minmax(0,125px) minmax(0,1fr)}}
+@media(prefers-reduced-motion:reduce){.stage,.clap .arm{animation:none}}
+</style>
+</head>
+<body>
 <div class="wrap">
-  <header class="top">
-    <div class="brand">
-      <b>Stasera cosa <i>guardo</i></b>
-      <span class="catpill" id="catpill" hidden><span class="dot" id="catdot"></span><span id="catname"></span></span>
-      <span class="count" id="count" aria-live="polite"></span>
-    </div>
-    <div class="bar" role="progressbar" aria-label="Avanzamento del quiz" aria-valuemin="0" aria-valuemax="7" id="barwrap"><span id="barfill"></span></div>
-  </header>
-  <main id="stage" class="stage"></main>
-  <footer>
-    <span>Fonti pubbliche e senza chiavi API: Wikidata/Wikipedia per i film, TVmaze per le serie TV, Jikan (MyAnimeList) per gli anime.</span>
-  </footer>
+<header>
+  <div class="brand"><span>Stasera cosa <i>guardo</i></span><span class="pill" id="pill" hidden><b id="pdot"></b><span id="pname"></span></span><span class="pill" id="count"></span></div>
+  <div class="bar" role="progressbar" aria-label="Avanzamento" aria-valuemin="0" aria-valuemax="6" id="bw"><span id="bf"></span></div>
+</header>
+<main id="stage" class="stage"></main>
+<footer>Fonti pubbliche, nessuna chiave API: Wikidata + Wikipedia (film), TVmaze (serie TV), Jikan/MyAnimeList (anime).</footer>
 </div>
+<div class="ib" id="ib" hidden><span style="font-size:22px">📲</span><p>Aggiungila alla schermata Home per usarla come un'app.</p><button class="btn p" id="ibtn">Installa</button><button class="btn g" id="ix" aria-label="Chiudi">✕</button></div>
 
 <script>
-(function () {
-  "use strict";
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const rand=n=>Math.floor(Math.random()*n), pick=a=>a[rand(a.length)], uniq=a=>[...new Set(a)], sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const strip=s=>{const d=document.createElement("div");d.innerHTML=s||"";return d.textContent||""};
 
-  /* ============================================================
-     CATEGORIE: Film (Wikidata+Wikipedia), Serie TV (TVmaze), Anime (Jikan)
-     Nessuna API key: tutte le fonti sono pubbliche e aperte.
-     ============================================================ */
+/* ---------- PWA senza file esterni: icona, manifest generati dal codice ---------- */
+function icon(sz){const c=document.createElement("canvas");c.width=c.height=sz;const x=c.getContext("2d"),g=x.createLinearGradient(0,0,sz,sz);
+g.addColorStop(0,"#ff3d52");g.addColorStop(1,"#9061f9");x.fillStyle=g;x.fillRect(0,0,sz,sz);x.fillStyle="#fff";x.beginPath();
+x.moveTo(sz*.38,sz*.28);x.lineTo(sz*.76,sz*.5);x.lineTo(sz*.38,sz*.72);x.closePath();x.fill();return c.toDataURL("image/png")}
+try{
+  const i180=icon(180),i192=icon(192),i512=icon(512);
+  $("apple").href=i180; $("fav").href=i192; $("fav").type="image/png";
+  const base=location.href.split("#")[0].split("?")[0];
+  const man={name:"Stasera cosa guardo",short_name:"Stasera",lang:"it",start_url:base,scope:base.replace(/[^/]*$/,""),display:"standalone",orientation:"portrait",background_color:"#0c0a11",theme_color:"#0c0a11",
+    icons:[{src:i192,sizes:"192x192",type:"image/png",purpose:"any maskable"},{src:i512,sizes:"512x512",type:"image/png",purpose:"any maskable"}]};
+  const ml=document.createElement("link");ml.rel="manifest";ml.href=URL.createObjectURL(new Blob([JSON.stringify(man)],{type:"application/manifest+json"}));document.head.appendChild(ml);
+}catch(e){}
 
-  var CATS = {
-    film:  { id: "film",  label: "Film",    ic: "🎬", sub: "da un secolo di cinema", accent: "var(--film)" },
-    serie: { id: "serie", label: "Serie TV", ic: "📺", sub: "da tutto il piccolo schermo", accent: "var(--serie)" },
-    anime: { id: "anime", label: "Anime",    ic: "⛩️", sub: "da tutto il catalogo MyAnimeList", accent: "var(--anime)" }
-  };
+/* ---------- Dati del quiz ---------- */
+const CATS={film:{l:"Film",ic:"🎬",sub:"dal grande cinema",c:"#ff3d52"},serie:{l:"Serie TV",ic:"📺",sub:"dal piccolo schermo",c:"#5ec8ff"},anime:{l:"Anime",ic:"⛩️",sub:"dal catalogo MyAnimeList",c:"#9061f9"}};
+const MOOD=[["feelgood","😊","Qualcosa di leggero","Niente pensieri, solo buonumore"],["laugh","😂","Mi serve ridere"],["love","❤️","Una storia d'amore"],["cry","🥺","Voglio commuovermi"],["scare","😱","Voglio avere paura"],["thrill","🔥","Azione e adrenalina"],["mindbend","🤯","Un colpo di scena assurdo"],["epic","🧙","Avventura epica o fantasy"]];
+const AV=(long,old,sex)=>[["horror","🚫","Horror"],["romance","🚫","Romance"],["long","🚫",long],["sad","🚫","Troppo triste"],["old","🚫",old],["violence","🚫","Troppa violenza"],["sex","🚫",sex],["none","✅","Nessuna preferenza"]];
+const STEPS=[
+ {id:"mood",q:"Che voglia hai stasera?",two:1,o:MOOD},
+ {id:"effort",q:"Quanto ti vuoi coinvolgere?",o:[["0","🛋️","Testa spenta","Solo intrattenimento, senza impegno."],["1","🍿","Equilibrato","Una bella storia, ma senza soffrire troppo."],["2","🧠","Qualcosa di forte","Fammi uscire diversa/o da questa storia."]]},
+ {id:"time",q:"Quanto tempo hai stasera?",byCat:{
+  film:[["short","⏱️","Meno di 90 minuti"],["mid","🎬","Un film normale (90–120 min)"],["long","🍿","Un film lungo, oltre 2 ore"],["any","🔥","Non mi importa"]],
+  serie:[["short","⏱️","Un episodio e via"],["mid","🎬","Un paio di episodi"],["long","🍿","Binge watching"],["any","🔥","Non mi importa"]],
+  anime:[["short","⏱️","Mini-serie, fino a 13 episodi"],["mid","🎬","Una stagione, fino a 26 episodi"],["long","🍿","Una saga lunghissima"],["any","🔥","Non mi importa"]]}},
+ {id:"who",q:"Con chi lo guardi?",o:[["solo","👤","Da sola/o"],["partner","❤️","Con il/la partner"],["friends","👯","Con gli amici"],["family","👨‍👩‍👧‍👦","Con la famiglia"],["convince","😈","Con qualcuno difficile da accontentare"]]},
+ {id:"risk",q:"Quanto vuoi uscire dai tuoi gusti abituali?",slider:1},
+ {id:"avoid",q:"C'è qualcosa che vuoi evitare?",multi:1,byCat:{film:AV("Film troppo lungo","Troppo vecchio","Troppo sesso"),serie:AV("Troppe puntate","Troppo vecchia","Troppo sesso"),anime:AV("Troppi episodi","Troppo vecchio","Fanservice/Ecchi")}}
+];
+const TOTAL=STEPS.length;
+const LOAD={film:["Sfoglio l'archivio di Wikidata...","Incrocio i generi...","Ci siamo quasi..."],serie:["Sfoglio il palinsesto...","Controllo le stagioni...","Ci siamo quasi..."],anime:["Sfoglio MyAnimeList...","Controllo gli episodi...","Ci siamo quasi..."]};
+const MOOD_TXT={feelgood:"qualcosa di leggero",laugh:"ridere",love:"una storia d'amore",cry:"commuoverti",scare:"avere paura",thrill:"azione e adrenalina",mindbend:"un colpo di scena assurdo",epic:"un'avventura epica"};
+const WHO_TXT={solo:"da sola/o",partner:"in coppia",friends:"con gli amici",family:"con la famiglia",convince:"con chi va convinto"};
+const riskLabel=n=>n<=15?"Voglio andare sul sicuro.":n<=35?"Una piccola sorpresa va bene.":n<=60?"Sorprendimi, ma con giudizio.":n<=80?"Fammi uscire dai binari.":"Portami dove non sono mai stata/o.";
 
-  var STEPS = [
-    { id: "vibe", q: "Che vibe hai stasera?", two: true, o: [
-      ["love", "❤️", "Voglio innamorarmi"], ["laugh", "😂", "Voglio ridere"], ["cry", "😭", "Voglio piangere"], ["scare", "😱", "Voglio avere paura"],
-      ["shock", "🤯", "Voglio rimanere sconvolta/o"], ["think", "🧠", "Voglio qualcosa che mi faccia pensare"], ["well", "✨", "Voglio semplicemente stare bene"], ["wild", "🔥", "Voglio qualcosa di completamente folle"] ] },
-    { id: "effort", q: "Quanto vuoi impegnarti emotivamente?", o: [
-      ["0", "🛋️", "Zero cervello", "Voglio solo rilassarmi e divertirmi."],
-      ["1", "🍿", "Medio", "Voglio una bella storia, ma senza soffrire troppo."],
-      ["2", "🧠", "Voglio soffrire", "Fammi uscire da questa storia completamente diversa/o."] ] },
-    { id: "time", q: "Quanto tempo hai?", byCat: {
-        film:  [["short","⏱️","Meno di 90 minuti"], ["mid","🎬","90–120 minuti"], ["long","🍿","Più di 2 ore"], ["any","🔥","Non mi interessa"]],
-        serie: [["short","⏱️","Un episodio veloce"], ["mid","🎬","Un paio di episodi"], ["long","🍿","Mi preparo al binge"], ["any","🔥","Non mi interessa"]],
-        anime: [["short","⏱️","Una mini-serie breve"], ["mid","🎬","Una stagione normale"], ["long","🍿","Un'opera lunghissima"], ["any","🔥","Non mi interessa"]]
-      } },
-    { id: "who", q: "Con chi guardi?", o: [
-      ["solo", "👤", "Da sola/o"], ["partner", "❤️", "Con il partner"], ["friends", "👯", "Con amici"], ["family", "👨‍👩‍👧‍👦", "Con la famiglia"],
-      ["convince", "😈", "Con qualcuno che devo convincere"] ] },
-    { id: "kind", q: "Che tipo di storia vuoi?", o: [
-      ["hook", "🔥", "Qualcosa che mi tenga incollata/o"], ["love", "💋", "Una grande storia d'amore"], ["disturb", "🚨", "Qualcosa di disturbante"], ["twist", "🤠", "Un colpo di scena assurdo"],
-      ["sexy", "👀", "Qualcosa di sexy"], ["smart", "😂", "Una commedia intelligente"], ["tears", "🥺", "Qualcosa che mi faccia piangere"], ["must", "🏆", "Qualcosa che devo assolutamente recuperare"] ] },
-    { id: "risk", q: "Quanto vuoi uscire dalla tua comfort zone?", slider: true },
-    { id: "avoid", q: "Cosa non vuoi assolutamente?", multi: true, byCat: {
-        film:  [["horror","🚫","Horror"], ["romance","🚫","Romance"], ["long","🚫","Film troppo lungo"], ["sad","🚫","Troppo triste"], ["old","🚫","Troppo vecchio"], ["violence","🚫","Troppa violenza"], ["sex","🚫","Troppo sesso"], ["none","✅","Nessuna preferenza"]],
-        serie: [["horror","🚫","Horror"], ["romance","🚫","Romance"], ["long","🚫","Troppe puntate"], ["sad","🚫","Troppo triste"], ["old","🚫","Troppo vecchia"], ["violence","🚫","Troppa violenza"], ["sex","🚫","Troppo sesso"], ["none","✅","Nessuna preferenza"]],
-        anime: [["horror","🚫","Horror"], ["romance","🚫","Romance"], ["long","🚫","Troppi episodi"], ["sad","🚫","Troppo triste"], ["old","🚫","Troppo vecchio"], ["violence","🚫","Troppa violenza"], ["sex","🚫","Fanservice/Ecchi"], ["none","✅","Nessuna preferenza"]]
-      } }
-  ];
-  var TOTAL = STEPS.length;
-  var LOAD_TXT = { film: ["Sfoglio l'archivio di Wikidata...", "Incrocio i generi...", "Ci siamo quasi..."], serie: ["Sfoglio il palinsesto...", "Controllo le stagioni...", "Ci siamo quasi..."], anime: ["Sfoglio il catalogo MyAnimeList...", "Controllo gli episodi...", "Ci siamo quasi..."] };
+const G={
+ film:{mood:{feelgood:["comedy film","family film","animated film"],laugh:["comedy film","romantic comedy film","romantic comedy"],love:["romance film","romantic drama film","romantic comedy film"],cry:["drama film","romance film"],scare:["horror film"],thrill:["action film","thriller film","adventure film"],mindbend:["mystery film","psychological thriller film","psychological thriller","science fiction film"],epic:["fantasy film","science fiction film","adventure film"]},
+  avoid:{horror:["horror film"],romance:["romance film","romantic comedy film"],violence:["horror film","war film","slasher film"],sex:["erotic film"]},heavy:["drama film","mystery film","war film"],light:["comedy film","action film","animated film","family film"]},
+ serie:{mood:{feelgood:["Comedy","Family"],laugh:["Comedy"],love:["Romance"],cry:["Drama","Romance"],scare:["Horror"],thrill:["Action","Thriller","Crime"],mindbend:["Mystery","Thriller","Science-Fiction"],epic:["Fantasy","Science-Fiction","Adventure"]},
+  avoid:{horror:["Horror"],romance:["Romance"],violence:["Horror","War","Crime"],sex:["Romance"]},heavy:["Drama","Mystery","War"],light:["Comedy","Family","Adventure"]},
+ anime:{mood:{feelgood:["Comedy","Slice of Life"],laugh:["Comedy"],love:["Romance"],cry:["Drama","Romance"],scare:["Horror"],thrill:["Action","Suspense"],mindbend:["Mystery","Psychological","Suspense"],epic:["Fantasy","Adventure","Sci-Fi","Supernatural"]},
+  avoid:{horror:["Horror"],romance:["Romance"],violence:["Horror","Gore"],sex:["Ecchi","Hentai"]},heavy:["Drama","Psychological","Mystery"],light:["Comedy","Slice of Life","Adventure"]}
+};
+const MOOD_IT={feelgood:"commedia",laugh:"commedia",love:"sentimentale",cry:"drammatico",scare:"horror",thrill:"azione",mindbend:"fantascienza",epic:"fantasy"};
 
-  var VIBE_TXT = { love: "innamorarti", laugh: "ridere", cry: "piangere", scare: "avere paura", shock: "rimanere sconvolta/o", think: "pensare", well: "stare bene", wild: "qualcosa di completamente folle" };
-  var KIND_TXT = { hook: "una storia che ti tenga incollata/o", love: "una grande storia d'amore", disturb: "qualcosa di disturbante", twist: "un colpo di scena assurdo", sexy: "qualcosa di sexy", smart: "una commedia intelligente", tears: "qualcosa che ti faccia piangere", must: "un titolo da recuperare assolutamente" };
-  var WHO_TXT = { solo: "da sola/o", partner: "in coppia", friends: "con gli amici", family: "con la famiglia", convince: "con chi va convinto" };
+const S={cat:null,step:0,a:null,cands:[],seen:[],cur:null};
+const resetA=()=>({mood:null,effort:null,time:null,who:null,risk:50,avoid:[]});
+const stage=$("stage");
+function setProg(n,l){$("bf").style.width=(n/TOTAL*100)+"%";$("bw").setAttribute("aria-valuenow",n);$("count").textContent=l||""}
+function swap(h){stage.classList.remove("stage");void stage.offsetWidth;stage.classList.add("stage");stage.innerHTML=h}
 
-  function riskLabel(n) {
-    if (n <= 15) return "Voglio andare sul sicuro.";
-    if (n <= 35) return "Una piccola sorpresa va bene.";
-    if (n <= 60) return "Sorprendimi, ma con giudizio.";
-    if (n <= 80) return "Fammi uscire dai binari.";
-    return "Portami dove non sono mai stata/o.";
+function fj(url,ms,opts){
+  const c=new AbortController(),t=setTimeout(()=>c.abort(),ms||12000);
+  return fetch(url,Object.assign({signal:c.signal},opts||{})).then(r=>{clearTimeout(t);if(r.status===429){const e=new Error("429");e.retry=1;throw e}if(!r.ok)throw new Error("HTTP "+r.status);return r.json()},e=>{clearTimeout(t);throw e});
+}
+const fjr=(url,ms)=>fj(url,ms).catch(e=>e&&e.retry?sleep(1000).then(()=>fj(url,ms)):Promise.reject(e));
+const without=(cat,a)=>{let w=[];a.avoid.forEach(k=>{if(G[cat].avoid[k])w=w.concat(G[cat].avoid[k])});if(a.who==="family")w=w.concat(cat==="film"?["horror film","erotic film","war film"]:cat==="serie"?["Horror","Adult"]:["Horror","Gore"]);return uniq(w)};
+/* applica filtri via via piu' larghi finche' resta qualcosa */
+function tier(list,tests){let last=[];for(const t of tests){const r=list.filter(t);if(r.length>=5)return r;if(r.length)last=r}return last.length?last:list}
+
+/* ---------- Italiano da Wikipedia ---------- */
+const KW=/film|serie|anime|televisiv|animazione|manga|telefilm|sitcom/i;
+const wsum=t=>fjr("https://it.wikipedia.org/api/rest_v1/page/summary/"+encodeURIComponent(t.trim().replace(/\s+/g,"_")),8000);
+async function enrich(title,kind){
+  const ok=r=>r&&r.extract&&r.type!=="disambiguation"&&KW.test(r.extract.slice(0,300));
+  const out=r=>({extract:r.extract,thumb:r.thumbnail&&r.thumbnail.source});
+  try{const r=await wsum(title);if(ok(r))return out(r)}catch(e){}
+  try{
+    const s=await fjr("https://it.wikipedia.org/w/api.php?action=query&list=search&format=json&origin=*&srlimit=3&srsearch="+encodeURIComponent(title+" "+kind),8000);
+    for(const x of (s.query&&s.query.search)||[]){try{const r=await wsum(x.title);if(ok(r))return out(r)}catch(e){}}
+  }catch(e){}
+  return null;
+}
+
+/* ---------- FILM: Wikidata (GET, CORS ok) con fallback su Wikipedia ---------- */
+async function sparql(q){const d=await fj("https://query.wikidata.org/sparql?format=json&query="+encodeURIComponent(q),30000);return(d.results&&d.results.bindings)||[]}
+const vals=l=>l.map(x=>'"'+x+'"@en').join(" ");
+async function wdFilms(a,strict){
+  const g=G.film,wn=without("film",a),genres=(g.mood[a.mood]||["drama film"]).filter(x=>wn.indexOf(x)<0);
+  const minL=(a.risk<30?40:a.risk<60?18:a.risk<80?8:3)/(strict?1:3);
+  const q="SELECT ?film ?filmLabel ?sl ?d ?rt WHERE{VALUES ?gl{"+vals(genres.length?genres:["drama film","comedy film"])+"} ?g rdfs:label ?gl. ?film wdt:P31 wd:Q11424; wdt:P136 ?g; wikibase:sitelinks ?sl. FILTER(?sl>="+Math.max(2,Math.round(minL))+") "+
+   (strict&&wn.length?"FILTER NOT EXISTS{?film wdt:P136 ?b. ?b rdfs:label ?bl. VALUES ?bl{"+vals(wn)+"}} ":"")+
+   "OPTIONAL{?film wdt:P577 ?d} OPTIONAL{?film wdt:P2047 ?rt} SERVICE wikibase:label{bd:serviceParam wikibase:language \"it,en\"}} LIMIT 200";
+  const seen={},out=[];
+  (await sparql(q)).forEach(b=>{const id=b.film.value.split("/").pop(),t=b.filmLabel&&b.filmLabel.value;if(seen[id]||!t||/^Q\d+$/.test(t))return;seen[id]=1;
+    out.push({id,title:t,year:b.d?b.d.value.slice(0,4):"",sl:+b.sl.value,runtime:b.rt?Math.round(+b.rt.value):null,genres:genres})});
+  return out;
+}
+async function wpFilms(a){
+  const wn=without("film",a),neg=wn.indexOf("horror film")>=0?" -horror":"";
+  const url="https://it.wikipedia.org/w/api.php?action=query&generator=search&format=json&origin=*&gsrnamespace=0&gsrlimit=30&gsroffset="+rand(200)+
+   "&gsrsearch="+encodeURIComponent('hastemplate:Film "è un film" '+MOOD_IT[a.mood]+neg)+"&prop=extracts|pageimages&exintro=1&explaintext=1&exsentences=4&exlimit=30&piprop=thumbnail&pithumbsize=500";
+  const d=await fj(url,12000),p=d.query&&d.query.pages?Object.values(d.query.pages):[];
+  return p.filter(x=>x.extract&&/film/i.test(x.extract.slice(0,200))).map(x=>({id:"wp"+x.pageid,title:x.title.replace(/\s*\(film.*\)$/,""),year:(x.extract.match(/\b(19|20)\d\d\b/)||[""])[0],sl:10,runtime:null,genres:G.film.mood[a.mood],pre:{extract:x.extract,thumb:x.thumbnail&&x.thumbnail.source}}));
+}
+async function filmDiscover(a){
+  const g=G.film;let list=[],err=null;
+  try{list=await wdFilms(a,true);
+    const rtMin=a.time==="mid"?85:a.time==="long"?115:0,rtMax=a.time==="short"?95:a.time==="mid"?125:a.avoid.indexOf("long")>=0?130:999,ym=a.avoid.indexOf("old")>=0?1995:0;
+    if(a.avoid.indexOf("long")>=0&&a.time!=="short"&&a.time!=="mid")list=list; // gestito sotto
+    const mx=a.avoid.indexOf("long")>=0?Math.min(rtMax,130):rtMax;
+    list=tier(list,[m=>(!m.runtime||(m.runtime>=rtMin&&m.runtime<=mx))&&(!ym||!m.year||+m.year>=ym),m=>!ym||!m.year||+m.year>=ym,()=>true]);
+  }catch(e){err=e}
+  if(list.length<5){try{list=list.concat(await wdFilms(a,false))}catch(e){err=err||e}}
+  if(list.length<3){try{list=list.concat(await wpFilms(a))}catch(e){err=err||e}}
+  if(!list.length&&err)throw err;
+  return list;
+}
+async function filmDetails(c){
+  const w=c.pre||await enrich(c.title,"film");
+  return{title:c.title,year:c.year,runtime:c.runtime,overview:(w&&w.extract)||"Trama non ancora disponibile su Wikipedia in italiano.",it:!!(w&&w.extract),poster:w&&w.thumb,pop:c.sl};
+}
+
+/* ---------- SERIE TV: TVmaze ---------- */
+async function tvDiscover(a){
+  const wn=without("serie",a),want=G.serie.mood[a.mood]||["Drama","Comedy"],ym=a.avoid.indexOf("old")>=0?1995:0;
+  const pages=uniq(Array.from({length:6},()=>rand(240)));
+  const lists=await Promise.all(pages.map(p=>fjr("https://api.tvmaze.com/shows?page="+p,9000).catch(()=>[])));
+  const all=[].concat(...lists);
+  if(!all.length)throw new Error("rete/TVmaze non raggiungibile");
+  const items=all.filter(s=>s.genres&&s.genres.length).map(s=>({id:s.id,title:s.name,year:s.premiered?s.premiered.slice(0,4):"",genres:s.genres,rating:s.rating&&s.rating.average,runtime:s.averageRuntime||s.runtime,image:s.image&&(s.image.original||s.image.medium),summary:strip(s.summary),lang:s.language}));
+  const ov=m=>m.genres.some(x=>want.indexOf(x)>=0), bad=m=>m.genres.some(x=>wn.indexOf(x)>=0);
+  return tier(items,[
+    m=>ov(m)&&!bad(m)&&(!ym||!m.year||+m.year>=ym)&&m.rating>=6.5&&(a.risk>=60||m.lang==="English"||m.lang==="Italian"),
+    m=>ov(m)&&!bad(m)&&(!ym||!m.year||+m.year>=ym)&&(!m.rating||m.rating>=5.5),
+    m=>ov(m)&&!bad(m), m=>ov(m)]);
+}
+async function tvDetails(c){const w=await enrich(c.title,"serie televisiva");
+  return{title:c.title,year:c.year,runtime:c.runtime,overview:(w&&w.extract)||c.summary||"Trama non disponibile.",it:!!(w&&w.extract),poster:(w&&w.thumb)||c.image,rl:"TVmaze",rv:c.rating,gt:(c.genres||[]).join(" · ")}}
+
+/* ---------- ANIME: Jikan, una richiesta per genere (evita l'AND dei generi) ---------- */
+let JG=null;
+async function jikanGenres(){if(JG)return JG;const r=await fjr("https://api.jikan.moe/v4/genres/anime",10000),m={};(r.data||[]).forEach(g=>m[g.name]=g.mal_id);return JG=m}
+async function animeDiscover(a){
+  const map=await jikanGenres(),wn=without("anime",a);
+  let want=(G.anime.mood[a.mood]||["Drama"]).filter(x=>map[x]&&wn.indexOf(x)<0).slice(0,3);if(!want.length)want=["Comedy"];
+  const ex=wn.filter(x=>map[x]).map(x=>map[x]).join(","),ym=a.avoid.indexOf("old")>=0?1995:0;
+  const epMax=a.time==="short"?13:a.time==="mid"?26:a.avoid.indexOf("long")>=0?26:0;
+  const rs=await Promise.all(want.map((gname,i)=>sleep(i*450).then(()=>{
+    const u=new URL("https://api.jikan.moe/v4/anime");
+    u.searchParams.set("genres",map[gname]);if(ex)u.searchParams.set("genres_exclude",ex);
+    u.searchParams.set("order_by","score");u.searchParams.set("sort","desc");u.searchParams.set("min_score","6.3");u.searchParams.set("page",1+rand(3));u.searchParams.set("limit","25");u.searchParams.set("sfw","true");
+    return fjr(u.toString(),12000).then(r=>r.data||[],e=>e)})));
+  const ok=rs.filter(Array.isArray);if(!ok.length)throw new Error("Jikan non raggiungibile");
+  const seen={},items=[];
+  [].concat(...ok).forEach(m=>{if(seen[m.mal_id])return;seen[m.mal_id]=1;
+    items.push({id:m.mal_id,title:m.title_english||m.title,year:(m.aired&&m.aired.prop&&m.aired.prop.from&&m.aired.prop.from.year)||"",genres:(m.genres||[]).concat(m.themes||[]).map(g=>g.name),rating:m.score,episodes:m.episodes,image:m.images&&m.images.jpg&&(m.images.jpg.large_image_url||m.images.jpg.image_url),summary:m.synopsis})});
+  const ep=m=>!epMax||!m.episodes||m.episodes<=epMax, yr=m=>!ym||!m.year||m.year>=ym;
+  return tier(items,[m=>ep(m)&&yr(m)&&m.rating>=7,m=>ep(m)&&yr(m),ep,()=>true]);
+}
+async function animeDetails(c){const w=await enrich(c.title,"anime");
+  return{title:c.title,year:c.year,episodes:c.episodes,overview:(w&&w.extract)||c.summary||"Trama non disponibile.",it:!!(w&&w.extract),poster:(w&&w.thumb)||c.image,rl:"MyAnimeList",rv:c.rating,gt:(c.genres||[]).join(" · ")}}
+
+const SRC={film:{d:filmDiscover,t:filmDetails},serie:{d:tvDiscover,t:tvDetails},anime:{d:animeDiscover,t:animeDetails}};
+
+/* ---------- Punteggio ---------- */
+const hit=(g,w)=>g&&w&&g.some(x=>w.indexOf(x)>=0)?1:0;
+const mainstream=(cat,m)=>cat==="film"?Math.max(0,Math.min(1,Math.log10(Math.max(2,m.sl))/2.6)):m.rating?Math.max(0,Math.min(1,(m.rating-4)/5)):.4;
+function score(cat,m,a){
+  const g=m.genres||[],gs=G[cat],ms=mainstream(cat,m),e=+a.effort;
+  const heavy=g.some(x=>gs.heavy.indexOf(x)>=0)||(m.rating||0)>=8.3,light=g.some(x=>gs.light.indexOf(x)>=0);
+  return 45*hit(g,gs.mood[a.mood])+20*(e===2?(heavy?1:.3):e===0?(light?1:.3):.75)+20*Math.max(0,1-Math.abs((1-ms)*100-a.risk)/70)+15*(cat==="film"?ms:m.rating?Math.max(0,Math.min(1,(m.rating-5)/4)):.5)+Math.random()*6;
+}
+const pct=s=>Math.round(Math.min(98,52+46*Math.pow(Math.max(0,s)/100,1.3)));
+
+/* ---------- Schermate ---------- */
+function renderCats(){
+  $("pill").hidden=true;setProg(0,"");
+  let h='<h1 class="q">Cosa guardiamo stasera?</h1><p class="hint">Scegli il tipo di titolo, poi rispondi a qualche domanda veloce.</p><div class="grid" id="cg">';
+  Object.keys(CATS).forEach(k=>{const c=CATS[k];h+='<button type="button" class="card" data-v="'+k+'" style="--c:'+c.c+'"><span class="ic" aria-hidden="true">'+c.ic+'</span><strong>'+c.l+'</strong><small>'+esc(c.sub)+'</small></button>'});
+  swap(h+"</div>");
+  $("cg").onclick=e=>{const b=e.target.closest(".card");if(!b)return;S.cat=b.dataset.v;S.step=0;S.a=resetA();S.cands=[];S.seen=[];renderStep()};
+}
+function renderStep(){
+  const cat=CATS[S.cat],st=STEPS[S.step];
+  $("pill").hidden=false;$("pdot").style.background=cat.c;$("pname").textContent=cat.l;setProg(S.step+1,(S.step+1)+"/"+TOTAL);
+  const opts=st.byCat?st.byCat[S.cat]:st.o;
+  let h='<h1 class="q">'+esc(st.q)+"</h1>";
+  if(st.slider){const r=S.a.risk;
+    h+='<p class="hint">Più sale il cursore, più il titolo sarà lontano da ciò che guardi di solito.</p><div class="sl"><div class="rn"><span id="rn">'+r+'</span><sup>%</sup></div><div class="rt" id="rt">'+esc(riskLabel(r))+'</div><input type="range" id="risk" min="0" max="100" value="'+r+'" aria-label="Livello di sorpresa"><div class="ends"><span>Sul sicuro</span><span>Fuori dagli schemi</span></div></div>';
+  }else{
+    if(st.multi)h+='<p class="hint">Puoi sceglierne più di una.</p>';
+    h+='<div class="opts'+(st.two?" two":"")+'" id="opts">';
+    opts.forEach(o=>{const on=st.multi?S.a.avoid.indexOf(o[0])>=0:S.a[st.id]===o[0];
+      h+='<button type="button" class="opt" data-v="'+o[0]+'" aria-pressed="'+on+'"><span class="emo" aria-hidden="true">'+o[1]+'</span><span class="lab"><strong>'+esc(o[2])+"</strong>"+(o[3]?"<small>"+esc(o[3])+"</small>":"")+"</span></button>"});
+    h+="</div>";
   }
+  h+='<div class="nav"><button type="button" class="btn g" id="back">← Indietro</button>'+(st.slider?'<button type="button" class="btn p cta" id="next">Avanti →</button>':"")+(st.multi?'<button type="button" class="btn p cta" id="go">'+cat.ic+" Trova il mio titolo</button>":"")+"</div>";
+  swap(h);
+  $("back").onclick=()=>{if(S.step>0){S.step--;renderStep()}else renderCats()};
+  if(st.slider){const rg=$("risk");rg.oninput=()=>{S.a.risk=+rg.value;$("rn").textContent=rg.value;$("rt").textContent=riskLabel(+rg.value)};$("next").onclick=()=>{S.step++;renderStep()};return}
+  const box=$("opts");
+  box.onclick=e=>{const b=e.target.closest(".opt");if(!b)return;const v=b.dataset.v;
+    if(st.multi){let av=S.a.avoid;if(v==="none")av=av.indexOf("none")>=0?[]:["none"];else{av=av.filter(x=>x!=="none");const i=av.indexOf(v);i>=0?av.splice(i,1):av.push(v)}S.a.avoid=av;
+      [].forEach.call(box.children,c=>c.setAttribute("aria-pressed",av.indexOf(c.dataset.v)>=0))}
+    else{S.a[st.id]=v;[].forEach.call(box.children,c=>c.setAttribute("aria-pressed",c===b));setTimeout(()=>{S.step++;renderStep()},260)}};
+  if(st.multi)$("go").onclick=()=>{S.seen=[];S.cands=[];run(false,true)};
+}
+function loading(){
+  setProg(TOTAL,TOTAL+"/"+TOTAL);const t=LOAD[S.cat];
+  swap('<div class="loading"><svg class="clap" viewBox="0 0 110 110" aria-hidden="true"><rect x="14" y="44" width="82" height="52" rx="6" fill="#1f1929" stroke="#9061f9" stroke-width="3"/><g class="arm"><rect x="14" y="26" width="82" height="16" rx="4" fill="#f4effa"/><path d="M26 26l10 16M46 26l10 16M66 26l10 16M86 26l10 16" stroke="#ff3d52" stroke-width="7"/></g><path d="M28 66h54M28 78h36" stroke="#a89fba" stroke-width="3" stroke-linecap="round"/></svg><p id="lt" aria-live="polite">'+t[0]+"</p></div>");
+  let i=0;const lt=$("lt"),iv=setInterval(()=>{i=(i+1)%t.length;if(lt.isConnected)lt.textContent=t[i]},1300);return()=>clearInterval(iv);
+}
+function showError(e){
+  const off=navigator.onLine===false,empty=e&&e.message==="EMPTY";
+  const msg=off?"Sembra che il telefono sia offline: controlla la connessione e riprova.":empty?"Nessun titolo trovato con queste regole. Togli qualche esclusione o alza il livello di sorpresa.":"Non riesco a contattare la fonte dati ("+CATS[S.cat].l+"). Può essere un intoppo momentaneo: riprova tra qualche secondo.";
+  setProg(TOTAL,"");
+  swap('<div class="err"><h2>Qualcosa non va</h2><p style="margin:0">'+esc(msg)+"</p>"+(empty||off?"":"<small>Dettaglio: "+esc(e&&e.message||"errore")+"</small>")+'<div class="nav" style="margin:0"><button class="btn p" id="retry">Riprova</button><button class="btn g" id="tq">Torna al quiz</button></div></div>');
+  $("retry").onclick=()=>{S.seen=[];S.cands=[];run(false,true)};$("tq").onclick=()=>{S.step=TOTAL-1;renderStep()};
+}
 
-  /* ============================================================
-     GENERI per categoria (tassonomie diverse per ogni fonte)
-     ============================================================ */
-
-  var GENRES = {
-    film: {
-      vibe: { love:["romance film","romantic drama"], laugh:["comedy film","romantic comedy","black comedy"], cry:["drama film","tearjerker film"],
-        scare:["horror film","slasher film"], shock:["thriller film","psychological thriller","mystery film"], think:["science fiction film","mystery film","drama film"],
-        well:["comedy film","adventure film","animated film","family film"], wild:["action film","science fiction film","fantasy film","comedy film"] },
-      kind: { hook:["thriller film","action film","adventure film"], love:["romance film"], disturb:["horror film","thriller film"], twist:["mystery film","thriller film"],
-        sexy:["romance film","erotic film"], smart:["comedy film"], tears:["drama film","romance film"], must:["drama film"] },
-      avoid: { horror:["horror film"], romance:["romance film"], violence:["horror film","war film"], sex:["erotic film"] },
-      heavy: ["drama film","mystery film","war film"], light: ["comedy film","action film","animated film","family film"]
-    },
-    serie: {
-      vibe: { love:["Romance"], laugh:["Comedy"], cry:["Drama","Romance"], scare:["Horror"], shock:["Thriller","Mystery"],
-        think:["Science-Fiction","Mystery","Drama"], well:["Comedy","Family","Adventure"], wild:["Action","Science-Fiction","Fantasy","Comedy"] },
-      kind: { hook:["Thriller","Action","Crime"], love:["Romance"], disturb:["Horror","Thriller"], twist:["Mystery","Thriller"],
-        sexy:["Romance"], smart:["Comedy"], tears:["Drama","Romance"], must:["Drama","Crime"] },
-      avoid: { horror:["Horror"], romance:["Romance"], violence:["Horror","War","Crime"], sex:["Romance"] },
-      heavy: ["Drama","Mystery","War"], light: ["Comedy","Family","Adventure"]
-    },
-    anime: {
-      vibe: { love:["Romance"], laugh:["Comedy"], cry:["Drama"], scare:["Horror"], shock:["Thriller","Suspense","Mystery"],
-        think:["Mystery","Psychological","Sci-Fi"], well:["Comedy","Slice of Life","Adventure"], wild:["Action","Sci-Fi","Fantasy","Supernatural"] },
-      kind: { hook:["Action","Thriller","Suspense"], love:["Romance"], disturb:["Horror","Psychological"], twist:["Mystery","Suspense"],
-        sexy:["Romance","Ecchi"], smart:["Comedy"], tears:["Drama","Romance"], must:["Action","Drama"] },
-      avoid: { horror:["Horror"], romance:["Romance"], violence:["Horror","Gore"], sex:["Ecchi","Hentai"] },
-      heavy: ["Drama","Psychological","Mystery"], light: ["Comedy","Slice of Life","Adventure"]
+/* ---------- Flusso ---------- */
+async function rank(a){
+  const list=await SRC[S.cat].d(a);
+  if(!list||!list.length)throw new Error("EMPTY");
+  return list.map(m=>({m,s:score(S.cat,m,a)})).sort((x,y)=>y.s-x.s);
+}
+const pickFrom=(r,sur)=>{const p=r.filter(x=>S.seen.indexOf(x.m.id)<0);if(!p.length)return null;return sur?pick(p.slice(0,10)):p[0]};
+async function run(surprise,fresh){
+  const stop=loading(),wait=sleep(1800);
+  try{
+    let ranked=null,cand=null;
+    if(!fresh&&!surprise)cand=pickFrom(S.cands,false);
+    if(!cand){
+      const a=surprise?Object.assign({},S.a,{risk:Math.max(S.a.risk+30,85)}):S.a;
+      ranked=await rank(a);if(!surprise)S.cands=ranked;
+      cand=pickFrom(ranked,surprise)||pick(ranked);
     }
-  };
-
-  var S = { cat: null, step: 0, a: { vibe: null, effort: null, time: null, who: null, kind: null, risk: 50, avoid: [] }, cands: [], seen: [], cur: null };
-  var stage = document.getElementById("stage");
-  var countEl = document.getElementById("count");
-  var fill = document.getElementById("barfill");
-  var barwrap = document.getElementById("barwrap");
-  var catpill = document.getElementById("catpill");
-
-  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
-  function rand(n) { return Math.floor(Math.random() * n); }
-  function pick(arr) { return arr[rand(arr.length)]; }
-  function uniq(arr) { var seen = {}; return arr.filter(function (x) { if (seen[x]) return false; seen[x] = 1; return true; }); }
-  function setProgress(n, label) { fill.style.width = (n / TOTAL * 100) + "%"; barwrap.setAttribute("aria-valuenow", n); countEl.textContent = label || ""; }
-  function swap(html) { stage.classList.remove("stage"); void stage.offsetWidth; stage.classList.add("stage"); stage.innerHTML = html; }
-  function stripHtml(s) { var d = document.createElement("div"); d.innerHTML = s || ""; return d.textContent || ""; }
-  function fetchJson(url, opts, timeoutMs) {
-    var ctrl = new AbortController();
-    var t = setTimeout(function () { ctrl.abort(); }, timeoutMs || 12000);
-    opts = opts || {};
-    opts.signal = ctrl.signal;
-    return fetch(url, opts).then(function (r) { clearTimeout(t); if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); },
-      function (e) { clearTimeout(t); throw e; });
-  }
-
-  /* ============================================================
-     SCHERMATA CATEGORIA
-     ============================================================ */
-  function renderCatPicker() {
-    catpill.hidden = true;
-    setProgress(0, "");
-    var h = '<h1 class="q">Cosa guardiamo stasera?</h1><p class="hint">Scegli il tipo di titolo e poi rispondi a qualche domanda veloce.</p>' +
-      '<div class="catgrid" id="catgrid">';
-    ["film", "serie", "anime"].forEach(function (k) {
-      var c = CATS[k];
-      h += '<button type="button" class="catcard ' + k + '" data-v="' + k + '" aria-pressed="false" style="--accent:' + c.accent + '"><span class="ic" aria-hidden="true">' + c.ic + '</span><strong>' + c.label + '</strong><small>' + esc(c.sub) + '</small></button>';
-    });
-    h += "</div>";
-    swap(h);
-    document.getElementById("catgrid").onclick = function (e) {
-      var b = e.target.closest(".catcard"); if (!b) return;
-      S.cat = b.getAttribute("data-v");
-      S.step = 0; S.a = { vibe: null, effort: null, time: null, who: null, kind: null, risk: 50, avoid: [] };
-      S.cands = []; S.seen = []; S.cur = null;
-      renderStep();
-    };
-  }
-
-  /* ============================================================
-     QUIZ
-     ============================================================ */
-  function renderStep() {
-    var cat = CATS[S.cat];
-    catpill.hidden = false;
-    document.getElementById("catdot").style.background = cat.accent;
-    document.getElementById("catname").textContent = cat.label;
-    var st = STEPS[S.step];
-    setProgress(S.step + 1, (S.step + 1) + "/" + TOTAL);
-    var opts = st.byCat ? st.byCat[S.cat] : st.o;
-    var h = '<h1 class="q">' + esc(st.q) + "</h1>";
-    if (st.slider) {
-      var r = S.a.risk;
-      h += '<p class="hint">Trascina il cursore: più sale, più il titolo sarà lontano da ciò che guardi di solito.</p>' +
-        '<div class="slider-box"><div class="risk-num"><span id="rn">' + r + '</span><sup>%</sup></div><div class="risk-txt" id="rt">' + esc(riskLabel(r)) + "</div>" +
-        '<input type="range" id="risk" min="0" max="100" step="1" value="' + r + '" aria-label="Livello di rischio da 0 a 100">' +
-        '<div class="ends"><span>Sul sicuro</span><span>Fuori dagli schemi</span></div></div>';
-    } else {
-      if (st.multi) h += '<p class="hint">Puoi sceglierne più di una.</p>';
-      h += '<div class="opts' + (st.two ? " two" : "") + '" id="opts">';
-      opts.forEach(function (o) {
-        var on = st.multi ? S.a.avoid.indexOf(o[0]) >= 0 : S.a[st.id] === o[0];
-        h += '<button type="button" class="opt" data-v="' + o[0] + '" aria-pressed="' + on + '"><span class="emo" aria-hidden="true">' + o[1] + '</span><span class="lab"><strong>' + esc(o[2]) + "</strong>" + (o[3] ? "<small>" + esc(o[3]) + "</small>" : "") + "</span></button>";
-      });
-      h += "</div>";
+    let d,tries=0;
+    for(;;){
+      S.seen.push(cand.m.id);d=await SRC[S.cat].t(cand.m);
+      if(S.cat!=="film"||d.it||tries++>=4)break;
+      const pool=ranked||S.cands,nx=pickFrom(pool,false);if(!nx)break;cand=nx;
     }
-    h += '<div class="nav">';
-    h += '<button type="button" class="btn ghost" id="back">← Indietro</button>';
-    if (st.slider) h += '<button type="button" class="btn primary cta" id="next">Avanti →</button>';
-    if (st.multi) h += '<button type="button" class="btn primary cta" id="go">' + cat.ic + ' Trova il mio titolo</button>';
-    h += "</div>";
-    swap(h);
+    await wait;stop();show({d,m:cand.m,s:cand.s},surprise);
+  }catch(e){await wait;stop();showError(e)}
+}
+const hue=s=>{let h=0;for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))%360;return h};
+const fbPoster=(t,y)=>{const h=hue(t);return'<div class="poster fb" role="img" aria-label="Copertina non disponibile" style="background:linear-gradient(165deg,hsl('+h+' 72% 42%),hsl('+((h+55)%360)+' 60% 14%) 85%)"><small>Stasera</small><h3>'+esc(t)+"</h3><em style=\"font-style:normal\">"+esc(y||"")+"</em></div>"};
+function why(r,sur){
+  const a=S.a,g=r.m.genres||[],o=[];
+  if(sur)o.push("È una scelta volutamente fuori dai tuoi binari, come hai chiesto.");
+  o.push(hit(g,G[S.cat].mood[a.mood])?"Stasera volevi "+MOOD_TXT[a.mood]+" e questo titolo punta dritto lì.":"Non è la scelta più ovvia per chi vuole "+MOOD_TXT[a.mood]+", ma si sposa bene con il resto delle tue risposte.");
+  const e=+a.effort;o.push(e===2?"Hai chiesto qualcosa che ti lasci un segno, non solo intrattenimento passeggero.":e===0?"Per spegnere il cervello e divertirti, è facile da seguire.":"Ha il giusto equilibrio tra storia e leggerezza che cercavi.");
+  o.push("Funziona bene "+WHO_TXT[a.who]+".");return o.join(" ");
+}
+function verdict(d){
+  if(S.cat==="film")return d.pop>=10?"Un film abbastanza noto da avere pagine Wikipedia in "+d.pop+" lingue diverse.":"Un film da scoprire, lontano dai titoli più battuti.";
+  const v=d.rv;if(!v)return"Un titolo che vale la pena scoprire, anche se non ha ancora un voto consolidato.";
+  return(v>=8?"Uno dei titoli più amati dal pubblico":v>=7?"Un titolo che piace davvero":"Un titolo che divide, nel modo giusto")+": "+(+v).toFixed(1)+" su 10 ("+d.rl+").";
+}
+function show(r,sur){
+  S.cur=r;const d=r.d;let p=pct(r.s);if(sur)p=Math.max(60,p-6);
+  setProg(TOTAL,"Fatto");
+  const poster=d.poster?'<div class="poster"><img id="pimg" src="'+esc(d.poster)+'" alt="Copertina di '+esc(d.title)+'" referrerpolicy="no-referrer"></div>':fbPoster(d.title,d.year);
+  let ch="";
+  if(d.year)ch+='<span class="chip">'+esc(d.year)+"</span>";
+  if(d.runtime)ch+='<span class="chip">'+d.runtime+(S.cat==="film"?" min":" min/ep")+"</span>";
+  if(d.episodes)ch+='<span class="chip">'+d.episodes+" episodi</span>";
+  if(d.rv)ch+='<span class="chip r">'+d.rl+" "+(+d.rv).toFixed(1)+"</span>";
+  const h='<div class="res">'+(sur?'<span class="tag">🎲 Fuori dalla tua comfort zone</span>':"")+'<div class="hero">'+poster+'<div class="meta"><h2>'+esc(d.title)+'</h2><div class="chips">'+ch+"</div>"+(d.gt?'<div class="chips"><span class="chip">'+esc(d.gt)+"</span></div>":"")+
+   '<div class="compat"><b>⭐ Compatibilità '+p+'%</b><div class="meter"><span style="width:'+p+'%"></span></div></div></div></div>'+
+   '<section class="block"><h3>Perché fa per te</h3><p>'+esc(why(r,sur))+"</p></section>"+
+   '<section class="block"><h3>Trama</h3><p>'+esc(d.overview)+'</p><p class="src">'+(d.it?"📖 Fonte: Wikipedia in italiano":"📖 Sinossi originale (nessuna voce italiana trovata)")+"</p></section>"+
+   '<section class="block v"><h3>Il verdetto</h3><p>“'+esc(verdict(d))+'”</p></section>'+
+   '<div class="row"><button class="btn" id="sur">🎲 Sorprendimi</button><button class="btn" id="oth">🔄 Un altro titolo</button><button class="btn" id="rst">'+CATS[S.cat].ic+" Cambia categoria</button></div></div>";
+  swap(h);scrollTo(0,0);
+  const im=$("pimg");if(im)im.onerror=()=>{im.parentNode.outerHTML=fbPoster(d.title,d.year)};
+  $("oth").onclick=()=>run(false,false);$("sur").onclick=()=>run(true,false);$("rst").onclick=renderCats;
+}
+renderCats();
 
-    document.getElementById("back").onclick = function () { if (S.step > 0) { S.step--; renderStep(); } else { renderCatPicker(); } };
-    if (st.slider) {
-      var rg = document.getElementById("risk");
-      rg.oninput = function () { S.a.risk = +rg.value; document.getElementById("rn").textContent = rg.value; document.getElementById("rt").textContent = riskLabel(+rg.value); };
-      document.getElementById("next").onclick = function () { S.step++; renderStep(); };
-      return;
-    }
-    var box = document.getElementById("opts");
-    box.onclick = function (e) {
-      var b = e.target.closest(".opt"); if (!b) return;
-      var v = b.getAttribute("data-v");
-      if (st.multi) {
-        var av = S.a.avoid;
-        if (v === "none") { S.a.avoid = av.indexOf("none") >= 0 ? [] : ["none"]; }
-        else { av = av.filter(function (x) { return x !== "none"; }); var i = av.indexOf(v); if (i >= 0) av.splice(i, 1); else av.push(v); S.a.avoid = av; }
-        Array.prototype.forEach.call(box.children, function (c) { c.setAttribute("aria-pressed", S.a.avoid.indexOf(c.getAttribute("data-v")) >= 0); });
-      } else {
-        S.a[st.id] = v;
-        Array.prototype.forEach.call(box.children, function (c) { c.setAttribute("aria-pressed", c === b); });
-        setTimeout(function () { S.step++; renderStep(); }, 260);
-      }
-    };
-    if (st.multi) document.getElementById("go").onclick = startSearch;
-  }
-
-  /* ============================================================
-     CARICAMENTO / ERRORE
-     ============================================================ */
-  function clapper() {
-    return '<svg class="clap" viewBox="0 0 110 110" aria-hidden="true"><rect x="14" y="44" width="82" height="52" rx="6" fill="#1f1929" stroke="#9061f9" stroke-width="3"/>' +
-      '<g class="arm"><rect x="14" y="26" width="82" height="16" rx="4" fill="#f4effa"/><path d="M26 26 l10 16 M46 26 l10 16 M66 26 l10 16 M86 26 l10 16" stroke="#ff3d52" stroke-width="7"/></g>' +
-      '<path d="M14 52 h82" stroke="#9061f9" stroke-width="2"/><path d="M28 66 h54 M28 78 h36" stroke="#a89fba" stroke-width="3" stroke-linecap="round"/></svg>';
-  }
-  function showLoading() {
-    setProgress(TOTAL, ""); countEl.textContent = TOTAL + "/" + TOTAL;
-    var txts = LOAD_TXT[S.cat];
-    swap('<div class="loading">' + clapper() + '<p id="lt" aria-live="polite">' + txts[0] + "</p></div>");
-    var lt = document.getElementById("lt"), i = 0;
-    var iv = setInterval(function () { i = (i + 1) % txts.length; if (lt.isConnected) lt.textContent = txts[i]; }, 1300);
-    return function () { clearInterval(iv); };
-  }
-  function showError(err) {
-    var msg = err && err.message === "EMPTY" ? "Nessun titolo trovato con queste regole. Prova a togliere qualche esclusione o ad alzare il livello di sorpresa."
-      : "Non riesco a contattare la fonte dati (" + CATS[S.cat].label + "). Controlla la connessione e riprova tra qualche secondo.";
-    setProgress(TOTAL, "");
-    swap('<div class="errbox"><h2>Qualcosa non va</h2><p style="margin:0">' + esc(msg) + '</p><div class="nav" style="margin-top:0">' +
-      '<button type="button" class="btn primary" id="retry">Riprova</button>' +
-      '<button type="button" class="btn ghost" id="toquiz">Torna al quiz</button></div></div>');
-    document.getElementById("retry").onclick = startSearch;
-    document.getElementById("toquiz").onclick = function () { S.step = TOTAL - 1; renderStep(); };
-  }
-
-  /* ============================================================
-     ARRICCHIMENTO IN ITALIANO (Wikipedia, senza chiave)
-     ============================================================ */
-  function wikiSummary(title) {
-    var t = title.trim().replace(/\s+/g, "_");
-    return fetchJson("https://it.wikipedia.org/api/rest_v1/page/summary/" + encodeURIComponent(t), {}, 8000);
-  }
-  function wikiSearchTitles(q) {
-    var url = "https://it.wikipedia.org/w/api.php?action=query&list=search&format=json&origin=*&srlimit=4&srsearch=" + encodeURIComponent(q);
-    return fetchJson(url, {}, 8000).then(function (r) { return (r.query && r.query.search || []).map(function (x) { return x.title; }); }, function () { return []; });
-  }
-  function enrichItalian(searchTitle) {
-    return wikiSummary(searchTitle).then(function (r) {
-      if (r && r.extract && r.type !== "disambiguation") return { extract: r.extract, thumb: r.thumbnail && r.thumbnail.source };
-      return wikiSearchTitles(searchTitle).then(tryList);
-    }, function () { return wikiSearchTitles(searchTitle).then(tryList); });
-    function tryList(titles) {
-      if (!titles.length) return null;
-      var t0 = titles[0];
-      return wikiSummary(t0).then(function (r2) {
-        if (r2 && r2.extract && r2.type !== "disambiguation") return { extract: r2.extract, thumb: r2.thumbnail && r2.thumbnail.source };
-        return null;
-      }, function () { return null; });
-    }
-  }
-
-  /* ============================================================
-     FONTE: FILM — Wikidata (SPARQL) + Wikipedia
-     ============================================================ */
-  function sparql(query) {
-    return fetch("https://query.wikidata.org/sparql", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded", "Accept": "application/sparql-results+json" },
-      body: "query=" + encodeURIComponent(query)
-    }).then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); });
-  }
-  function filmFilters(a) {
-    var g = GENRES.film, without = [];
-    a.avoid.forEach(function (k) { if (g.avoid[k]) without = without.concat(g.avoid[k]); });
-    if (a.who === "family") without = without.concat(["horror film", "erotic film", "war film"]);
-    var rtMin, rtMax;
-    if (a.time === "short") rtMax = 95; else if (a.time === "mid") { rtMin = 85; rtMax = 125; } else if (a.time === "long") rtMin = 115;
-    if (a.avoid.indexOf("long") >= 0) rtMax = Math.min(rtMax || 999, 130);
-    return { without: uniq(without), rtMin: rtMin, rtMax: rtMax, yearMin: a.avoid.indexOf("old") >= 0 ? 1995 : undefined };
-  }
-  function filmGenreSet(a) {
-    var g = GENRES.film;
-    return uniq((g.vibe[a.vibe] || []).concat(g.kind[a.kind] || []));
-  }
-  function filmDiscover(a, surprise, relax) {
-    var f = filmFilters(a);
-    var genres = filmGenreSet(a).filter(function (x) { return f.without.indexOf(x) < 0; });
-    if (!genres.length) genres = ["drama film", "comedy film"];
-    var risk = surprise ? Math.max(a.risk + 30, 85) : a.risk;
-    var minLinks = risk < 30 ? 40 : risk < 60 ? 18 : risk < 80 ? 8 : 3;
-    if (relax) minLinks = Math.max(2, Math.floor(minLinks / 3));
-    var values = genres.map(function (x) { return '"' + x.replace(/"/g, '') + '"@en'; }).join(" ");
-    var yearFilter = f.yearMin ? ("FILTER(!BOUND(?year) || ?year >= " + f.yearMin + ") ") : "";
-    var rtFilter = (f.rtMin || f.rtMax) ? ("FILTER(!BOUND(?runtime) || (" + (f.rtMin ? "?runtime >= " + f.rtMin : "true") + " && " + (f.rtMax ? "?runtime <= " + f.rtMax : "true") + ")) ") : "";
-    var q = "SELECT DISTINCT ?film ?filmLabel ?year ?sitelinks ?image ?runtime WHERE { " +
-      "VALUES ?gl { " + values + " } ?genre rdfs:label ?gl . " +
-      "?film wdt:P31 wd:Q11424 ; wdt:P136 ?genre ; wikibase:sitelinks ?sitelinks . " +
-      "FILTER(?sitelinks >= " + minLinks + ") " +
-      "OPTIONAL { ?film wdt:P577 ?date . BIND(YEAR(?date) AS ?year) } " +
-      "OPTIONAL { ?film wdt:P18 ?image } " +
-      "OPTIONAL { ?film wdt:P2047 ?runtime } " +
-      yearFilter + rtFilter +
-      "SERVICE wikibase:label { bd:serviceParam wikibase:language \"it,en\" } " +
-      "} ORDER BY DESC(?sitelinks) LIMIT 60";
-    return sparql(q).then(function (d) {
-      var rows = (d.results && d.results.bindings) || [];
-      return rows.map(function (b) {
-        var qid = b.film.value.split("/").pop();
-        return {
-          id: qid, title: b.filmLabel ? b.filmLabel.value : qid,
-          year: b.year ? b.year.value : "",
-          sitelinks: b.sitelinks ? +b.sitelinks.value : 0,
-          image: b.image ? b.image.value : null,
-          runtime: b.runtime ? Math.round(+b.runtime.value) : null,
-          genres: genres
-        };
-      }).filter(function (m) { return !/^Q\d+$/.test(m.title); });
-    });
-  }
-  function filmDetails(c) {
-    var posterPromise = c.image ? Promise.resolve(c.image + "?width=500") : Promise.resolve(null);
-    return enrichItalian(c.title).then(function (wiki) {
-      return posterPromise.then(function (img) {
-        return {
-          title: c.title, year: c.year, runtime: c.runtime,
-          overview: (wiki && wiki.extract) || "Trama non ancora disponibile su Wikipedia in italiano.",
-          overviewIsItalian: !!(wiki && wiki.extract),
-          poster: (wiki && wiki.thumb) || img,
-          ratingLabel: null, ratingVal: null,
-          popLabel: "Wikipedia", popVal: c.sitelinks,
-          genresText: null
-        };
-      });
-    });
-  }
-
-  /* ============================================================
-     FONTE: SERIE TV — TVmaze
-     ============================================================ */
-  function tvGenreSet(a) {
-    var g = GENRES.serie;
-    return uniq((g.vibe[a.vibe] || []).concat(g.kind[a.kind] || []));
-  }
-  function tvFilters(a) {
-    var g = GENRES.serie, without = [];
-    a.avoid.forEach(function (k) { if (g.avoid[k]) without = without.concat(g.avoid[k]); });
-    if (a.who === "family") without = without.concat(["Horror", "Adult"]);
-    return { without: uniq(without), yearMin: a.avoid.indexOf("old") >= 0 ? 1995 : undefined };
-  }
-  function tvDiscover(a, surprise, relax) {
-    var f = tvFilters(a);
-    var wanted = tvGenreSet(a).filter(function (x) { return f.without.indexOf(x) < 0; });
-    if (!wanted.length) wanted = ["Drama", "Comedy"];
-    var pagesToTry = relax ? 10 : 6;
-    var pages = []; for (var i = 0; i < pagesToTry; i++) pages.push(rand(380));
-    pages = uniq(pages);
-    var jobs = pages.map(function (p) {
-      return fetchJson("https://api.tvmaze.com/shows?page=" + p, {}, 9000).then(function (list) { return list || []; }, function () { return []; });
-    });
-    return Promise.all(jobs).then(function (lists) {
-      var all = [].concat.apply([], lists);
-      var minRating = surprise ? 0 : (relax ? 5.5 : 6.5);
-      return all.filter(function (s) {
-        if (!s.genres || !s.genres.length) return false;
-        var overlap = s.genres.some(function (g) { return wanted.indexOf(g) >= 0; });
-        if (!overlap) return false;
-        var bad = s.genres.some(function (g) { return f.without.indexOf(g) >= 0; });
-        if (bad) return false;
-        if (f.yearMin && s.premiered && +s.premiered.slice(0, 4) < f.yearMin) return false;
-        if (s.rating && s.rating.average && s.rating.average < minRating) return false;
-        if (s.language && s.language !== "English" && s.language !== "Italian" && a.risk < 60 && !surprise) return false;
-        return true;
-      }).map(function (s) {
-        return { id: s.id, title: s.name, year: s.premiered ? s.premiered.slice(0, 4) : "", genres: s.genres,
-          rating: s.rating && s.rating.average, runtime: s.averageRuntime || s.runtime,
-          image: s.image && (s.image.original || s.image.medium), summary: stripHtml(s.summary), status: s.status };
-      });
-    });
-  }
-  function tvDetails(c) {
-    return enrichItalian(c.title).then(function (wiki) {
-      return {
-        title: c.title, year: c.year, runtime: c.runtime,
-        overview: (wiki && wiki.extract) || c.summary || "Trama non disponibile.",
-        overviewIsItalian: !!(wiki && wiki.extract),
-        poster: (wiki && wiki.thumb) || c.image,
-        ratingLabel: "TVmaze", ratingVal: c.rating,
-        popLabel: null, popVal: null,
-        genresText: (c.genres || []).join(" · ")
-      };
-    });
-  }
-
-  /* ============================================================
-     FONTE: ANIME — Jikan (MyAnimeList)
-     ============================================================ */
-  var jikanGenreMap = null;
-  function jikanGenres() {
-    if (jikanGenreMap) return Promise.resolve(jikanGenreMap);
-    return fetchJson("https://api.jikan.moe/v4/genres/anime", {}, 9000).then(function (r) {
-      var map = {};
-      (r.data || []).forEach(function (g) { map[g.name] = g.mal_id; });
-      jikanGenreMap = map;
-      return map;
-    });
-  }
-  function animeGenreSet(a) {
-    var g = GENRES.anime;
-    return uniq((g.vibe[a.vibe] || []).concat(g.kind[a.kind] || []));
-  }
-  function animeFilters(a) {
-    var g = GENRES.anime, without = [];
-    a.avoid.forEach(function (k) { if (g.avoid[k]) without = without.concat(g.avoid[k]); });
-    var epMax;
-    if (a.time === "short") epMax = 13; else if (a.time === "mid") epMax = 26; else if (a.time === "long") epMax = undefined;
-    if (a.avoid.indexOf("long") >= 0) epMax = Math.min(epMax || 9999, 26);
-    return { without: uniq(without), epMax: epMax, yearMin: a.avoid.indexOf("old") >= 0 ? 1995 : undefined };
-  }
-  function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
-  function animeDiscover(a, surprise, relax) {
-    var f = animeFilters(a);
-    return jikanGenres().then(function (map) {
-      var wanted = animeGenreSet(a).filter(function (x) { return f.without.indexOf(x) < 0 && map[x]; }).map(function (x) { return map[x]; });
-      if (!wanted.length) wanted = [map["Drama"], map["Comedy"]].filter(Boolean);
-      var without = f.without.filter(function (x) { return map[x]; }).map(function (x) { return map[x]; });
-      var minScore = surprise ? 0 : (relax ? 6 : 7);
-      var pages = relax ? [1, 2, 3] : [1 + rand(2), 3 + rand(2)];
-      var jobs = pages.map(function (pg, idx) {
-        return sleep(idx * 420).then(function () {
-          var url = new URL("https://api.jikan.moe/v4/anime");
-          url.searchParams.set("genres", wanted.join(","));
-          if (without.length) url.searchParams.set("genres_exclude", without.join(","));
-          url.searchParams.set("order_by", "score"); url.searchParams.set("sort", "desc");
-          url.searchParams.set("min_score", minScore); url.searchParams.set("page", pg); url.searchParams.set("limit", "24");
-          url.searchParams.set("sfw", "true");
-          return fetchJson(url.toString(), {}, 10000).then(function (r) { return r.data || []; }, function () { return []; });
-        });
-      });
-      return Promise.all(jobs).then(function (lists) {
-        var all = [].concat.apply([], lists);
-        return all.filter(function (m) {
-          if (f.epMax && m.episodes && m.episodes > f.epMax) return false;
-          if (f.yearMin && m.aired && m.aired.prop && m.aired.prop.from && m.aired.prop.from.year && m.aired.prop.from.year < f.yearMin) return false;
-          return true;
-        }).map(function (m) {
-          return { id: m.mal_id, title: m.title, year: m.aired && m.aired.prop && m.aired.prop.from ? m.aired.prop.from.year : "",
-            genres: (m.genres || []).map(function (g) { return g.name; }), rating: m.score, episodes: m.episodes,
-            image: m.images && m.images.jpg && (m.images.jpg.large_image_url || m.images.jpg.image_url), synopsis: m.synopsis };
-        });
-      });
-    });
-  }
-  function animeDetails(c) {
-    return enrichItalian(c.title).then(function (wiki) {
-      return {
-        title: c.title, year: c.year, runtime: null, episodes: c.episodes,
-        overview: (wiki && wiki.extract) || c.synopsis || "Trama non disponibile.",
-        overviewIsItalian: !!(wiki && wiki.extract),
-        poster: (wiki && wiki.thumb) || c.image,
-        ratingLabel: "MyAnimeList", ratingVal: c.rating,
-        popLabel: null, popVal: null,
-        genresText: (c.genres || []).join(" · ")
-      };
-    });
-  }
-
-  var SOURCES = {
-    film:  { discover: filmDiscover,  details: filmDetails,  heavy: GENRES.film.heavy,  light: GENRES.film.light },
-    serie: { discover: tvDiscover,    details: tvDetails,    heavy: GENRES.serie.heavy, light: GENRES.serie.light },
-    anime: { discover: animeDiscover, details: animeDetails, heavy: GENRES.anime.heavy, light: GENRES.anime.light }
-  };
-
-  /* ============================================================
-     PUNTEGGIO (generico, adattato per categoria)
-     ============================================================ */
-  function hit(genresOfCand, wantedList) {
-    if (!genresOfCand || !wantedList || !wantedList.length) return 0;
-    var any = genresOfCand.some(function (g) { return wantedList.indexOf(g) >= 0; });
-    return any ? 1 : 0;
-  }
-  function mainstreamProxy(cat, m) {
-    if (cat === "film") return Math.max(0, Math.min(1, Math.log10(Math.max(2, m.sitelinks)) / 2.6));
-    if (cat === "anime") return Math.max(0, Math.min(1, Math.log10(Math.max(10, (m.rating || 5) * 1000)) / 5));
-    return m.rating ? Math.max(0, Math.min(1, (m.rating - 3) / 6)) : 0.4;
-  }
-  function score(cat, m, a) {
-    var src = SOURCES[cat];
-    var gset = GENRES[cat];
-    var g = m.genres || [];
-    var s = 0;
-    s += 35 * hit(g, gset.vibe[a.vibe]);
-    s += 25 * hit(g, gset.kind[a.kind]);
-    var e = +a.effort;
-    var heavy = g.some(function (x) { return src.heavy.indexOf(x) >= 0; }) || (m.rating || 0) >= 8.3;
-    var light = g.some(function (x) { return src.light.indexOf(x) >= 0; });
-    s += 15 * (e === 2 ? (heavy ? 1 : 0.3) : e === 0 ? (light ? 1 : 0.3) : 0.75);
-    var mainstream = mainstreamProxy(cat, m);
-    s += 15 * Math.max(0, 1 - Math.abs((1 - mainstream) * 100 - a.risk) / 70);
-    s += 10 * (cat === "film" ? Math.max(0, Math.min(1, mainstream)) : m.rating ? Math.max(0, Math.min(1, (m.rating - 5) / 4)) : 0.5);
-    return s;
-  }
-  function pctOf(s) { return Math.round(Math.min(98, 52 + 46 * Math.pow(Math.max(0, s) / 100, 1.3))); }
-
-  /* ============================================================
-     RICERCA / FLUSSO
-     ============================================================ */
-  function newCands(surprise) {
-    var src = SOURCES[S.cat];
-    return src.discover(S.a, surprise, false).then(function (c) {
-      if (c.length >= 5) return c;
-      return src.discover(S.a, surprise, true).then(function (c2) { return c.concat(c2); });
-    }).then(function (c) {
-      var seen = {}; c = c.filter(function (m) { if (seen[m.id]) return false; seen[m.id] = 1; return true; });
-      if (!c.length) throw new Error("EMPTY");
-      var ranked = c.map(function (m) { return { m: m, s: score(S.cat, m, S.a) }; }).sort(function (x, y) { return y.s - x.s; });
-      return ranked;
-    });
-  }
-  function pickFrom(ranked, surprise) {
-    var pool = ranked.filter(function (x) { return S.seen.indexOf(x.m.id) < 0; });
-    if (!pool.length) return null;
-    if (surprise) { pool = pool.slice(0, 10); return pick(pool); }
-    return pool[0];
-  }
-  function run(surprise, fresh) {
-    var stop = showLoading();
-    var wait = new Promise(function (r) { setTimeout(r, 2200); });
-    var src = SOURCES[S.cat];
-    var job = Promise.resolve().then(function () {
-      var cand = !fresh && !surprise ? pickFrom(S.cands, false) : null;
-      if (cand) return cand;
-      return newCands(surprise).then(function (ranked) {
-        if (!surprise) S.cands = ranked;
-        return pickFrom(ranked, surprise) || pick(ranked);
-      });
-    }).then(function (cand) {
-      S.seen.push(cand.m.id);
-      return src.details(cand.m).then(function (d) { return { d: d, m: cand.m, s: cand.s }; });
-    });
-    Promise.all([job, wait]).then(function (r) { stop(); showResult(r[0], surprise); }, function (e) { stop(); showError(e); });
-  }
-  function startSearch() { S.seen = []; S.cands = []; run(false, true); }
-
-  /* ============================================================
-     RISULTATO
-     ============================================================ */
-  function hue(str) { var h = 0; for (var i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) % 360; return h; }
-  function fallbackPoster(t, y) {
-    var h = hue(t);
-    return '<div class="poster fallback" role="img" aria-label="Copertina non disponibile" style="background:linear-gradient(165deg,hsl(' + h + ' 72% 42%),hsl(' + ((h + 55) % 360) + ' 60% 14%) 85%)"><small>Stasera</small><h3>' + esc(t) + "</h3><em>" + esc(y) + "</em></div>";
-  }
-  function why(cat, r, surprise) {
-    var a = S.a, gset = GENRES[cat], g = r.m.genres || [], out = [];
-    if (surprise) out.push("È una scelta volutamente fuori dai tuoi binari, come hai chiesto.");
-    if (hit(g, gset.vibe[a.vibe])) out.push("Stasera volevi " + VIBE_TXT[a.vibe] + " e questo titolo punta dritto lì.");
-    else out.push("Non è la scelta più ovvia per chi vuole " + VIBE_TXT[a.vibe] + ", ma si sposa bene con il resto delle tue risposte.");
-    if (hit(g, gset.kind[a.kind])) out.push("Cercavi " + KIND_TXT[a.kind] + ": ci siamo.");
-    var e = +a.effort;
-    if (e === 2) out.push("Hai chiesto qualcosa che ti lasci addosso qualcosa.");
-    else if (e === 0) out.push("Per spegnere il cervello e divertirti, è una scelta leggera da seguire.");
-    else out.push("Ha il giusto equilibrio tra storia e leggerezza che cercavi.");
-    out.push("Funziona bene " + WHO_TXT[a.who] + ".");
-    return out.join(" ");
-  }
-  function verdict(cat, d) {
-    if (cat === "film") {
-      var n = (d.popVal || 0).toLocaleString("it-IT");
-      return "Un film abbastanza noto da avere pagine Wikipedia in " + n + " lingue diverse.";
-    }
-    var v = d.ratingVal;
-    if (!v) return "Un titolo che vale la pena scoprire, anche se non ha ancora un voto consolidato.";
-    var lead = v >= 8 ? "Uno dei titoli più amati dal pubblico" : v >= 7 ? "Un titolo che piace davvero" : "Un titolo che divide, nel modo giusto";
-    return lead + ": " + v.toFixed(1) + " su 10 (" + d.ratingLabel + ").";
-  }
-  function showResult(r, surprise) {
-    S.cur = r;
-    var cat = S.cat, d = r.d, pct = pctOf(r.s); if (surprise) pct = Math.max(60, pct - 6); r.pct = pct;
-    setProgress(TOTAL, ""); countEl.textContent = "Fatto";
-    var posterHtml = d.poster ? '<div class="poster"><img id="pimg" src="' + esc(d.poster) + '" alt="Copertina di ' + esc(d.title) + '"></div>' : fallbackPoster(d.title, d.year);
-    var chips = "";
-    if (d.year) chips += '<span class="chip">' + esc(d.year) + "</span>";
-    if (d.runtime) chips += '<span class="chip">' + d.runtime + " min/ep</span>";
-    if (d.episodes) chips += '<span class="chip">' + d.episodes + " episodi</span>";
-    if (d.ratingVal) chips += '<span class="chip rating">' + d.ratingLabel + " " + (+d.ratingVal).toFixed(1) + "</span>";
-    if (cat === "film") chips += '<span class="chip rating">Wikipedia ×' + d.popVal + "</span>";
-    var h = '<div class="res">' + (surprise ? '<span class="tag">🎲 Fuori dalla tua comfort zone</span>' : "") +
-      '<div class="hero">' + posterHtml + '<div class="meta"><h2>' + esc(d.title) + '</h2><div class="chips">' + chips + "</div>" +
-      (d.genresText ? '<div class="chips"><span class="chip">' + esc(d.genresText) + "</span></div>" : "") +
-      '<div class="compat"><b>⭐ Compatibilità ' + pct + '%</b><div class="meter"><span style="width:' + pct + '%"></span></div></div></div></div>' +
-      '<section class="block"><h3>Perché fa per te</h3><p>' + esc(why(cat, r, surprise)) + "</p></section>" +
-      '<section class="block"><h3>Trama</h3><p>' + esc(d.overview) + '</p><p class="src">' + (d.overviewIsItalian ? "📖 Fonte: Wikipedia in italiano" : "📖 Sinossi originale (non ancora tradotta su Wikipedia)") + "</p></section>" +
-      '<section class="block verdict"><h3>Il verdetto</h3><p>“' + esc(verdict(cat, d)) + "”</p></section>" +
-      '<div class="actions"><div class="row"><button type="button" class="btn" id="surprise">🎲 Sorprendimi</button><button type="button" class="btn" id="another">🔄 Un altro titolo</button><button type="button" class="btn" id="restart">' + CATS[cat].ic + ' Cambia categoria</button></div></div></div>';
-    swap(h);
-    window.scrollTo(0, 0);
-    var img = document.getElementById("pimg");
-    if (img) img.onerror = function () { img.parentNode.outerHTML = fallbackPoster(d.title, d.year); };
-    document.getElementById("another").onclick = function () { run(false, false); };
-    document.getElementById("surprise").onclick = function () { run(true, false); };
-    document.getElementById("restart").onclick = function () { renderCatPicker(); };
-  }
-
-  renderCatPicker();
+/* ---------- Banner "installa" ---------- */
+let dp=null;const ib=$("ib");
+addEventListener("beforeinstallprompt",e=>{e.preventDefault();dp=e;try{if(!localStorage.getItem("stasera_ix"))ib.hidden=false}catch(x){ib.hidden=false}});
+$("ibtn").onclick=()=>{ib.hidden=true;if(dp){dp.prompt();dp=null}};
+$("ix").onclick=()=>{ib.hidden=true;try{localStorage.setItem("stasera_ix","1")}catch(x){}};
+addEventListener("appinstalled",()=>{ib.hidden=true});
 })();
 </script>
+</body>
+</html>
