@@ -375,11 +375,6 @@ function why(r,sur){
   const e=+a.effort;o.push(e===2?"Hai chiesto qualcosa che ti lasci un segno, non solo intrattenimento passeggero.":e===0?"Per spegnere il cervello e divertirti, è facile da seguire.":"Ha il giusto equilibrio tra storia e leggerezza che cercavi.");
   o.push("Funziona bene "+WHO_TXT[a.who]+".");return o.join(" ");
 }
-function verdict(d){
-  if(S.cat==="film")return d.pop>=10?"Un film abbastanza noto da avere pagine Wikipedia in "+d.pop+" lingue diverse.":"Un film da scoprire, lontano dai titoli più battuti.";
-  const v=d.rv;if(!v)return"Un titolo che vale la pena scoprire, anche se non ha ancora un voto consolidato.";
-  return(v>=8?"Uno dei titoli più amati dal pubblico":v>=7?"Un titolo che piace davvero":"Un titolo che divide, nel modo giusto")+": "+(+v).toFixed(1)+" su 10 ("+d.rl+").";
-}
 function show(r,sur){
   S.cur=r;const d=r.d;let p=pct(r.s);if(sur)p=Math.max(60,p-6);
   setProg(TOTAL,"Fatto");
@@ -393,7 +388,6 @@ function show(r,sur){
    '<div class="compat"><b>⭐ Compatibilità '+p+'%</b><div class="meter"><span style="width:'+p+'%"></span></div></div></div></div>'+
    '<section class="block"><h3>Perché fa per te</h3><p>'+esc(why(r,sur))+"</p></section>"+
    '<section class="block"><h3>Trama</h3><p>'+esc(d.overview)+'</p><p class="src">'+(d.it?"📖 Fonte: Wikipedia in italiano":"📖 Sinossi originale (nessuna voce italiana trovata)")+"</p></section>"+
-   '<section class="block v"><h3>Il verdetto</h3><p>“'+esc(verdict(d))+'”</p></section>'+
    '<div class="row"><button class="btn" id="sur">🎲 Sorprendimi</button><button class="btn" id="oth">🔄 Un altro titolo</button><button class="btn" id="rst">'+CATS[S.cat].ic+" Cambia categoria</button></div></div>";
   swap(h);scrollTo(0,0);
   const im=$("pimg");if(im)im.onerror=()=>{im.parentNode.outerHTML=fbPoster(d.title,d.year)};
