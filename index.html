@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <title>Stasera Cosa Guardo</title>
-<meta name="description" content="Quiz per scegliere film, serie TV o anime da guardare stasera. Fonti pubbliche, senza API key.">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<meta name="description" content="Scegli film, serie TV o anime da guardare stasera in 10 secondi. Fonti pubbliche, senza API key.">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link id="fav" rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23ff3d52'/%3E%3Cpath d='M24 18l24 14-24 14V18z' fill='%23fff'/%3E%3C/svg%3E">
 <link id="apple" rel="apple-touch-icon" href="">
-<meta name="theme-color" content="#0c0a11">
+<meta name="theme-color" content="#0b0911">
 <meta name="color-scheme" content="dark">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -20,107 +20,137 @@
 <style>
 :root{
   --bg:#0b0911;
-  --panel:#12111a;
-  --panel-2:#1a1523;
-  --panel-3:#201b2d;
+  --panel:#14121d;
+  --panel-2:#1b1726;
   --line:#2d2740;
   --fg:#f4effa;
   --mut:#a7a0b7;
   --red:#ff3d52;
   --vio:#9061f9;
   --gold:#f5c451;
-  --green:#7ee7a8;
+  --r:14px;          /* raggio unico per tutti i controlli */
+  --h:60px;          /* altezza unica per tutti i bottoni di scelta */
   --fd:"Bricolage Grotesque","Arial Narrow",Arial,sans-serif;
   --fb:"Instrument Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   color-scheme:dark;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html{height:100%}
+html{-webkit-text-size-adjust:100%;background:var(--bg)}
 body{
-  margin:0;
-  min-height:100vh;
-  font:16px/1.45 var(--fb);
-  color:var(--fg);
-  background:radial-gradient(1200px 580px at 80% 0%,rgba(144,97,249,.18),transparent 60%) no-repeat,
-              radial-gradient(900px 420px at 20% 100%,rgba(255,61,82,.12),transparent 65%) no-repeat,
-              var(--bg);
-  -webkit-user-select:none;user-select:none;
-  -webkit-touch-callout:none;
-  text-rendering:optimizeLegibility;
-  padding:max(16px,env(safe-area-inset-top,0px)) max(14px,env(safe-area-inset-right,0px)) max(18px,env(safe-area-inset-bottom,0px)) max(14px,env(safe-area-inset-left,0px));
+  margin:0;min-height:100vh;min-height:100dvh;
+  font:16px/1.45 var(--fb);color:var(--fg);
+  background:radial-gradient(900px 480px at 85% -5%,rgba(144,97,249,.20),transparent 60%) no-repeat,
+             radial-gradient(700px 400px at 0% 100%,rgba(255,61,82,.12),transparent 65%) no-repeat,var(--bg);
+  background-attachment:fixed;
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;
+  overscroll-behavior-y:none;
+  padding:max(14px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) calc(110px + env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left));
 }
-button{font:inherit;color:inherit;cursor:pointer;-webkit-appearance:none;appearance:none;touch-action:manipulation;margin:0;text-align:left;border:0;background:none;padding:0}
+button{font:inherit;color:inherit;cursor:pointer;-webkit-appearance:none;appearance:none;touch-action:manipulation;margin:0;border:0;background:none;padding:0}
 img{max-width:100%;display:block}
-a{color:inherit;text-decoration:none}
-:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
-.app-shell{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
-.topbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
-.brand{font-family:var(--fd);font-weight:800;font-size:1.05rem;letter-spacing:.08em;text-transform:uppercase;display:flex;align-items:center;gap:.3em}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.app{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+
+/* header */
+.top{display:flex;align-items:center;justify-content:space-between;padding:2px 2px 0}
+.brand{font-family:var(--fd);font-weight:800;font-size:1rem;letter-spacing:.08em;text-transform:uppercase}
 .brand i{font-style:normal;color:var(--red)}
-.mini-label{padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.02);font-size:.78rem;color:var(--mut);letter-spacing:.08em;text-transform:uppercase}
-.stage{display:flex;flex-direction:column;gap:18px;animation:rise .28s both}
+h1{margin:0;font-family:var(--fd);font-weight:800;font-size:clamp(1.9rem,8vw,2.5rem);line-height:1.02;letter-spacing:-.035em}
+.sub{margin:6px 0 0;color:var(--mut);font-size:.95rem}
+
+/* sezioni */
+.sec{display:flex;flex-direction:column;gap:8px}
+.sec>h2{margin:0 2px;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--mut);font-weight:700}
+.grid{display:grid;gap:8px}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+
+/* bottone di scelta: UNICO componente per tutte le scelte */
+.opt{
+  min-height:var(--h);border-radius:var(--r);border:1px solid var(--line);background:var(--panel);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  padding:8px 4px;text-align:center;line-height:1.15;
+  transition:background .15s,border-color .15s,transform .1s;
+}
+.opt .e{font-size:1.35rem;line-height:1}
+.opt .t{font-size:.76rem;font-weight:600;color:var(--fg);word-break:break-word}
+.opt:active{transform:scale(.97)}
+.opt.on{background:linear-gradient(135deg,rgba(255,61,82,.22),rgba(144,97,249,.20));border-color:var(--red);box-shadow:inset 0 0 0 1px rgba(255,61,82,.35)}
+
+/* bottoni azione: stessa altezza e raggio */
+.bar{
+  position:fixed;left:0;right:0;bottom:0;z-index:5;
+  padding:14px max(14px,env(safe-area-inset-right)) calc(14px + env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left));
+  background:linear-gradient(180deg,rgba(11,9,17,0),rgba(11,9,17,.92) 35%,var(--bg));
+}
+.bar-in{max-width:560px;margin:0 auto;display:grid;gap:8px;grid-auto-flow:column;grid-auto-columns:1fr}
+.btn{
+  min-height:56px;border-radius:var(--r);border:1px solid var(--line);background:var(--panel-2);
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:0 14px;font-weight:700;font-size:1rem;text-align:center;transition:transform .1s,filter .15s;
+}
+.btn:active{transform:scale(.97)}
+.btn.primary{background:linear-gradient(135deg,var(--red),#c42ddb 130%);border-color:transparent;color:#fff;box-shadow:0 10px 26px rgba(255,61,82,.28)}
+.bar-in.home{grid-template-columns:76px 1fr}
+.bar-in.home .btn:first-child{font-size:1.4rem;padding:0}
+
+/* caricamento */
+.load{min-height:62vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;text-align:center}
+.spin{width:54px;height:54px;border-radius:50%;border:4px solid var(--line);border-top-color:var(--red);animation:sp 0.9s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.load p{margin:0;font-family:var(--fd);font-weight:700;font-size:1.3rem}
+
+/* errore */
+.err{display:flex;flex-direction:column;gap:12px;padding:20px 4px}
+.err h2{margin:0;font-family:var(--fd);font-size:1.9rem;line-height:1.05}
+.err p,.err small{margin:0;color:var(--mut)}
+
+/* risultato */
+.hero{display:grid;grid-template-columns:128px minmax(0,1fr);gap:14px;align-items:start}
+.poster{width:100%;aspect-ratio:2/3;border-radius:var(--r);overflow:hidden;background:var(--panel-2);border:1px solid var(--line)}
+.poster img{width:100%;height:100%;object-fit:cover}
+.poster.fb{display:flex;flex-direction:column;justify-content:space-between;padding:12px;color:#fff;border:0}
+.poster.fb h3{margin:0;font-family:var(--fd);font-size:1.15rem;line-height:1.1}
+.poster.fb small{opacity:.8;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase}
+.meta{display:flex;flex-direction:column;gap:10px;min-width:0}
+.meta h2{margin:0;font-family:var(--fd);font-weight:800;font-size:clamp(1.5rem,6.5vw,2.1rem);line-height:1.05;letter-spacing:-.03em;word-break:break-word}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{padding:4px 10px;border-radius:999px;border:1px solid var(--line);background:var(--panel);font-size:.75rem;color:var(--mut);font-weight:600}
+.chip.r{color:var(--gold);border-color:rgba(245,196,81,.4)}
+.compat b{font:700 .78rem var(--fd);letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
+.meter{height:8px;margin-top:6px;background:var(--panel-2);border-radius:99px;overflow:hidden}
+.meter span{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--red));border-radius:inherit}
+.block{padding:14px 16px;border:1px solid var(--line);border-radius:var(--r);background:var(--panel)}
+.block h3{margin:0 0 8px;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--mut)}
+.block p{margin:0;font-size:.95rem;-webkit-user-select:text;user-select:text}
+.why{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px;font-size:.92rem}
+.why li{display:flex;gap:10px;align-items:flex-start}
+.why li b{color:var(--gold)}
+.in{animation:rise .25s both}
 @keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-.q-wrap{display:flex;flex-direction:column;gap:16px;padding:18px;border:1px solid var(--line);background:rgba(18,17,26,.82);border-radius:22px;backdrop-filter:blur(8px);box-shadow:0 15px 35px rgba(0,0,0,.24)}
-.q-header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
-.q-header h1{margin:0;font-family:var(--fd);font-size:clamp(1.8rem,4vw,2.6rem);line-height:1.05;letter-spacing:-.04em}
-.hint{margin:0;color:var(--mut);font-size:.98rem}
-.quick-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.choice-card{padding:14px;border-radius:18px;border:1px solid var(--line);background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,0));display:flex;flex-direction:column;gap:12px}
-.choice-card h2{margin:0;font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--mut);font-weight:700}
-.choice-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-.choice-card.full .choice-options{grid-template-columns:repeat(2,minmax(0,1fr));}
-.choice-card.full .choice-btn{min-height:64px}
-.choice-btn{
-  width:100%;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;
-  min-height:54px;padding:12px 12px;border-radius:14px;border:1px solid var(--line);background:var(--panel-2);
-  color:var(--fg);transition:all .15s ease, border-color .15s ease, transform .15s ease;
-}
-.choice-btn span{display:block}
-.choice-btn .emoji{font-size:1.3rem;line-height:1;margin-bottom:6px}
-.choice-btn .title{font-weight:700;font-size:1rem;line-height:1.2}
-.choice-btn .sub{font-size:.75rem;color:var(--mut);line-height:1.25;margin-top:2px}
-.choice-btn:hover{border-color:rgba(255,255,255,.16);transform:translateY(-1px)}
-.choice-btn.is-active{background:linear-gradient(135deg,rgba(255,61,82,.18),rgba(144,97,249,.14));border-color:rgba(255,61,82,.52);box-shadow:inset 0 0 0 1px rgba(255,61,82,.2)}
-.choice-btn.is-active .title{color:var(--fg)}
-.choice-card.single .choice-options{grid-template-columns:repeat(2,minmax(0,1fr));}
-.choice-card.single .choice-btn{align-items:flex-start}
-.range-wrap{display:flex;flex-direction:column;gap:10px;padding:10px 0 2px}
-.range-row{display:flex;justify-content:space-between;align-items:center;gap:10px;color:var(--mut);font-size:.8rem;text-transform:uppercase;letter-spacing:.08em}
-.range-row b{font-family:var(--fd);font-size:1.6rem;letter-spacing:-.06em;color:var(--fg);font-weight:800}
-input[type="range"]{width:100%;accent-color:var(--red);height:32px;margin:0}
-.quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
-.btn{display:flex;align-items:center;justify-content:center;min-height:54px;padding:12px 16px;border-radius:14px;font-weight:700;border:1px solid var(--line);background:var(--panel-2);color:var(--fg);transition:transform .15s ease, border-color .15s ease, filter .15s ease}
-.btn:hover{border-color:rgba(255,255,255,.2)}
-.btn:active{transform:scale(.98)}
-.btn.primary{background:linear-gradient(135deg,var(--red),#c42ddb 120%);border-color:transparent;color:white;box-shadow:0 14px 30px rgba(255,61,82,.28)}
-.btn.secondary{background:transparent}
-.header-score{display:flex;gap:8px;align-items:center}
-.pill{display:inline-flex;align-items:center;gap:8px;padding:7px 10px;border-radius:999px;background:rgba(255,255,255,.02);border:1px solid var(--line);color:var(--mut);font-size:.7rem;letter-spacing:.09em;text-transform:uppercase}
-.dot{width:8px;height:8px;border-radius:50%;background:var(--red);display:inline-block}
-@media (max-width:560px){
-  .quick-grid{grid-template-columns:1fr}
-  .choice-options{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .quick-actions{grid-template-columns:1fr}
-}
-@media (prefers-reduced-motion:reduce){
-  .stage,.choice-btn,.btn{animation:none;transition:none}
-}
+
+/* banner installazione */
+.ib{position:fixed;left:12px;right:12px;bottom:calc(90px + env(safe-area-inset-bottom));z-index:9;max-width:536px;margin:0 auto;display:flex;align-items:center;gap:10px;padding:12px;border-radius:var(--r);background:var(--panel-2);border:1px solid var(--line);box-shadow:0 12px 30px rgba(0,0,0,.5)}
+.ib[hidden]{display:none}
+.ib p{margin:0;flex:1;font-size:.85rem}
+.ib .btn{min-height:44px;font-size:.85rem;padding:0 12px}
+
+@media (max-width:360px){.opt .t{font-size:.7rem}.hero{grid-template-columns:104px minmax(0,1fr)}}
+@media (prefers-reduced-motion:reduce){.in,.spin{animation:none}.opt,.btn{transition:none}}
 </style>
 </head>
 <body>
-<div class="app-shell">
-  <header class="topbar">
-    <div class="brand">Stasera cosa <i>guardo</i></div>
-    <div class="mini-label">quick pick</div>
-  </header>
-  <main id="stage" class="stage"></main>
+<div class="app">
+  <header class="top"><div class="brand">Stasera cosa <i>guardo</i></div></header>
+  <main id="stage"></main>
 </div>
+<div id="barhost"></div>
 
 <div class="ib" id="ib" hidden>
   <span style="font-size:22px">📲</span>
   <p>Aggiungila alla schermata Home per usarla come un'app.</p>
   <button class="btn primary" id="ibtn">Installa</button>
-  <button class="btn secondary" id="ix" aria-label="Chiudi">Chiudi</button>
+  <button class="btn" id="ix" aria-label="Chiudi">✕</button>
 </div>
 
 <script>
@@ -128,197 +158,200 @@ input[type="range"]{width:100%;accent-color:var(--red);height:32px;margin:0}
 "use strict";
 const $=id=>document.getElementById(id);
 const rand=n=>Math.floor(Math.random()*n), pick=a=>a[rand(a.length)], uniq=a=>[...new Set(a)], sleep=ms=>new Promise(r=>setTimeout(r,ms));
-const esc=s=>String(s).replace(/[&<>\""]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]));
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const strip=s=>{const d=document.createElement("div");d.innerHTML=s||"";return d.textContent||"";};
 
-const CATS={film:{l:"Film",ic:"🎬",sub:"dal grande cinema",c:"#ff3d52"},serie:{l:"Serie TV",ic:"📺",sub:"dal piccolo schermo",c:"#5ec8ff"},anime:{l:"Anime",ic:"⛩️",sub:"giapponesi: serie e film",c:"#9061f9"},cartoni:{l:"Cartoni",ic:"🧸",sub:"animazione e familiare",c:"#ffb74d"}};
+/* ---------- Dati ---------- */
+const CATS=[["film","🎬","Film"],["serie","📺","Serie TV"],["anime","⛩️","Anime"],["cartoni","🧸","Cartoni"]];
 const MOOD=[
-  ["feelgood","😊","Leggero","Niente pensieri"],
-  ["laugh","😂","Mi serve ridere"],
-  ["love","❤️","Storia d'amore"],
-  ["cry","🥺","Mi voglio commuovere"],
-  ["scare","😱","Ho paura"],
-  ["thrill","⚡","Azione e adrenalina"],
-  ["mindbend","🧠","Colpo di scena"],
-  ["epic","🏰","Avventura epica"]
+  ["feelgood","😊","Leggero"],["laugh","😂","Ridere"],["love","❤️","Amore"],["cry","🥺","Lacrime"],
+  ["scare","😱","Paura"],["thrill","⚡","Azione"],["mindbend","🧠","Colpo di scena"],["epic","🏰","Epico"]
 ];
 const TIME_BY_CAT={
-  film:[['short','⏱️','Meno di 90 min'],['mid','🎬','Normale'],['long','🍿','Lungo'],['any','🔥','Tutto ok']],
-  serie:[['short','⏱️','Un episodio'],['mid','🎬','2–4 episodi'],['long','🍿','Binge'],['any','🔥','Tutto ok']],
-  anime:[['short','⏱️','Fino a 13 eps'],['mid','🎬','Una stagione'],['long','🍿','Saga lunga'],['any','🔥','Tutto ok']],
+  film:[['short','⏱️','Sotto 90 min'],['mid','🎬','Normale'],['long','🍿','Lungo'],['any','🔥','Tutto ok']],
+  serie:[['short','⏱️','1 episodio'],['mid','🎬','2–4 episodi'],['long','🍿','Binge'],['any','🔥','Tutto ok']],
+  anime:[['short','🎬','Un film'],['mid','📺','Una stagione'],['long','🍿','Saga lunga'],['any','🔥','Tutto ok']],
   cartoni:[['short','⏱️','Veloce'],['mid','🎬','Normale'],['long','🍿','Lungo'],['any','🔥','Tutto ok']]
 };
-const STYLE=[['safe','🛋️','Sicuro'],['balanced','🍿','Equilibrato'],['surprise','🎲','Sorprendimi']];
-const riskLabel=n=>n<=15?"Sul sicuro":n<=35?"Un po' di sorpresa":n<=60?"Equilibrio perfetto":n<=80?"Fuori dalle righe":"Sorpresa totale";
+const STYLE=[['safe','🛋️','Sul sicuro'],['balanced','🍿','Equilibrato'],['surprise','🎲','Osa un po\'']];
+const RISK={safe:20,balanced:55,surprise:85};
 const G={
- film:{mood:{feelgood:["comedy film","family film"],laugh:["comedy film","romantic comedy film","romantic comedy"],love:["romance film","romantic drama film","romantic comedy film"],cry:["drama film","romance film"],scare:["horror film"],thrill:["action film","thriller film","adventure film"],mindbend:["mystery film","psychological thriller film","science fiction film"],epic:["fantasy film","science fiction film","adventure film"]},avoid:{horror:["horror film"],romance:["romance film","romantic comedy film"],violence:["horror film","war film","slasher film"],sex:["erotic film"]},heavy:["drama film","mystery film","war film"],light:["comedy film","family film","adventure film"]},
- serie:{mood:{feelgood:["Comedy","Family"],laugh:["Comedy"],love:["Romance"],cry:["Drama","Romance"],scare:["Horror"],thrill:["Action","Thriller","Crime"],mindbend:["Mystery","Thriller","Science-Fiction"],epic:["Fantasy","Science-Fiction","Adventure"]},avoid:{horror:["Horror"],romance:["Romance"],violence:["Horror","War","Crime"],sex:["Romance"]},heavy:["Drama","Mystery","War"],light:["Comedy","Family","Adventure"]},
- anime:{mood:{feelgood:["Comedy","Slice of Life"],laugh:["Comedy"],love:["Romance"],cry:["Drama","Romance"],scare:["Horror"],thrill:["Action","Suspense"],mindbend:["Mystery","Psychological","Suspense"],epic:["Fantasy","Adventure","Sci-Fi"]},avoid:{horror:["Horror"],romance:["Romance"],violence:["Horror","Gore"],sex:["Ecchi","Hentai"]},heavy:["Drama","Psychological","Mystery"],light:["Comedy","Slice of Life","Adventure"]}
+ film:{mood:{feelgood:["comedy film","family film"],laugh:["comedy film","romantic comedy film","romantic comedy"],love:["romance film","romantic drama film","romantic comedy film"],cry:["drama film","romance film"],scare:["horror film"],thrill:["action film","thriller film","adventure film"],mindbend:["mystery film","psychological thriller film","science fiction film"],epic:["fantasy film","science fiction film","adventure film"]},avoid:{},heavy:["drama film","mystery film","war film"],light:["comedy film","family film","adventure film"]},
+ serie:{mood:{feelgood:["Comedy","Family"],laugh:["Comedy"],love:["Romance"],cry:["Drama","Romance"],scare:["Horror"],thrill:["Action","Thriller","Crime"],mindbend:["Mystery","Thriller","Science-Fiction"],epic:["Fantasy","Science-Fiction","Adventure"]},avoid:{},heavy:["Drama","Mystery","War"],light:["Comedy","Family","Adventure"]},
+ anime:{mood:{feelgood:["Comedy","Slice of Life"],laugh:["Comedy"],love:["Romance"],cry:["Drama","Romance"],scare:["Horror"],thrill:["Action","Suspense"],mindbend:["Mystery","Psychological","Suspense"],epic:["Fantasy","Adventure","Sci-Fi"]},avoid:{},heavy:["Drama","Psychological","Mystery"],light:["Comedy","Slice of Life","Adventure"]}
 };
+const JID={"Action":1,"Adventure":2,"Comedy":4,"Drama":8,"Fantasy":10,"Horror":14,"Mystery":7,"Romance":22,"Sci-Fi":24,"Slice of Life":36,"Suspense":41,"Psychological":40,"Gore":58,"Ecchi":9,"Hentai":12};
 const MOOD_TXT={feelgood:"qualcosa di leggero",laugh:"ridere",love:"una storia d'amore",cry:"commuoverti",scare:"avere paura",thrill:"azione e adrenalina",mindbend:"un colpo di scena assurdo",epic:"un'avventura epica"};
-const WHO_TXT={solo:"da sola/o",partner:"in coppia",friends:"con gli amici",family:"con la famiglia",convince:"con chi va convinto"};
-const S={cat:"film",step:0,a:null,cands:[],seen:[],cur:null};
-const resetA=()=>({fmt:null,mood:"feelgood",effort:"1",time:"any",who:"solo",risk:55,avoid:[]});
-const stage=$("stage");
-function setProg(n,l){if($("bf")){$("bf").style.width=(n/6*100)+"%";$("bw").setAttribute("aria-valuenow",n);$("count").textContent=l||"";}}
-function swap(h){stage.classList.remove("stage");void stage.offsetWidth;stage.classList.add("stage");stage.innerHTML=h;scrollTo(0,0)};
+
+/* ---------- Stato ---------- */
+const S={cat:"film",mood:"feelgood",time:"any",style:"balanced",seen:[],cands:[],cur:null,a:null};
+const buildA=()=>({
+  cat:S.cat,mood:S.mood,time:S.time,effort:"1",who:"solo",avoid:[],risk:RISK[S.style],
+  fmt:S.cat==="cartoni"?"movie":S.cat==="anime"?(S.time==="short"?"movie":S.time==="any"?"any":null):null
+});
+const stage=$("stage"), barhost=$("barhost");
+function swap(h,anim){stage.innerHTML=h;if(anim!==false){stage.classList.remove("in");void stage.offsetWidth;stage.classList.add("in");scrollTo(0,0);}}
+function setBar(h){barhost.innerHTML=h;}
 
 function gkey(cat,a){cat=cat==="cartoni"?(a&&a.fmt==="movie"?"film":"serie"):cat; return cat==="film"?"film":cat==="anime"?"anime":"serie";}
-function optKey(){const c=S.cat,mv=S.a&&S.a.fmt==="movie";return c==="film"||(mv&&(c==="anime"||c==="cartoni"))?"film":c==="anime"?"anime":"serie";}
-const without=(cat,a)=>{cat=gkey(cat,a); let w=[]; (a.avoid||[]).forEach(k=>{if(G[cat].avoid[k]) w=w.concat(G[cat].avoid[k]);}); if(a.who==="family") w=w.concat(cat==="film"?["horror film","erotic film","war film"]:cat==="anime"?["Horror","Ecchi","Hentai"]:["Horror","War","Crime"]); return uniq(w);};
+const without=(cat,a)=>{cat=gkey(cat,a);let w=[];(a.avoid||[]).forEach(k=>{if(G[cat].avoid[k]) w=w.concat(G[cat].avoid[k]);}); if(a.who==="family") w=w.concat(cat==="film"?["horror film","erotic film","war film"]:cat==="anime"?["Horror","Ecchi","Hentai"]:["Horror","War","Crime"]); return uniq(w);};
 
-function renderCats(){
-  S.a = S.a || resetA();
-  S.a.cat = S.cat;
-  const selectedCat = S.cat;
-  const selectedMood = S.a.mood || "feelgood";
-  const selectedTime = S.a.time || "any";
-  const selectedEffort = String(S.a.effort || "1");
-  const selectedRisk = Number(S.a.risk || 55);
-  const timeOptions = TIME_BY_CAT[selectedCat] || TIME_BY_CAT.film;
-  const moodOptions = MOOD;
-  const effortOptions = [['0','🛋️','Testa spenta'],['1','🍿','Equilibrato'],['2','🔥','Più coinvolgente']];
-
-  const h = `
-    <div class="q-wrap">
-      <div class="q-header">
-        <div>
-          <h1>Trova qualcosa da guardare</h1>
-          <p class="hint">4 scelte, una ricerca. Quasi come una app, non come un quiz.</p>
-        </div>
-        <div class="header-score">
-          <span class="pill"><span class="dot"></span>${CATS[selectedCat].l}</span>
-        </div>
-      </div>
-      <div class="quick-grid">
-        <section class="choice-card full">
-          <h2>Tipo</h2>
-          <div class="choice-options">
-            ${Object.keys(CATS).map(k=>`<button type="button" class="choice-btn ${selectedCat===k?'is-active':''}" data-group="cat" data-value="${k}"><span class="emoji">${CATS[k].ic}</span><span class="title">${CATS[k].l}</span><span class="sub">${CATS[k].sub}</span></button>`).join('')}
-          </div>
-        </section>
-        <section class="choice-card">
-          <h2>Vibe</h2>
-          <div class="choice-options">
-            ${moodOptions.map(([v,ic,title,sub])=>`<button type="button" class="choice-btn ${selectedMood===v?'is-active':''}" data-group="mood" data-value="${v}"><span class="emoji">${ic}</span><span class="title">${title}</span>${sub?`<span class="sub">${sub}</span>`:''}</button>`).join('')}
-          </div>
-        </section>
-        <section class="choice-card">
-          <h2>Tempo</h2>
-          <div class="choice-options">
-            ${timeOptions.map(([v,ic,title])=>`<button type="button" class="choice-btn ${selectedTime===v?'is-active':''}" data-group="time" data-value="${v}"><span class="emoji">${ic}</span><span class="title">${title}</span></button>`).join('')}
-          </div>
-        </section>
-        <section class="choice-card single">
-          <h2>Intensità</h2>
-          <div class="choice-options">
-            ${effortOptions.map(([v,ic,title])=>`<button type="button" class="choice-btn ${selectedEffort===v?'is-active':''}" data-group="effort" data-value="${v}"><span class="emoji">${ic}</span><span class="title">${title}</span></button>`).join('')}
-          </div>
-          <div class="range-wrap">
-            <div class="range-row"><span>Livello sorpresa</span><b>${selectedRisk}</b></div>
-            <input type="range" min="0" max="100" value="${selectedRisk}" id="risk-range" aria-label="Livello sorpresa">
-            <div class="range-row"><span>${riskLabel(selectedRisk)}</span></div>
-          </div>
-        </section>
-      </div>
-      <div class="quick-actions">
-        <button type="button" class="btn secondary" id="surprise-btn">🎲 Sorprendimi</button>
-        <button type="button" class="btn primary" id="go-btn">Trova titolo</button>
-      </div>
-    </div>
-  `;
-  swap(h);
-
-  document.querySelectorAll('[data-group]').forEach(btn=>{
-    btn.onclick=()=>{
-      const group=btn.dataset.group, val=btn.dataset.value;
-      if(group==='cat'){ S.cat=val; S.a = Object.assign(resetA(), {cat:val, mood:'feelgood', time:'any', effort:'1', risk:55}); renderCats(); return; }
-      if(group==='mood'){ S.a.mood=val; renderCats(); }
-      if(group==='time'){ S.a.time=val; renderCats(); }
-      if(group==='effort'){ S.a.effort=val; renderCats(); }
-    };
-  });
-
-  const range=$('#risk-range');
-  if(range){
-    range.oninput=()=>{
-      S.a.risk=+range.value;
-      renderCats();
-    };
-  }
-
-  $('#go-btn').onclick=()=>{ S.seen=[]; S.cands=[]; run(false,true); };
-  $('#surprise-btn').onclick=()=>run(true,false);
+/* ---------- Schermata unica ---------- */
+function opt(group,val,ic,title,on){return '<button type="button" class="opt'+(on?' on':'')+'" data-g="'+group+'" data-v="'+val+'" aria-pressed="'+(on?'true':'false')+'"><span class="e">'+ic+'</span><span class="t">'+esc(title)+'</span></button>';}
+function home(anim){
+  const times=TIME_BY_CAT[S.cat]||TIME_BY_CAT.film;
+  swap('<div style="display:flex;flex-direction:column;gap:18px">'+
+    '<div><h1>Cosa guardi stasera?</h1><p class="sub">Quattro tocchi e hai il titolo.</p></div>'+
+    '<section class="sec"><h2>1 · Cosa</h2><div class="grid g4">'+CATS.map(c=>opt('cat',c[0],c[1],c[2],S.cat===c[0])).join('')+'</div></section>'+
+    '<section class="sec"><h2>2 · Che voglia hai</h2><div class="grid g4">'+MOOD.map(m=>opt('mood',m[0],m[1],m[2],S.mood===m[0])).join('')+'</div></section>'+
+    '<section class="sec"><h2>3 · Quanto tempo</h2><div class="grid g4">'+times.map(t=>opt('time',t[0],t[1],t[2],S.time===t[0])).join('')+'</div></section>'+
+    '<section class="sec"><h2>4 · Stile</h2><div class="grid g3">'+STYLE.map(t=>opt('style',t[0],t[1],t[2],S.style===t[0])).join('')+'</div></section>'+
+  '</div>',anim);
+  setBar('<div class="bar"><div class="bar-in home"><button type="button" class="btn" id="surprise-btn" aria-label="Sorprendimi">🎲</button><button type="button" class="btn primary" id="go-btn">Trova titolo</button></div></div>');
+  stage.querySelectorAll('.opt').forEach(b=>{b.onclick=()=>{S[b.dataset.g]=b.dataset.v;if(b.dataset.g==="cat")S.time="any";home(false);};});
+  $('go-btn').onclick=()=>{S.seen=[];S.cands=[];run(false,true);};
+  $('surprise-btn').onclick=()=>{S.seen=[];S.cands=[];run(true,true);};
 }
 
 function loading(){
-  const t = ["Cerco un titolo adatto a te...","Poi lo confronto con i tuoi gusti...","Uno secondo..." ];
-  swap('<div class="q-wrap"><div class="loading" style="display:flex;align-items:center;justify-content:center;flex-direction:column;min-height:220px;gap:20px;text-align:center"><svg width="110" height="110" viewBox="0 0 110 110" aria-hidden="true"><rect x="14" y="44" width="82" height="52" rx="8" fill="#1c1728" stroke="#9061f9" stroke-width="3"/><g class="arm"><rect x="26" y="26" width="18" height="42" rx="8" fill="#ff3d52" transform="rotate(-12 35 40)"/></g><path d="M28 64h54M33 76h44" stroke="#a7a0b7" stroke-width="3" stroke-linecap="round"/><g opacity=".9"><circle cx="60" cy="48" r="4" fill="#f5c451"/></g></svg><p style="margin:0;font-family:var(--fd);font-size:1.4rem;">'+esc(t[0])+'</p><div class="mini-label">in corso</div></div></div>');
-  let i=0; const p=stage.querySelector('p');
-  const iv=setInterval(()=>{ i=(i+1)%t.length; if(p && p.isConnected) p.textContent=t[i]; },1200);
+  const t=["Cerco un titolo adatto a te...","Controllo i tuoi gusti...","Ci siamo quasi..."];
+  setBar('');
+  swap('<div class="load"><div class="spin" aria-hidden="true"></div><p id="lt">'+esc(t[0])+'</p></div>');
+  let i=0;const iv=setInterval(()=>{i=(i+1)%t.length;const p=$('lt');if(p)p.textContent=t[i];},1300);
   return ()=>clearInterval(iv);
 }
 
 function showError(e){
   const off=navigator.onLine===false, empty=e&&e.message==="EMPTY";
-  const msg=off?"Sembra che il telefono sia offline: controlla la connessione e riprova.":empty?"Nessun titolo trovato con queste regole. Prova a cambiare un po' le preferenze.":"Non riesco a trovare un risultato adesso.";
-  swap('<div class="q-wrap"><div style="display:flex;flex-direction:column;gap:16px"><h2 style="margin:0;font-family:var(--fd);font-size:2rem;line-height:1">Qualcosa non va</h2><p style="margin:0;color:var(--mut)">'+esc(msg)+'</p>'+(empty||off?'':'<small style="color:var(--mut);word-break:break-all">Dettaglio: '+esc(e&&e.message||'errore')+'</small>')+'<div class="quick-actions"><button type="button" class="btn secondary" id="retry-btn">Riprova</button><button type="button" class="btn primary" id="back-btn">Modifica</button></div></div></div>');
-  $('#retry-btn').onclick=()=>{S.seen=[];S.cands=[];run(false,true)};
-  $('#back-btn').onclick=renderCats;
+  const msg=off?"Sembra che il telefono sia offline: controlla la connessione e riprova.":empty?"Nessun titolo trovato con queste regole. Prova a cambiare qualcosa.":"Non riesco a trovare un risultato adesso.";
+  swap('<div class="err"><h2>Qualcosa non va</h2><p>'+esc(msg)+'</p>'+(empty||off?'':'<small style="word-break:break-all">Dettaglio: '+esc(e&&e.message||'errore')+'</small>')+'</div>');
+  setBar('<div class="bar"><div class="bar-in"><button type="button" class="btn" id="back-btn">Modifica</button><button type="button" class="btn primary" id="retry-btn">Riprova</button></div></div>');
+  $('retry-btn').onclick=()=>{S.seen=[];S.cands=[];run(false,true);};
+  $('back-btn').onclick=()=>home();
 }
 
-const LOAD={film:["Sfoglio l'archivio...","Controllo i generi...","Ci siamo quasi..."],serie:["Sfoglio il palinsesto...","Controllo le stagioni...","Ci siamo quasi..."],anime:["Sfoglio il catalogo anime...","Controllo i generi...","Ci siamo quasi..."]};
+/* ---------- Fonti dati (logica invariata) ---------- */
 const KW=/film|serie|anime|televisiv|animazione|manga|telefilm|sitcom/i;
 const VALS=l=>l.map(x=>'"'+x+'"@en').join(' ');
-function fj(url,ms,opts){const c=new AbortController(),t=setTimeout(()=>c.abort(),ms||12000);return fetch(url,Object.assign({signal:c.signal},opts||{})).then(r=>{clearTimeout(t);if(r.status===429){const e=new Error("429");e.retry=1;throw e;}if(!r.ok)throw new Error("HTTP "+r.status);return r.json()}).catch(e=>{clearTimeout(t);throw e;});}
+function fj(url,ms,opts){const c=new AbortController(),t=setTimeout(()=>c.abort(),ms||12000);return fetch(url,Object.assign({signal:c.signal},opts||{})).then(r=>{clearTimeout(t);if(r.status===429){const e=new Error("429");e.retry=1;throw e;}if(!r.ok)throw new Error("HTTP "+r.status);return r.json();}).catch(e=>{clearTimeout(t);throw e;});}
 const fjr=(url,ms)=>fj(url,ms).catch(e=>e&&e.retry?sleep(1000).then(()=>fj(url,ms)):Promise.reject(e));
-const without=(cat,a)=>{cat=gkey(cat,a);let w=[]; (a.avoid||[]).forEach(k=>{if(G[cat].avoid[k]) w=w.concat(G[cat].avoid[k]);}); if(a.who==="family") w=w.concat(cat==="film"?["horror film","erotic film","war film"]:cat==="anime"?["Horror","Ecchi","Hentai"]:["Horror","War","Crime"]); return uniq(w);};
-function tier(list,tests){let last=[]; for(const t of tests){const r=list.filter(t); if(r.length>=5) return r; if(r.length) last=r;} return last.length ? last : list;}
+function tier(list,tests){let last=[];for(const t of tests){const r=list.filter(t);if(r.length>=5)return r;if(r.length)last=r;}return last.length?last:list;}
 const wsum=t=>fjr("https://it.wikipedia.org/api/rest_v1/page/summary/"+encodeURIComponent(t.trim().replace(/\s+/g,"_")),8000);
-async function enrich(title,kind){const ok=r=>r&&r.extract&&r.type!=='disambiguation'&&KW.test(r.extract.slice(0,300)); const out=r=>({extract:r.extract,thumb:r.thumbnail&&r.thumbnail.source}); try{const r=await wsum(title); if(ok(r)) return out(r);}catch(e){} try{const s=await fjr("https://it.wikipedia.org/w/api.php?action=query&list=search&format=json&origin=*&srlimit=3&srsearch="+encodeURIComponent(title+" "+kind),8000); for(const x of (s.query&&s.query.search)||[]){try{const r=await wsum(x.title); if(ok(r)) return out(r);}catch(e){}}}catch(e){} return null; }
-async function sparql(q){const d=await fj("https://query.wikidata.org/sparql?format=json&query="+encodeURIComponent(q),30000); return(d.results&&d.results.bindings)||[];}
-async function wdFilms(a,strict,anim){const wn=without("film",a); let genres=(G.film.mood[a.mood]||["drama film"]).filter(x=>wn.indexOf(x)<0&&x!=="animated film"); if(!anim&&!genres.length) genres=["drama film","comedy film"]; const useMood=anim?(strict&&genres.length>0):true; const minL=Math.max(2,Math.round((a.risk<30?40:a.risk<60?18:a.risk<80?8:3)/(strict?1:3)/(anim?2:1))); const AN='?film wdt:P136 ?ga. ?ga rdfs:label "animated film"@en. '; const q="SELECT ?film ?filmLabel ?sl ?d ?rt ?img WHERE{"+(useMood?"VALUES ?gl{"+VALS(genres)+"} ?g rdfs:label ?gl. ?film wdt:P136 ?g. ":"")+"?film wdt:P31 wd:Q11424; wikibase:sitelinks ?sl. FILTER(?sl>="+minL+") "+(anim?AN+"FILTER NOT EXISTS{?film wdt:P495 wd:Q17} ":"FILTER NOT EXISTS{"+AN+"} ")+(strict&&wn.length?"FILTER NOT EXISTS{?film wdt:P136 ?b. ?b rdfs:label ?bl. VALUES ?bl{"+VALS(wn)+"}} ":"")+"OPTIONAL{?film wdt:P577 ?d} OPTIONAL{?film wdt:P2047 ?rt} OPTIONAL{?film wdt:P18 ?img} SERVICE wikibase:label{bd:serviceParam wikibase:language \"it,en\"}} LIMIT 200"; const seen={},out=[]; (await sparql(q)).forEach(b=>{const id=b.film.value.split("/").pop(),t=b.filmLabel&&b.filmLabel.value;if(seen[id]||!t||/^Q\d+$/.test(t))return;seen[id]=1; out.push({id,title:t,year:b.d?b.d.value.slice(0,4):"",sl:+b.sl.value,runtime:b.rt?Math.round(+b.rt.value):null,img:b.img?b.img.value.replace(/^http:/,"https:")+"?width=500":null,genres:useMood?genres:[],movie:true});}); return out; }
-async function wpFilms(a,anim){const wn=without("film",a),term=anim?'"film d\'animazione" -giapponese':MOOD_TXT[a.mood]+(wn.indexOf("horror film")>=0?" -horror":""); const url="https://it.wikipedia.org/w/api.php?action=query&generator=search&format=json&origin=*&gsrnamespace=0&gsrlimit=30&gsroffset="+rand(200)+"&gsrsearch="+encodeURIComponent('hastemplate:Film "è un film" '+term)+"&prop=extracts|pageimages&exintro=1&explaintext=1&exsentences=4&exlimit=30&piprop=thumbnail&pithumbsize=500"; const d=await fj(url,12000),p=d.query&&d.query.pages?Object.values(d.query.pages):[]; return p.filter(x=>x.extract&&/film/i.test(x.extract.slice(0,200))).map(x=>({id:"wp"+x.pageid,title:x.title.replace(/\s*\(film.*\)$/,""),year:(x.extract.match(/\b(19|20)\d\d\b/)||[""])[0],sl:10,runtime:null,genres:[],movie:true,pre:{extract:x.extract,thumb:x.thumbnail&&x.thumbnail.source}}));}
-async function filmDiscover(a,anim){ let list=[],err=null; try{list=await wdFilms(a,true,anim); const rtMin=a.time==="mid"?85:a.time==="long"?115:0, rtMax=a.time==="short"?95:a.time==="mid"?125:a.avoid.indexOf("long")>=0?130:999, ym=a.avoid.indexOf("old")>=0?1995:0; const mx=a.avoid.indexOf("long")>=0?Math.min(rtMax,130):rtMax; list=tier(list,[m=>(!m.runtime||(m.runtime>=rtMin&&m.runtime<=mx))&&(!ym||!m.year||+m.year>=ym),m=>!ym||!m.year||+m.year>=ym,()=>true]); }catch(e){err=e;} if(list.length<5){try{list=list.concat(await wdFilms(a,false,anim))}catch(e){err=err||e;}} if(list.length<3){try{list=list.concat(await wpFilms(a,anim))}catch(e){err=err||e;}} if(!list.length&&err) throw err; return list; }
-async function wdMeta(id){ if(!/^Q\d+$/.test(id)) return {}; try{const q='SELECT ?gl ?dl WHERE{OPTIONAL{wd:'+id+' wdt:P136 ?g. ?g rdfs:label ?gl. FILTER(LANG(?gl)="it")} OPTIONAL{wd:'+id+' wdt:P57 ?dr. ?dr rdfs:label ?dl. FILTER(LANG(?dl)="en")}}'; const rows=await Promise.race([sparql(q),sleep(8000).then(()=>{throw new Error("t")})]); const gl=[],dr=[]; rows.forEach(b=>{if(b.gl) gl.push(b.gl.value.replace(/^film\s+(di\s+|d['’]\s*)?/i,"")); if(b.dl) dr.push(b.dl.value);}); return{glist:uniq(gl).slice(0,4),dir:uniq(dr).slice(0,2).join(", ")};}catch(e){return{}} }
-async function filmDetails(c){ const [w,meta]=await Promise.all([c.pre?Promise.resolve(c.pre):enrich(c.title,"film"),wdMeta(c.id)]); const gl=meta.glist&&meta.glist.length?meta.glist:uniq((c.genres||[]).map(x=>x)); return{movie:true,title:c.title,year:c.year,runtime:c.runtime,dir:meta.dir||"",glist:gl,gt:gl.join(" · "),overview:(w&&w.extract)||"Trama non ancora disponibile su Wikipedia in italiano.",it:!!(w&&w.extract),poster:(w&&w.thumb)||c.img,rl:"Wikidata",rv:null,pop:c.sl}; }
+async function enrich(title,kind){const ok=r=>r&&r.extract&&r.type!=='disambiguation'&&KW.test(r.extract.slice(0,300));const out=r=>({extract:r.extract,thumb:r.thumbnail&&r.thumbnail.source});try{const r=await wsum(title);if(ok(r))return out(r);}catch(e){}try{const s=await fjr("https://it.wikipedia.org/w/api.php?action=query&list=search&format=json&origin=*&srlimit=3&srsearch="+encodeURIComponent(title+" "+kind),8000);for(const x of (s.query&&s.query.search)||[]){try{const r=await wsum(x.title);if(ok(r))return out(r);}catch(e){}}}catch(e){}return null;}
+async function sparql(q){const d=await fj("https://query.wikidata.org/sparql?format=json&query="+encodeURIComponent(q),30000);return(d.results&&d.results.bindings)||[];}
+async function wdFilms(a,strict,anim){const wn=without("film",a);let genres=(G.film.mood[a.mood]||["drama film"]).filter(x=>wn.indexOf(x)<0&&x!=="animated film");if(!anim&&!genres.length)genres=["drama film","comedy film"];const useMood=anim?(strict&&genres.length>0):true;const minL=Math.max(2,Math.round((a.risk<30?40:a.risk<60?18:a.risk<80?8:3)/(strict?1:3)/(anim?2:1)));const AN='?film wdt:P136 ?ga. ?ga rdfs:label "animated film"@en. ';const q="SELECT ?film ?filmLabel ?sl ?d ?rt ?img WHERE{"+(useMood?"VALUES ?gl{"+VALS(genres)+"} ?g rdfs:label ?gl. ?film wdt:P136 ?g. ":"")+"?film wdt:P31 wd:Q11424; wikibase:sitelinks ?sl. FILTER(?sl>="+minL+") "+(anim?AN+"FILTER NOT EXISTS{?film wdt:P495 wd:Q17} ":"FILTER NOT EXISTS{"+AN+"} ")+(strict&&wn.length?"FILTER NOT EXISTS{?film wdt:P136 ?b. ?b rdfs:label ?bl. VALUES ?bl{"+VALS(wn)+"}} ":"")+"OPTIONAL{?film wdt:P577 ?d} OPTIONAL{?film wdt:P2047 ?rt} OPTIONAL{?film wdt:P18 ?img} SERVICE wikibase:label{bd:serviceParam wikibase:language \"it,en\"}} LIMIT 200";const seen={},out=[];(await sparql(q)).forEach(b=>{const id=b.film.value.split("/").pop(),t=b.filmLabel&&b.filmLabel.value;if(seen[id]||!t||/^Q\d+$/.test(t))return;seen[id]=1;out.push({id,title:t,year:b.d?b.d.value.slice(0,4):"",sl:+b.sl.value,runtime:b.rt?Math.round(+b.rt.value):null,img:b.img?b.img.value.replace(/^http:/,"https:")+"?width=500":null,genres:useMood?genres:[],movie:true});});return out;}
+async function wpFilms(a,anim){const wn=without("film",a),term=anim?'"film d\'animazione" -giapponese':MOOD_TXT[a.mood]+(wn.indexOf("horror film")>=0?" -horror":"");const url="https://it.wikipedia.org/w/api.php?action=query&generator=search&format=json&origin=*&gsrnamespace=0&gsrlimit=30&gsroffset="+rand(200)+"&gsrsearch="+encodeURIComponent('hastemplate:Film "è un film" '+term)+"&prop=extracts|pageimages&exintro=1&explaintext=1&exsentences=4&exlimit=30&piprop=thumbnail&pithumbsize=500";const d=await fj(url,12000),p=d.query&&d.query.pages?Object.values(d.query.pages):[];return p.filter(x=>x.extract&&/film/i.test(x.extract.slice(0,200))).map(x=>({id:"wp"+x.pageid,title:x.title.replace(/\s*\(film.*\)$/,""),year:(x.extract.match(/\b(19|20)\d\d\b/)||[""])[0],sl:10,runtime:null,genres:[],movie:true,pre:{extract:x.extract,thumb:x.thumbnail&&x.thumbnail.source}}));}
+async function filmDiscover(a,anim){let list=[],err=null;try{list=await wdFilms(a,true,anim);const rtMin=a.time==="mid"?85:a.time==="long"?115:0,rtMax=a.time==="short"?95:a.time==="mid"?125:999,ym=0;list=tier(list,[m=>(!m.runtime||(m.runtime>=rtMin&&m.runtime<=rtMax))&&(!ym||!m.year||+m.year>=ym),()=>true]);}catch(e){err=e;}if(list.length<5){try{list=list.concat(await wdFilms(a,false,anim));}catch(e){err=err||e;}}if(list.length<3){try{list=list.concat(await wpFilms(a,anim));}catch(e){err=err||e;}}if(!list.length&&err)throw err;return list;}
+async function wdMeta(id){if(!/^Q\d+$/.test(id))return{};try{const q='SELECT ?gl ?dl WHERE{OPTIONAL{wd:'+id+' wdt:P136 ?g. ?g rdfs:label ?gl. FILTER(LANG(?gl)="it")} OPTIONAL{wd:'+id+' wdt:P57 ?dr. ?dr rdfs:label ?dl. FILTER(LANG(?dl)="en")}}';const rows=await Promise.race([sparql(q),sleep(8000).then(()=>{throw new Error("t");})]);const gl=[],dr=[];rows.forEach(b=>{if(b.gl)gl.push(b.gl.value.replace(/^film\s+(di\s+|d['’]\s*)?/i,""));if(b.dl)dr.push(b.dl.value);});return{glist:uniq(gl).slice(0,4),dir:uniq(dr).slice(0,2).join(", ")};}catch(e){return{};}}
+async function filmDetails(c){const [w,meta]=await Promise.all([c.pre?Promise.resolve(c.pre):enrich(c.title,"film"),wdMeta(c.id)]);const gl=meta.glist&&meta.glist.length?meta.glist:uniq((c.genres||[]).map(x=>x));return{movie:true,title:c.title,year:c.year,runtime:c.runtime,dir:meta.dir||"",glist:gl,gt:gl.join(" · "),overview:(w&&w.extract)||"Trama non ancora disponibile su Wikipedia in italiano.",it:!!(w&&w.extract),poster:(w&&w.thumb)||c.img,rl:"Wikidata",rv:null,pop:c.sl};}
 
-async function tvDiscover(a,anim){ const wn=without("serie",a),want=G.serie.mood[a.mood]||["Drama","Comedy"],ym=a.avoid.indexOf("old")>=0?1995:0; const pages=uniq(Array.from({length:anim?14:6},()=>rand(240))); const lists=await Promise.all(pages.map(p=>fjr("https://api.tvmaze.com/shows?page="+p,9000).catch(()=>[]))); const all=[].concat(...lists); if(!all.length) throw new Error("rete/TVmaze non raggiungibile"); const items=all.filter(s=>(anim?s.type==="Animation":s.type!=="Animation")&&(s.genres||[]).indexOf("Anime")<0&&(anim||(s.genres&&s.genres.length))).map(s=>({id:s.id,src:"tv",anim:anim,title:s.name,year:s.premiered?s.premiered.slice(0,4):"",genres:s.genres||[],rating:s.rating&&s.rating.average||0,runtime:s.averageRuntime||30,image:s.image&&s.image.original||null,summary:strip(s.summary||""),lang:s.language||""})); const ov=m=>m.genres.some(x=>want.indexOf(x)>=0),bad=m=>m.genres.some(x=>wn.indexOf(x)>=0); return tier(items,[m=>ov(m)&&!bad(m)&&(!ym||!m.year||+m.year>=ym)&&m.rating>=6.5&&(anim||a.risk>=60||m.lang==="English"||m.lang==="Italian"),m=>ov(m)&&!bad(m)&&(!ym||!m.year||+m.year>=ym)&&(!m.rating||m.rating>=5.5),m=>ov(m)&&!bad(m),m=>ov(m),()=>true]); }
-async function tvDetails(c){ const w=await enrich(c.title,c.anim?"serie animata":"serie televisiva"); return{title:c.title,year:c.year,runtime:c.runtime,overview:(w&&w.extract)||c.summary||"Trama non disponibile.",it:!!(w&&w.extract),poster:c.image||(w&&w.thumb),rl:"TVmaze",rv:c.rating,glist:uniq(c.genres||[]),gt:uniq(c.genres||[]).join(" · ")}; }
+async function tvDiscover(a,anim){const wn=without("serie",a),want=G.serie.mood[a.mood]||["Drama","Comedy"],ym=0;const pages=uniq(Array.from({length:anim?14:6},()=>rand(240)));const lists=await Promise.all(pages.map(p=>fjr("https://api.tvmaze.com/shows?page="+p,9000).catch(()=>[])));const all=[].concat(...lists);if(!all.length)throw new Error("rete/TVmaze non raggiungibile");const items=all.filter(s=>(anim?s.type==="Animation":s.type!=="Animation")&&(s.genres||[]).indexOf("Anime")<0&&(anim||(s.genres&&s.genres.length))).map(s=>({id:s.id,src:"tv",anim:anim,title:s.name,year:s.premiered?s.premiered.slice(0,4):"",genres:s.genres||[],rating:s.rating&&s.rating.average||0,runtime:s.averageRuntime||30,image:s.image&&s.image.original||null,summary:strip(s.summary||""),lang:s.language||""}));const ov=m=>m.genres.some(x=>want.indexOf(x)>=0),bad=m=>m.genres.some(x=>wn.indexOf(x)>=0);return tier(items,[m=>ov(m)&&!bad(m)&&(!ym||!m.year||+m.year>=ym)&&m.rating>=6.5&&(anim||a.risk>=60||m.lang==="English"||m.lang==="Italian"),m=>ov(m)&&!bad(m)&&(!m.rating||m.rating>=5.5),m=>ov(m)&&!bad(m),m=>ov(m),()=>true]);}
+async function tvDetails(c){const w=await enrich(c.title,c.anim?"serie animata":"serie televisiva");return{title:c.title,year:c.year,runtime:c.runtime,overview:(w&&w.extract)||c.summary||"Trama non disponibile.",it:!!(w&&w.extract),poster:c.image||(w&&w.thumb),rl:"TVmaze",rv:c.rating,glist:itg(c.genres),gt:itg(c.genres).join(" · ")};}
 
-function fmtMin(m){return m>=60?Math.floor(m/60)+" h"+(m%60?" "+String(m%60).padStart(2,'0'):""):m+" min";}
 const GIT={"Comedy":"Commedia","Drama":"Drammatico","Romance":"Sentimentale","Horror":"Horror","Action":"Azione","Adventure":"Avventura","Fantasy":"Fantasy","Science-Fiction":"Fantascienza","Sci-Fi":"Fantascienza","Mystery":"Mistero","Thriller":"Thriller","Suspense":"Suspense","Slice of Life":"Vita quotidiana","Psychological":"Psicologico","Family":"Famiglia","Crime":"Crimine"};
 const itg=a=>uniq((a||[]).map(x=>GIT[x]||x));
+function fmtMin(m){return m>=60?Math.floor(m/60)+" h"+(m%60?" "+String(m%60).padStart(2,'0'):""):m+" min";}
 const mainstream=(cat,m)=>m.sl!=null?Math.max(0,Math.min(1,Math.log10(Math.max(2,m.sl))/2.6)):m.rating?Math.max(0,Math.min(1,(m.rating-4)/5)):.4;
 const hit=(g,w)=>g&&w&&g.some(x=>w.indexOf(x)>=0)?1:0;
-function score(cat,m,a){const g=m.genres||[],gs=G[gkey(cat,a)],ms=mainstream(cat,m),e=+a.effort; const heavy=g.some(x=>gs.heavy.indexOf(x)>=0)||(m.rating||0)>=8.3, light=g.some(x=>gs.light.indexOf(x)>=0); return 45*hit(g,gs.mood[a.mood])+20*(e===2?(heavy?1:.3):e===0?(light?1:.3):.75)+20*Math.max(0,1-Math.abs((1-ms)*100-a.risk)/70)+15*(m.sl!=null?ms:m.rating?Math.max(0,Math.min(1,(m.rating-5)/4)):.5)+Math.random()*6; }
+function score(cat,m,a){const g=m.genres||[],gs=G[gkey(cat,a)],ms=mainstream(cat,m),e=+a.effort;const heavy=g.some(x=>gs.heavy.indexOf(x)>=0)||(m.rating||0)>=8.3,light=g.some(x=>gs.light.indexOf(x)>=0);return 45*hit(g,gs.mood[a.mood])+20*(e===2?(heavy?1:.3):e===0?(light?1:.3):.75)+20*Math.max(0,1-Math.abs((1-ms)*100-a.risk)/70)+15*(m.sl!=null?ms:m.rating?Math.max(0,Math.min(1,(m.rating-5)/4)):.5)+Math.random()*6;}
 const pct=s=>Math.round(Math.min(98,52+46*Math.pow(Math.max(0,s)/100,1.3)));
 
-async function animeDiscover(a){ const wn=without("anime",a); let want=(G.anime.mood[a.mood]||["Drama"]).filter(x=>!wn.includes(x)).slice(0,3); if(!want.length) want=["Comedy"]; const ex=wn.filter(x=>G.anime.mood[a.mood]&&G.anime.mood[a.mood].indexOf(x)>=0); const subs=a.fmt==="movie"?["movie"]:a.fmt==="any"?["TV","movie"]:["TV"]; const items=[]; for(const s of subs){ try{ const url="https://api.jikan.moe/v4/anime?genres="+encodeURIComponent(want[0])+"&limit=12&order_by=score&sort=desc&min_score=6.3&sfw=true"; const r=await fj(url,12000); for(const m of (r.data||[])) items.push({id:m.mal_id,src:"anime",movie:s==="movie",title:m.title_english||m.title,year:m.aired&&m.aired.prop&&m.aired.prop.from?m.aired.prop.from.year:'',genres:(m.genres||[]).map(g=>g.name),rating:m.score||0,runtime:m.duration?(m.duration.includes("min")?Number(m.duration.replace(/[^0-9]/g,"")):null):null,image:(m.images&&m.images.jpg&&m.images.jpg.large_image_url)||null,summary:m.synopsis||""}); }catch(e){} }
- return items.slice(0,20); }
-async function animeDetails(c){ const w=await enrich(c.title,c.movie?"film anime":"anime"); return{movie:!!c.movie,title:c.title,year:c.year,runtime:c.runtime,episodes:c.episodes,overview:(w&&w.extract)||c.summary||"Trama non disponibile.",it:!!(w&&w.extract),poster:c.image||(w&&w.thumb),rl:"Jikan",rv:c.rating,glist:itag(c.genres),gt:itg(c.genres).join(" · ")}; }
+function parseDur(d){if(!d)return null;const h=/(\d+)\s*hr/.exec(d),m=/(\d+)\s*min/.exec(d);const v=(h?+h[1]*60:0)+(m?+m[1]:0);return v||null;}
+async function animeDiscover(a){
+  const wn=without("anime",a);
+  let want=(G.anime.mood[a.mood]||["Drama"]).filter(x=>!wn.includes(x));if(!want.length)want=["Comedy"];
+  const subs=a.fmt==="movie"?["movie"]:a.fmt==="any"?["tv","movie"]:["tv"];
+  const ex=wn.map(x=>JID[x]).filter(Boolean).join(",");
+  const items=[];
+  for(const s of subs){
+    try{
+      const g=JID[pick(want)]||4;
+      const url="https://api.jikan.moe/v4/anime?genres="+g+(ex?"&genres_exclude="+ex:"")+"&type="+s+"&limit=15&page="+(1+rand(3))+"&order_by=score&sort=desc&min_score=6.3&sfw=true";
+      const r=await fjr(url,12000);
+      for(const m of (r.data||[])) items.push({id:m.mal_id,src:"anime",movie:s==="movie",title:m.title_english||m.title,year:m.aired&&m.aired.prop&&m.aired.prop.from?m.aired.prop.from.year:'',genres:(m.genres||[]).map(x=>x.name).concat((m.themes||[]).map(x=>x.name)),rating:m.score||0,runtime:s==="movie"?parseDur(m.duration):null,episodes:m.episodes||null,image:(m.images&&m.images.jpg&&m.images.jpg.large_image_url)||null,summary:m.synopsis||""});
+    }catch(e){}
+    if(subs.length>1) await sleep(450);
+  }
+  return items.slice(0,30);
+}
+async function animeDetails(c){const w=await enrich(c.title,c.movie?"film anime":"anime");return{movie:!!c.movie,title:c.title,year:c.year,runtime:c.runtime,episodes:c.episodes,overview:(w&&w.extract)||c.summary||"Trama non disponibile.",it:!!(w&&w.extract),poster:c.image||(w&&w.thumb),rl:"Jikan",rv:c.rating,glist:itg(c.genres),gt:itg(c.genres).join(" · ")};}
 const detailsOf=c=>c.sl!=null?filmDetails(c):c.src==="tv"?tvDetails(c):animeDetails(c);
-const SRC={film:{d:a=>filmDiscover(a,false)},serie:{d:a=>tvDiscover(a,false)},anime:{d:a=>animeDiscover(a)},cartoni:{d:a=>filmDiscover(a,true)}};
-async function rank(a){ const list=await SRC[S.cat].d(a); if(!list||!list.length) throw new Error("EMPTY"); return list.map(m=>({m,s:score(S.cat,m,a)})).sort((x,y)=>y.s-x.s); }
-const pickFrom=(r,sur)=>{const p=r.filter(x=>S.seen.indexOf(x.m.id)<0); if(!p.length) return null; return sur?pick(p.slice(0,10)):p[0];};
-async function run(surprise,fresh){ const stop=loading(); const wait=sleep(1500); try{ let ranked=null,cand=null; if(!fresh&&!surprise) cand=pickFrom(S.cands,false); if(!cand){ const a=surprise?Object.assign({},S.a,{risk:Math.max(S.a.risk+30,85)}):S.a; ranked=await rank(a); if(!surprise) S.cands=ranked; cand=pickFrom(ranked,surprise)||pick(ranked); }
-   let d,tries=0; for(;;){ S.seen.push(cand.m.id); d=await detailsOf(cand.m); if(cand.m.sl==null||d.it||tries++>=4) break; const pool=ranked||S.cands, nx=pickFrom(pool,false); if(!nx) break; cand=nx; }
-   await wait; stop(); show({d,m:cand.m,s:cand.s},surprise);
- }catch(e){ await wait; stop(); showError(e);} }
-function fbPoster(t,y){ const h=Array.from(t).reduce((a,ch)=>((a*31+ch.charCodeAt(0))%360),0); return '<div class="poster fb" style="background:linear-gradient(135deg,hsl('+h+' 68% 42%),hsl('+(h+55)%360+' 58% 30%));"><small>Stasera</small><h3>'+esc(t)+'</h3><small>'+esc(y||'')+'</small></div>';} 
-function why(r,sur){ const a=S.a,d=r.d,m=r.m,g=m.genres||[],gk=gkey(S.cat,a),gs=G[gk],o=[],e=+a.effort; if(sur) o.push('È una scelta volutamente fuori dalla tua comfort zone, come hai chiesto.'); if(hit(g,gs.mood[a.mood])) o.push('Cercavi '+MOOD_TXT[a.mood]+(d.glist&&d.glist.length?" e i suoi generi ("+d.glist.slice(0,3).join(', ')+") vanno in quella direzione.":".")); else o.push('Non è il genere più ovvio per chi cerca '+MOOD_TXT[a.mood]+(d.glist&&d.glist.length?" ("+d.glist.slice(0,3).join(', ')+")":"")+': lo propongo per gli altri criteri.'); if(d.runtime) o.push('Dura '+fmtMin(d.runtime)+'.'); if(d.rv) o.push('Voto '+(+d.rv).toFixed(1)+' / 10.'); if(a.who==='family') o.push('Ho evitato contenuti troppo pesanti perché lo guardi in famiglia.'); if(a.risk>=70) o.push('La scelta è abbastanza fuori dagli schemi da risultare interessante.'); return o.slice(0,5); }
-function show(r,sur){ S.cur=r; const d=r.d; let p=pct(r.s); if(sur) p=Math.max(60,p-6); const poster=d.poster?'<div class="poster"><img src="'+esc(d.poster)+'" alt="Copertina di '+esc(d.title)+'" referrerpolicy="no-referrer"></div>':fbPoster(d.title,d.year); const h='<div class="q-wrap"><div class="res"><div class="hero" style="display:grid;grid-template-columns:minmax(0,150px) minmax(0,1fr);gap:16px;align-items:start">'+poster+'<div class="meta" style="display:flex;flex-direction:column;gap:10px;min-width:0"><h2 style="margin:0;font-family:var(--fd);font-size:clamp(1.7rem,4vw,2.6rem);line-height:1.05">'+esc(d.title)+'</h2><div class="chips" style="display:flex;flex-wrap:wrap;gap:8px">'+(d.year?'<span class="chip">'+esc(d.year)+'</span>':'')+(S.cat==='anime'||S.cat==='cartoni'?'<span class="chip">'+(d.movie?'Film':'Serie')+'</span>':'')+(d.runtime?'<span class="chip">'+d.runtime+' min</span>':'')+(d.rv?'<span class="chip r">'+esc(d.rl)+' '+(+d.rv).toFixed(1)+'</span>':'')+'</div><div class="compat" style="display:flex;flex-direction:column;gap:8px"><b style="font:700 15px var(--fd);letter-spacing:.1em;text-transform:uppercase;color:var(--gold)">Compatibilità '+p+'%</b><div class="meter" style="height:8px;background:var(--panel-3);border-radius:99px;overflow:hidden"><span style="display:block;height:100%;width:'+p+'%;background:linear-gradient(90deg,var(--gold),var(--red));border-radius:inherit"></span></div></div></div></div><section class="block" style="padding:16px 18px;border:1px solid var(--line);border-radius:16px;background:var(--panel)"><h3 style="margin:0 0 8px;font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:var(--mut)">Perché fa per te</h3><ul class="why" style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px">'+why(r,sur).map(x=>'<li style="display:flex;gap:10px;align-items:flex-start;line-height:1.5"><span style="color:var(--gold);font-weight:700">✓</span><span>'+esc(x)+'</span></li>').join('')+'</ul></section><section class="block" style="padding:16px 18px;border:1px solid var(--line);border-radius:16px;background:var(--panel)"><h3 style="margin:0 0 8px;font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:var(--mut)">Trama</h3><p style="margin:0;max-width:65ch;color:var(--fg)">'+esc(d.overview || 'Trama non disponibile.')+'</p></section><div class="quick-actions"><button class="btn secondary" id="sur">🎲 Sorprendimi</button><button class="btn secondary" id="oth">🔄 Un altro</button><button class="btn primary" id="rst">↩ Cambia scelta</button></div></div></div>';
-  swap(h); document.getElementById('oth').onclick=()=>run(false,false); document.getElementById('sur').onclick=()=>run(true,false); document.getElementById('rst').onclick=renderCats; }
+const SRC={film:a=>filmDiscover(a,false),serie:a=>tvDiscover(a,false),anime:a=>animeDiscover(a),cartoni:a=>filmDiscover(a,true)};
+async function rank(a){const list=await SRC[S.cat](a);if(!list||!list.length)throw new Error("EMPTY");return list.map(m=>({m,s:score(S.cat,m,a)})).sort((x,y)=>y.s-x.s);}
+const pickFrom=(r,sur)=>{const p=r.filter(x=>S.seen.indexOf(x.m.id)<0);if(!p.length)return null;return sur?pick(p.slice(0,10)):p[0];};
 
-S.a = resetA();
-renderCats();
+async function run(surprise,fresh){
+  const stop=loading();const wait=sleep(1200);
+  try{
+    S.a=buildA();
+    let ranked=null,cand=null;
+    if(!fresh&&!surprise)cand=pickFrom(S.cands,false);
+    if(!cand){
+      const a=surprise?Object.assign({},S.a,{risk:Math.max(S.a.risk+30,85)}):S.a;
+      ranked=await rank(a);
+      if(!surprise)S.cands=ranked;
+      cand=pickFrom(ranked,surprise)||pick(ranked);
+    }
+    let d,tries=0;
+    for(;;){
+      S.seen.push(cand.m.id);d=await detailsOf(cand.m);
+      if(cand.m.sl==null||d.it||tries++>=4)break;
+      const pool=ranked||S.cands,nx=pickFrom(pool,false);
+      if(!nx)break;cand=nx;
+    }
+    await wait;stop();show({d,m:cand.m,s:cand.s},surprise);
+  }catch(e){await wait;stop();showError(e);}
+}
 
-let dp=null; const ib=$("ib");
-addEventListener("beforeinstallprompt",e=>{e.preventDefault();dp=e;try{if(!localStorage.getItem("stasera_ix"))ib.hidden=false}catch(x){ib.hidden=false}});
-$("ibtn").onclick=()=>{ib.hidden=true;if(dp){dp.prompt();dp=null}};
-$("ix").onclick=()=>{ib.hidden=true;try{localStorage.setItem("stasera_ix","1")}catch(x){}};
-try{const ios=/iphone|ipad|ipod/i.test(navigator.userAgent),stand=navigator.standalone===true||matchMedia("(display-mode: standalone)").matches;if(ios&&!stand&&!localStorage.getItem("stasera_ix")){ib.querySelector("p").innerHTML="Per usarla come app: tocca <b>Condividi</b> ⬆️ e poi <b>Aggiungi a Home</b>."; $("ibtn").hidden=true; ib.hidden=false;}}catch(e){}
-addEventListener("appinstalled",()=>{ib.hidden=true});
+/* ---------- Risultato ---------- */
+function fbPoster(t,y){const h=Array.from(t).reduce((a,ch)=>((a*31+ch.charCodeAt(0))%360),0);return '<div class="poster fb" style="background:linear-gradient(135deg,hsl('+h+' 68% 42%),hsl('+((h+55)%360)+' 58% 30%))"><small>Stasera</small><h3>'+esc(t)+'</h3><small>'+esc(y||'')+'</small></div>';}
+function why(r,sur){
+  const a=S.a,d=r.d,m=r.m,g=m.genres||[],gs=G[gkey(S.cat,a)],o=[];
+  if(sur)o.push('È una scelta volutamente fuori dalla tua comfort zone.');
+  if(hit(g,gs.mood[a.mood]))o.push('Cercavi '+MOOD_TXT[a.mood]+(d.glist&&d.glist.length?" e i suoi generi ("+d.glist.slice(0,3).join(', ')+") vanno in quella direzione.":"."));
+  else o.push('Non è il genere più ovvio per chi cerca '+MOOD_TXT[a.mood]+(d.glist&&d.glist.length?" ("+d.glist.slice(0,3).join(', ')+")":"")+': lo propongo per gli altri criteri.');
+  if(d.runtime)o.push('Dura '+fmtMin(d.runtime)+'.');
+  if(!d.runtime&&d.episodes)o.push(d.episodes+' episodi.');
+  if(d.rv)o.push('Voto '+(+d.rv).toFixed(1)+' / 10.');
+  if(a.risk>=70)o.push('È abbastanza fuori dagli schemi da risultare interessante.');
+  return o.slice(0,4);
+}
+function show(r,sur){
+  S.cur=r;const d=r.d;let p=pct(r.s);if(sur)p=Math.max(60,p-6);
+  const poster=d.poster?'<div class="poster"><img src="'+esc(d.poster)+'" alt="Copertina di '+esc(d.title)+'" referrerpolicy="no-referrer"></div>':fbPoster(d.title,d.year);
+  const h='<div style="display:flex;flex-direction:column;gap:14px">'+
+    '<div class="hero">'+poster+'<div class="meta"><h2>'+esc(d.title)+'</h2><div class="chips">'+
+      (d.year?'<span class="chip">'+esc(d.year)+'</span>':'')+
+      (S.cat==='anime'||S.cat==='cartoni'?'<span class="chip">'+(d.movie?'Film':'Serie')+'</span>':'')+
+      (d.runtime?'<span class="chip">'+d.runtime+' min</span>':'')+
+      (d.rv?'<span class="chip r">★ '+(+d.rv).toFixed(1)+'</span>':'')+
+    '</div><div class="compat"><b>Compatibilità '+p+'%</b><div class="meter"><span style="width:'+p+'%"></span></div></div></div></div>'+
+    '<section class="block"><h3>Perché fa per te</h3><ul class="why">'+why(r,sur).map(x=>'<li><b>✓</b><span>'+esc(x)+'</span></li>').join('')+'</ul></section>'+
+    '<section class="block"><h3>Trama</h3><p>'+esc(d.overview||'Trama non disponibile.')+'</p></section>'+
+  '</div>';
+  swap(h);
+  setBar('<div class="bar"><div class="bar-in"><button type="button" class="btn" id="rst">← Modifica</button><button type="button" class="btn" id="sur">🎲 Sorprendi</button><button type="button" class="btn primary" id="oth">Un altro</button></div></div>');
+  $('oth').onclick=()=>run(false,false);
+  $('sur').onclick=()=>run(true,false);
+  $('rst').onclick=()=>home();
+}
+
+/* ---------- Icona app (iOS) ---------- */
+try{
+  const c=document.createElement("canvas");c.width=c.height=180;const x=c.getContext("2d");
+  x.fillStyle="#ff3d52";x.fillRect(0,0,180,180);
+  x.fillStyle="#fff";x.beginPath();x.moveTo(68,48);x.lineTo(136,90);x.lineTo(68,132);x.closePath();x.fill();
+  $("apple").href=c.toDataURL("image/png");
+}catch(e){}
+
+/* ---------- Avvio e installazione ---------- */
+home();
+let dp=null;const ib=$("ib");
+addEventListener("beforeinstallprompt",e=>{e.preventDefault();dp=e;try{if(!localStorage.getItem("stasera_ix"))ib.hidden=false;}catch(x){ib.hidden=false;}});
+$("ibtn").onclick=()=>{ib.hidden=true;if(dp){dp.prompt();dp=null;}};
+$("ix").onclick=()=>{ib.hidden=true;try{localStorage.setItem("stasera_ix","1");}catch(x){}};
+try{const ios=/iphone|ipad|ipod/i.test(navigator.userAgent),stand=navigator.standalone===true||matchMedia("(display-mode: standalone)").matches;if(ios&&!stand&&!localStorage.getItem("stasera_ix")){ib.querySelector("p").innerHTML="Per usarla come app: tocca <b>Condividi</b> ⬆️ e poi <b>Aggiungi a Home</b>.";$("ibtn").hidden=true;ib.hidden=false;}}catch(e){}
+addEventListener("appinstalled",()=>{ib.hidden=true;});
 })();
 </script>
 </body>
