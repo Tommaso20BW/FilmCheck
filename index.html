@@ -21,24 +21,23 @@
 :root{--bg:#0c0a11;--s:#16121e;--s2:#1f1929;--line:#2f2740;--fg:#f4effa;--mut:#a89fba;--red:#ff3d52;--vio:#9061f9;--gold:#f5c451;
 --fd:"Bricolage Grotesque","Arial Narrow",Arial,sans-serif;--fb:"Instrument Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color-scheme:dark}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html{background:#0c0a11;-webkit-text-size-adjust:100%;text-size-adjust:100%}
-body{margin:0;min-height:100vh;min-height:100dvh;color:var(--fg);font:16px/1.5 var(--fb);overscroll-behavior:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-font-smoothing:antialiased;
+html{min-height:100%;-webkit-text-size-adjust:100%;text-size-adjust:100%;background:radial-gradient(900px 500px at 85% 0,rgba(144,97,249,.16),transparent 60%) no-repeat,radial-gradient(700px 420px at 0 0,rgba(255,61,82,.12),transparent 60%) no-repeat,#0c0a11}
+body{margin:0;min-height:100vh;min-height:100dvh;color:var(--fg);font:16px/1.5 var(--fb);overscroll-behavior:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;text-rendering:optimizeLegibility;
 padding:max(20px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(40px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
-body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(900px 500px at 85% -10%,rgba(144,97,249,.16),transparent 60%),radial-gradient(700px 420px at -10% 0,rgba(255,61,82,.12),transparent 60%),#0c0a11}
 img{-webkit-user-drag:none;-webkit-touch-callout:none}
 .wrap{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
 h1,h2,h3{font-family:var(--fd);margin:0;line-height:1.1;text-wrap:balance}
 button{font:inherit;color:inherit;cursor:pointer;-webkit-appearance:none;appearance:none;touch-action:manipulation;margin:0;text-align:left;-webkit-text-fill-color:currentColor}
 .btn,.card{text-align:center}.card{text-align:left}
 :focus-visible{outline:2px solid var(--gold);outline-offset:3px}
-.brand{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;font-family:var(--fd);font-weight:800;font-size:14px;letter-spacing:.14em;text-transform:uppercase}
+.brand{position:relative;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;font-family:var(--fd);font-weight:800;font-size:14px;letter-spacing:.14em;text-transform:uppercase}
 .brand i{font-style:normal;color:var(--red)}
 .pill{font:12.5px var(--fb);color:var(--mut);letter-spacing:.06em;display:flex;align-items:center;gap:6px;text-transform:none}
 .pill b{width:8px;height:8px;border-radius:50%;display:inline-block}
 .bar{height:6px;border-radius:99px;background:var(--s2);overflow:hidden;margin-top:12px}
 .bar span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--red),var(--vio));transition:width .4s}
 .stage{animation:rise .35s both}
-@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes rise{from{opacity:0}to{opacity:1}}
 .q{font-size:clamp(26px,6.5vw,38px);font-weight:800;letter-spacing:-.02em;margin-bottom:8px}
 .hint{color:var(--mut);margin:0 0 18px}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
@@ -92,6 +91,7 @@ input[type=range]{width:100%;accent-color:var(--red);height:32px;margin:0}
 .block p{margin:0;max-width:65ch}.block .src{font-size:12.5px;color:var(--mut);margin-top:8px}
 .block.v{background:linear-gradient(135deg,rgba(255,61,82,.14),rgba(144,97,249,.16));border-color:rgba(255,61,82,.4)}
 .block.v p{font:700 19px/1.3 var(--fd)}
+.why{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}.why li{display:flex;gap:10px;align-items:flex-start;line-height:1.4}.why li::before{content:"✓";color:var(--gold);font-weight:700;flex:none}
 .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
 footer{color:var(--mut);font-size:12.5px;text-align:center}
 .ib{position:fixed;left:16px;right:16px;bottom:max(16px,env(safe-area-inset-bottom,0px));z-index:20;background:var(--s);border:1.5px solid var(--vio);border-radius:16px;padding:12px 14px;display:flex;align-items:center;gap:12px;max-width:640px;margin:0 auto}
@@ -107,7 +107,7 @@ footer{color:var(--mut);font-size:12.5px;text-align:center}
   <div class="bar" role="progressbar" aria-label="Avanzamento" aria-valuemin="0" aria-valuemax="6" id="bw"><span id="bf"></span></div>
 </header>
 <main id="stage" class="stage"></main>
-<footer>Fonti pubbliche, nessuna chiave API: Wikidata + Wikipedia (film), TVmaze (serie TV), Jikan/MyAnimeList (anime).</footer>
+<footer>Fonti pubbliche, nessuna chiave API: Wikidata + Wikipedia (film e film d'animazione), TVmaze (serie TV e cartoni), Kitsu/Jikan (anime).</footer>
 </div>
 <div class="ib" id="ib" hidden><span style="font-size:22px">📲</span><p>Aggiungila alla schermata Home per usarla come un'app.</p><button class="btn p" id="ibtn">Installa</button><button class="btn g" id="ix" aria-label="Chiudi">✕</button></div>
 
@@ -133,10 +133,11 @@ try{
 }catch(e){}
 
 /* ---------- Dati del quiz ---------- */
-const CATS={film:{l:"Film",ic:"🎬",sub:"dal grande cinema",c:"#ff3d52"},serie:{l:"Serie TV",ic:"📺",sub:"dal piccolo schermo",c:"#5ec8ff"},anime:{l:"Anime",ic:"⛩️",sub:"dal catalogo MyAnimeList",c:"#9061f9"}};
+const CATS={film:{l:"Film",ic:"🎬",sub:"dal grande cinema",c:"#ff3d52"},serie:{l:"Serie TV",ic:"📺",sub:"dal piccolo schermo",c:"#5ec8ff"},anime:{l:"Anime",ic:"⛩️",sub:"giapponesi: serie e film",c:"#9061f9"},cartoni:{l:"Cartoni",ic:"🧸",sub:"animazione occidentale",c:"#ffb703"}};
 const MOOD=[["feelgood","😊","Qualcosa di leggero","Niente pensieri, solo buonumore"],["laugh","😂","Mi serve ridere"],["love","❤️","Una storia d'amore"],["cry","🥺","Voglio commuovermi"],["scare","😱","Voglio avere paura"],["thrill","🔥","Azione e adrenalina"],["mindbend","🤯","Un colpo di scena assurdo"],["epic","🧙","Avventura epica o fantasy"]];
 const AV=(long,old,sex)=>[["horror","🚫","Horror"],["romance","🚫","Romance"],["long","🚫",long],["sad","🚫","Troppo triste"],["old","🚫",old],["violence","🚫","Troppa violenza"],["sex","🚫",sex],["none","✅","Nessuna preferenza"]];
 const STEPS=[
+ {id:"fmt",q:"Serie o film?",only:["anime","cartoni"],o:[["serie","📺","Una serie","Episodi da guardare uno dopo l'altro."],["movie","🎬","Un film d'animazione","Una storia che si chiude in una sera."],["any","🎲","Va bene entrambi"]]},
  {id:"mood",q:"Che voglia hai stasera?",two:1,o:MOOD},
  {id:"effort",q:"Quanto ti vuoi coinvolgere?",o:[["0","🛋️","Testa spenta","Solo intrattenimento, senza impegno."],["1","🍿","Equilibrato","Una bella storia, ma senza soffrire troppo."],["2","🧠","Qualcosa di forte","Fammi uscire diversa/o da questa storia."]]},
  {id:"time",q:"Quanto tempo hai stasera?",byCat:{
@@ -147,15 +148,18 @@ const STEPS=[
  {id:"risk",q:"Quanto vuoi uscire dai tuoi gusti abituali?",slider:1},
  {id:"avoid",q:"C'è qualcosa che vuoi evitare?",multi:1,byCat:{film:AV("Film troppo lungo","Troppo vecchio","Troppo sesso"),serie:AV("Troppe puntate","Troppo vecchia","Troppo sesso"),anime:AV("Troppi episodi","Troppo vecchio","Fanservice/Ecchi")}}
 ];
-const TOTAL=STEPS.length;
-const LOAD={film:["Sfoglio l'archivio di Wikidata...","Incrocio i generi...","Ci siamo quasi..."],serie:["Sfoglio il palinsesto...","Controllo le stagioni...","Ci siamo quasi..."],anime:["Sfoglio MyAnimeList...","Controllo gli episodi...","Ci siamo quasi..."]};
+let TOTAL=6;
+const stepsFor=()=>STEPS.filter(st=>!st.only||st.only.indexOf(S.cat)>=0);
+const gkey=(cat,a)=>cat==="cartoni"?(a&&a.fmt==="movie"?"film":"serie"):cat;
+const optKey=()=>{const c=S.cat,mv=S.a&&S.a.fmt==="movie";return c==="film"||(mv&&(c==="anime"||c==="cartoni"))?"film":c==="anime"?"anime":"serie"};
+const LOAD={film:["Sfoglio l'archivio di Wikidata...","Incrocio i generi...","Ci siamo quasi..."],serie:["Sfoglio il palinsesto...","Controllo le stagioni...","Ci siamo quasi..."],anime:["Sfoglio il catalogo anime...","Controllo gli episodi...","Ci siamo quasi..."],cartoni:["Sfoglio i cartoni...","Incrocio i generi...","Ci siamo quasi..."]};
 const MOOD_TXT={feelgood:"qualcosa di leggero",laugh:"ridere",love:"una storia d'amore",cry:"commuoverti",scare:"avere paura",thrill:"azione e adrenalina",mindbend:"un colpo di scena assurdo",epic:"un'avventura epica"};
 const WHO_TXT={solo:"da sola/o",partner:"in coppia",friends:"con gli amici",family:"con la famiglia",convince:"con chi va convinto"};
 const riskLabel=n=>n<=15?"Voglio andare sul sicuro.":n<=35?"Una piccola sorpresa va bene.":n<=60?"Sorprendimi, ma con giudizio.":n<=80?"Fammi uscire dai binari.":"Portami dove non sono mai stata/o.";
 
 const G={
- film:{mood:{feelgood:["comedy film","family film","animated film"],laugh:["comedy film","romantic comedy film","romantic comedy"],love:["romance film","romantic drama film","romantic comedy film"],cry:["drama film","romance film"],scare:["horror film"],thrill:["action film","thriller film","adventure film"],mindbend:["mystery film","psychological thriller film","psychological thriller","science fiction film"],epic:["fantasy film","science fiction film","adventure film"]},
-  avoid:{horror:["horror film"],romance:["romance film","romantic comedy film"],violence:["horror film","war film","slasher film"],sex:["erotic film"]},heavy:["drama film","mystery film","war film"],light:["comedy film","action film","animated film","family film"]},
+ film:{mood:{feelgood:["comedy film","family film"],laugh:["comedy film","romantic comedy film","romantic comedy"],love:["romance film","romantic drama film","romantic comedy film"],cry:["drama film","romance film"],scare:["horror film"],thrill:["action film","thriller film","adventure film"],mindbend:["mystery film","psychological thriller film","psychological thriller","science fiction film"],epic:["fantasy film","science fiction film","adventure film"]},
+  avoid:{horror:["horror film"],romance:["romance film","romantic comedy film"],violence:["horror film","war film","slasher film"],sex:["erotic film"]},heavy:["drama film","mystery film","war film"],light:["comedy film","action film","family film"]},
  serie:{mood:{feelgood:["Comedy","Family"],laugh:["Comedy"],love:["Romance"],cry:["Drama","Romance"],scare:["Horror"],thrill:["Action","Thriller","Crime"],mindbend:["Mystery","Thriller","Science-Fiction"],epic:["Fantasy","Science-Fiction","Adventure"]},
   avoid:{horror:["Horror"],romance:["Romance"],violence:["Horror","War","Crime"],sex:["Romance"]},heavy:["Drama","Mystery","War"],light:["Comedy","Family","Adventure"]},
  anime:{mood:{feelgood:["Comedy","Slice of Life"],laugh:["Comedy"],love:["Romance"],cry:["Drama","Romance"],scare:["Horror"],thrill:["Action","Suspense"],mindbend:["Mystery","Psychological","Suspense"],epic:["Fantasy","Adventure","Sci-Fi","Supernatural"]},
@@ -164,7 +168,7 @@ const G={
 const MOOD_IT={feelgood:"commedia",laugh:"commedia",love:"sentimentale",cry:"drammatico",scare:"horror",thrill:"azione",mindbend:"fantascienza",epic:"fantasy"};
 
 const S={cat:null,step:0,a:null,cands:[],seen:[],cur:null};
-const resetA=()=>({mood:null,effort:null,time:null,who:null,risk:50,avoid:[]});
+const resetA=()=>({fmt:null,mood:null,effort:null,time:null,who:null,risk:50,avoid:[]});
 const stage=$("stage");
 function setProg(n,l){$("bf").style.width=(n/TOTAL*100)+"%";$("bw").setAttribute("aria-valuenow",n);$("count").textContent=l||""}
 function swap(h){stage.classList.remove("stage");void stage.offsetWidth;stage.classList.add("stage");stage.innerHTML=h;scrollTo(0,0)}
@@ -174,7 +178,7 @@ function fj(url,ms,opts){
   return fetch(url,Object.assign({signal:c.signal},opts||{})).then(r=>{clearTimeout(t);if(r.status===429){const e=new Error("429");e.retry=1;throw e}if(!r.ok)throw new Error("HTTP "+r.status);return r.json()},e=>{clearTimeout(t);throw e});
 }
 const fjr=(url,ms)=>fj(url,ms).catch(e=>e&&e.retry?sleep(1000).then(()=>fj(url,ms)):Promise.reject(e));
-const without=(cat,a)=>{let w=[];a.avoid.forEach(k=>{if(G[cat].avoid[k])w=w.concat(G[cat].avoid[k])});if(a.who==="family")w=w.concat(cat==="film"?["horror film","erotic film","war film"]:cat==="serie"?["Horror","Adult"]:["Horror","Gore"]);return uniq(w)};
+const without=(cat,a)=>{cat=gkey(cat,a);let w=[];a.avoid.forEach(k=>{if(G[cat].avoid[k])w=w.concat(G[cat].avoid[k])});if(a.who==="family")w=w.concat(cat==="film"?["horror film","erotic film","war film"]:cat==="serie"?["Horror","Adult"]:["Horror","Gore"]);return uniq(w)};
 /* applica filtri via via piu' larghi finche' resta qualcosa */
 function tier(list,tests){let last=[];for(const t of tests){const r=list.filter(t);if(r.length>=5)return r;if(r.length)last=r}return last.length?last:list}
 
@@ -195,83 +199,87 @@ async function enrich(title,kind){
 /* ---------- FILM: Wikidata (GET, CORS ok) con fallback su Wikipedia ---------- */
 async function sparql(q){const d=await fj("https://query.wikidata.org/sparql?format=json&query="+encodeURIComponent(q),30000);return(d.results&&d.results.bindings)||[]}
 const vals=l=>l.map(x=>'"'+x+'"@en').join(" ");
-async function wdFilms(a,strict){
-  const g=G.film,wn=without("film",a),genres=(g.mood[a.mood]||["drama film"]).filter(x=>wn.indexOf(x)<0);
-  const minL=(a.risk<30?40:a.risk<60?18:a.risk<80?8:3)/(strict?1:3);
-  const q="SELECT ?film ?filmLabel ?sl ?d ?rt ?img WHERE{VALUES ?gl{"+vals(genres.length?genres:["drama film","comedy film"])+"} ?g rdfs:label ?gl. ?film wdt:P31 wd:Q11424; wdt:P136 ?g; wikibase:sitelinks ?sl. FILTER(?sl>="+Math.max(2,Math.round(minL))+") "+
+async function wdFilms(a,strict,anim){
+  const wn=without("film",a);
+  let genres=(G.film.mood[a.mood]||["drama film"]).filter(x=>wn.indexOf(x)<0&&x!=="animated film");
+  if(!anim&&!genres.length)genres=["drama film","comedy film"];
+  const useMood=anim?(strict&&genres.length>0):true;
+  const minL=Math.max(2,Math.round((a.risk<30?40:a.risk<60?18:a.risk<80?8:3)/(strict?1:3)/(anim?2:1)));
+  const AN='?film wdt:P136 ?ga. ?ga rdfs:label "animated film"@en. ';
+  const q="SELECT ?film ?filmLabel ?sl ?d ?rt ?img WHERE{"+(useMood?"VALUES ?gl{"+vals(genres)+"} ?g rdfs:label ?gl. ?film wdt:P136 ?g. ":"")+
+   "?film wdt:P31 wd:Q11424; wikibase:sitelinks ?sl. FILTER(?sl>="+minL+") "+
+   (anim?AN+"FILTER NOT EXISTS{?film wdt:P495 wd:Q17} ":"FILTER NOT EXISTS{"+AN+"} ")+
    (strict&&wn.length?"FILTER NOT EXISTS{?film wdt:P136 ?b. ?b rdfs:label ?bl. VALUES ?bl{"+vals(wn)+"}} ":"")+
    "OPTIONAL{?film wdt:P577 ?d} OPTIONAL{?film wdt:P2047 ?rt} OPTIONAL{?film wdt:P18 ?img} SERVICE wikibase:label{bd:serviceParam wikibase:language \"it,en\"}} LIMIT 200";
   const seen={},out=[];
   (await sparql(q)).forEach(b=>{const id=b.film.value.split("/").pop(),t=b.filmLabel&&b.filmLabel.value;if(seen[id]||!t||/^Q\d+$/.test(t))return;seen[id]=1;
-    out.push({id,title:t,year:b.d?b.d.value.slice(0,4):"",sl:+b.sl.value,runtime:b.rt?Math.round(+b.rt.value):null,img:b.img?b.img.value.replace(/^http:/,"https:")+"?width=500":null,genres:genres})});
+    out.push({id,title:t,year:b.d?b.d.value.slice(0,4):"",sl:+b.sl.value,runtime:b.rt?Math.round(+b.rt.value):null,img:b.img?b.img.value.replace(/^http:/,"https:")+"?width=500":null,genres:useMood?genres:[],movie:true})});
   return out;
 }
-async function wpFilms(a){
-  const wn=without("film",a),neg=wn.indexOf("horror film")>=0?" -horror":"";
+async function wpFilms(a,anim){
+  const wn=without("film",a),term=anim?'"film d\'animazione" -giapponese':MOOD_IT[a.mood]+(wn.indexOf("horror film")>=0?" -horror":"");
   const url="https://it.wikipedia.org/w/api.php?action=query&generator=search&format=json&origin=*&gsrnamespace=0&gsrlimit=30&gsroffset="+rand(200)+
-   "&gsrsearch="+encodeURIComponent('hastemplate:Film "è un film" '+MOOD_IT[a.mood]+neg)+"&prop=extracts|pageimages&exintro=1&explaintext=1&exsentences=4&exlimit=30&piprop=thumbnail&pithumbsize=500";
+   "&gsrsearch="+encodeURIComponent('hastemplate:Film "è un film" '+term)+"&prop=extracts|pageimages&exintro=1&explaintext=1&exsentences=4&exlimit=30&piprop=thumbnail&pithumbsize=500";
   const d=await fj(url,12000),p=d.query&&d.query.pages?Object.values(d.query.pages):[];
-  return p.filter(x=>x.extract&&/film/i.test(x.extract.slice(0,200))).map(x=>({id:"wp"+x.pageid,title:x.title.replace(/\s*\(film.*\)$/,""),year:(x.extract.match(/\b(19|20)\d\d\b/)||[""])[0],sl:10,runtime:null,genres:G.film.mood[a.mood],pre:{extract:x.extract,thumb:x.thumbnail&&x.thumbnail.source}}));
+  return p.filter(x=>x.extract&&/film/i.test(x.extract.slice(0,200))).map(x=>({id:"wp"+x.pageid,title:x.title.replace(/\s*\(film.*\)$/,""),year:(x.extract.match(/\b(19|20)\d\d\b/)||[""])[0],sl:10,runtime:null,genres:anim?[]:G.film.mood[a.mood],movie:true,pre:{extract:x.extract,thumb:x.thumbnail&&x.thumbnail.source}}));
 }
-async function filmDiscover(a){
-  const g=G.film;let list=[],err=null;
-  try{list=await wdFilms(a,true);
+async function filmDiscover(a,anim){
+  let list=[],err=null;
+  try{list=await wdFilms(a,true,anim);
     const rtMin=a.time==="mid"?85:a.time==="long"?115:0,rtMax=a.time==="short"?95:a.time==="mid"?125:a.avoid.indexOf("long")>=0?130:999,ym=a.avoid.indexOf("old")>=0?1995:0;
-    if(a.avoid.indexOf("long")>=0&&a.time!=="short"&&a.time!=="mid")list=list; // gestito sotto
     const mx=a.avoid.indexOf("long")>=0?Math.min(rtMax,130):rtMax;
     list=tier(list,[m=>(!m.runtime||(m.runtime>=rtMin&&m.runtime<=mx))&&(!ym||!m.year||+m.year>=ym),m=>!ym||!m.year||+m.year>=ym,()=>true]);
   }catch(e){err=e}
-  if(list.length<5){try{list=list.concat(await wdFilms(a,false))}catch(e){err=err||e}}
-  if(list.length<3){try{list=list.concat(await wpFilms(a))}catch(e){err=err||e}}
+  if(list.length<5){try{list=list.concat(await wdFilms(a,false,anim))}catch(e){err=err||e}}
+  if(list.length<3){try{list=list.concat(await wpFilms(a,anim))}catch(e){err=err||e}}
   if(!list.length&&err)throw err;
   return list;
 }
 async function filmDetails(c){
-  const w=c.pre||await enrich(c.title,"film");
-  return{title:c.title,year:c.year,runtime:c.runtime,overview:(w&&w.extract)||"Trama non ancora disponibile su Wikipedia in italiano.",it:!!(w&&w.extract),poster:(w&&w.thumb)||c.img,pop:c.sl};
+  const [w,meta]=await Promise.all([c.pre?Promise.resolve(c.pre):enrich(c.title,"film"),wdMeta(c.id)]);
+  const gl=meta.glist&&meta.glist.length?meta.glist:itg(c.genres);
+  return{movie:true,title:c.title,year:c.year,runtime:c.runtime,dir:meta.dir||"",glist:gl,gt:gl.join(" · "),overview:(w&&w.extract)||"Trama non ancora disponibile su Wikipedia in italiano.",it:!!(w&&w.extract),poster:(w&&w.thumb)||c.img,pop:c.sl};
 }
-
-/* ---------- SERIE TV: TVmaze ---------- */
-async function tvDiscover(a){
+async function tvDiscover(a,anim){
   const wn=without("serie",a),want=G.serie.mood[a.mood]||["Drama","Comedy"],ym=a.avoid.indexOf("old")>=0?1995:0;
-  const pages=uniq(Array.from({length:6},()=>rand(240)));
+  const pages=uniq(Array.from({length:anim?14:6},()=>rand(240)));
   const lists=await Promise.all(pages.map(p=>fjr("https://api.tvmaze.com/shows?page="+p,9000).catch(()=>[])));
   const all=[].concat(...lists);
   if(!all.length)throw new Error("rete/TVmaze non raggiungibile");
-  const items=all.filter(s=>s.genres&&s.genres.length).map(s=>({id:s.id,title:s.name,year:s.premiered?s.premiered.slice(0,4):"",genres:s.genres,rating:s.rating&&s.rating.average,runtime:s.averageRuntime||s.runtime,image:s.image&&(s.image.original||s.image.medium),summary:strip(s.summary),lang:s.language}));
-  const ov=m=>m.genres.some(x=>want.indexOf(x)>=0), bad=m=>m.genres.some(x=>wn.indexOf(x)>=0);
+  const items=all.filter(s=>(anim?s.type==="Animation":s.type!=="Animation")&&(s.genres||[]).indexOf("Anime")<0&&(anim||(s.genres&&s.genres.length))).map(s=>({id:s.id,src:"tv",anim:anim,title:s.name,year:s.premiered?s.premiered.slice(0,4):"",genres:s.genres||[],rating:s.rating&&s.rating.average,runtime:s.averageRuntime||s.runtime,image:s.image&&(s.image.original||s.image.medium),summary:strip(s.summary),lang:s.language}));
+  const ov=m=>m.genres.some(x=>want.indexOf(x)>=0),bad=m=>m.genres.some(x=>wn.indexOf(x)>=0);
   return tier(items,[
-    m=>ov(m)&&!bad(m)&&(!ym||!m.year||+m.year>=ym)&&m.rating>=6.5&&(a.risk>=60||m.lang==="English"||m.lang==="Italian"),
+    m=>ov(m)&&!bad(m)&&(!ym||!m.year||+m.year>=ym)&&m.rating>=6.5&&(anim||a.risk>=60||m.lang==="English"||m.lang==="Italian"),
     m=>ov(m)&&!bad(m)&&(!ym||!m.year||+m.year>=ym)&&(!m.rating||m.rating>=5.5),
-    m=>ov(m)&&!bad(m), m=>ov(m)]);
+    m=>ov(m)&&!bad(m),m=>ov(m),()=>true]);
 }
-async function tvDetails(c){const w=await enrich(c.title,"serie televisiva");
-  return{title:c.title,year:c.year,runtime:c.runtime,overview:(w&&w.extract)||c.summary||"Trama non disponibile.",it:!!(w&&w.extract),poster:c.image||(w&&w.thumb),rl:"TVmaze",rv:c.rating,gt:(c.genres||[]).join(" · ")}}
-
-/* ---------- ANIME: Jikan, una richiesta per genere (evita l'AND dei generi) ---------- */
+async function tvDetails(c){const w=await enrich(c.title,c.anim?"serie animata":"serie televisiva");
+  return{title:c.title,year:c.year,runtime:c.runtime,overview:(w&&w.extract)||c.summary||"Trama non disponibile.",it:!!(w&&w.extract),poster:c.image||(w&&w.thumb),rl:"TVmaze",rv:c.rating,glist:itg(c.genres),gt:itg(c.genres).join(" · ")}}
+async function animeDetails(c){const w=await enrich(c.title,c.movie?"film anime":"anime");
+  return{movie:!!c.movie,title:c.title,year:c.year,runtime:c.runtime,episodes:c.episodes,overview:(w&&w.extract)||c.summary||"Trama non disponibile.",it:!!(w&&w.extract),poster:c.image||(w&&w.thumb),rl:"Voto",rv:c.rating,glist:itg(c.genres),gt:itg(c.genres).join(" · ")}}
 const JID={"Action":1,"Adventure":2,"Comedy":4,"Drama":8,"Fantasy":10,"Horror":14,"Mystery":7,"Romance":22,"Sci-Fi":24,"Slice of Life":36,"Supernatural":37,"Suspense":41,"Psychological":40,"Ecchi":9,"Hentai":12,"Gore":58};
 const KIT={"Action":"action","Adventure":"adventure","Comedy":"comedy","Drama":"drama","Fantasy":"fantasy","Horror":"horror","Mystery":"mystery","Romance":"romance","Sci-Fi":"science-fiction","Slice of Life":"slice-of-life","Supernatural":"supernatural","Suspense":"thriller","Psychological":"psychological"};
 async function jr(url){for(let i=0;i<3;i++){try{return await fj(url,12000)}catch(e){if(i===2)throw e;await sleep(1300*(i+1))}}}
-async function jikanItems(want,ex){
+async function jikanItems(want,ex,sub){
   const out=[];let err=null;
   for(let i=0;i<want.length;i++){
     if(i)await sleep(750);
     const u=new URL("https://api.jikan.moe/v4/anime");
-    u.searchParams.set("genres",JID[want[i]]);if(ex)u.searchParams.set("genres_exclude",ex);
+    u.searchParams.set("genres",JID[want[i]]);if(ex)u.searchParams.set("genres_exclude",ex);u.searchParams.set("type",sub==="movie"?"movie":"tv");
     u.searchParams.set("order_by","score");u.searchParams.set("sort","desc");u.searchParams.set("min_score","6.3");u.searchParams.set("page",1+rand(3));u.searchParams.set("limit","25");u.searchParams.set("sfw","true");
-    try{const r=await jr(u.toString());(r.data||[]).filter(m=>!m.type||m.type==="TV"||m.type==="Movie").forEach(m=>out.push({id:m.mal_id,title:m.title_english||m.title,year:(m.aired&&m.aired.prop&&m.aired.prop.from&&m.aired.prop.from.year)||"",genres:(m.genres||[]).concat(m.themes||[]).map(g=>g.name),rating:m.score,episodes:m.episodes,image:m.images&&m.images.jpg&&(m.images.jpg.large_image_url||m.images.jpg.image_url),summary:m.synopsis}))}catch(e){err=e}
+    try{const r=await jr(u.toString());(r.data||[]).forEach(m=>out.push({id:m.mal_id,src:"anime",movie:sub==="movie",title:m.title_english||m.title,year:(m.aired&&m.aired.prop&&m.aired.prop.from&&m.aired.prop.from.year)||"",genres:(m.genres||[]).concat(m.themes||[]).map(g=>g.name),rating:m.score,episodes:m.episodes,image:m.images&&m.images.jpg&&(m.images.jpg.large_image_url||m.images.jpg.image_url),summary:m.synopsis}))}catch(e){err=e}
   }
   if(!out.length&&err)throw err;return out;
 }
 const KN={"Science Fiction":"Sci-Fi","Thriller":"Suspense"};
-async function kitsuItems(want){
+async function kitsuItems(want,sub){
   const out=[];let err=null;
   await Promise.all(want.map(async g=>{const slug=KIT[g];if(!slug)return;
-    try{const r=await fj("https://kitsu.io/api/edge/anime?filter[categories]="+slug+"&sort=-averageRating&include=categories&page[limit]=20&page[offset]="+rand(4)*20,12000);
+    try{const r=await fj("https://kitsu.io/api/edge/anime?filter[categories]="+slug+"&filter[subtype]="+sub+"&sort=-averageRating&include=categories&page[limit]=20&page[offset]="+rand(4)*20,12000);
       const cat={};(r.included||[]).forEach(i=>{if(i.type==="categories")cat[i.id]=KN[i.attributes.title]||i.attributes.title});
-      (r.data||[]).forEach(x=>{const t=x.attributes;if(t.nsfw||(t.subtype&&["TV","movie"].indexOf(t.subtype)<0))return;
+      (r.data||[]).forEach(x=>{const t=x.attributes;if(t.nsfw)return;const mv=sub==="movie";
         const gl=((x.relationships&&x.relationships.categories&&x.relationships.categories.data)||[]).map(c=>cat[c.id]).filter(Boolean);
-        out.push({id:"k"+x.id,title:(t.titles&&(t.titles.en||t.titles.en_us))||t.canonicalTitle,year:t.startDate?+t.startDate.slice(0,4):"",genres:uniq(gl.concat([g])),rating:t.averageRating?+t.averageRating/10:null,episodes:t.episodeCount,image:t.posterImage&&(t.posterImage.large||t.posterImage.medium),summary:t.synopsis})})}catch(e){err=e}}));
+        out.push({id:"k"+x.id,src:"anime",movie:mv,title:(t.titles&&(t.titles.en||t.titles.en_us))||t.canonicalTitle,year:t.startDate?+t.startDate.slice(0,4):"",genres:uniq(gl.concat([g])),rating:t.averageRating?+t.averageRating/10:null,episodes:mv?1:t.episodeCount,runtime:mv?(t.totalLength||t.episodeLength):t.episodeLength,image:t.posterImage&&(t.posterImage.large||t.posterImage.medium),summary:t.synopsis})})}catch(e){err=e}}));
   if(!out.length&&err)throw err;return out;
 }
 const SEQ=/\b(season|stagione|saison|cour)\s*\d|\b\d+(st|nd|rd|th)\s+season|\b(part|parte)\s*\d|\b(second|third|fourth|final)\s+season|\b(II|III|IV|V|VI|VII)\s*$|\s[2-9]$|\b(OVA|OAD|ONA|special|recap|specials)\b|:\s*.*\b(arc|chapter)\b/i;
@@ -279,27 +287,46 @@ async function animeDiscover(a){
   const wn=without("anime",a);
   let want=(G.anime.mood[a.mood]||["Drama"]).filter(x=>JID[x]&&wn.indexOf(x)<0).slice(0,3);if(!want.length)want=["Comedy"];
   const ex=wn.filter(x=>JID[x]).map(x=>JID[x]).join(","),ym=a.avoid.indexOf("old")>=0?1995:0;
-  const epMax=a.time==="short"?13:a.time==="mid"?26:a.avoid.indexOf("long")>=0?26:0;
+  const subs=a.fmt==="movie"?["movie"]:a.fmt==="any"?["TV","movie"]:["TV"];
+  const epMax=a.fmt==="movie"?0:a.time==="short"?13:a.time==="mid"?26:a.avoid.indexOf("long")>=0?26:0;
+  const rtMin=a.time==="mid"?85:a.time==="long"?115:0,rtMax=a.time==="short"?95:a.time==="mid"?125:999;
   let all=[],e1=null;
-  try{all=await kitsuItems(want)}catch(e){e1=e}
-  if(!all.length){try{all=await jikanItems(want,ex)}catch(e){throw new Error("Kitsu: "+(e1&&e1.message||"nessun dato")+" / Jikan: "+e.message)}}
+  try{all=[].concat(...await Promise.all(subs.map(x=>kitsuItems(want,x).catch(e=>{e1=e;return[]}))))}catch(e){e1=e}
+  if(!all.length){try{for(const x of subs)all=all.concat(await jikanItems(want,ex,x.toLowerCase()))}catch(e){throw new Error("Kitsu: "+(e1&&e1.message||"nessun dato")+" / Jikan: "+e.message)}}
   const seen={};let items=all.filter(m=>{if(seen[m.id])return false;seen[m.id]=1;return true});
   const first=items.filter(m=>!SEQ.test(m.title));if(first.length>=3)items=first;
-  const ep=m=>!epMax||!m.episodes||m.episodes<=epMax,yr=m=>!ym||!m.year||m.year>=ym,ok=m=>!m.genres.some(x=>wn.indexOf(x)>=0);
-  return tier(items,[m=>ok(m)&&ep(m)&&yr(m)&&m.rating>=7,m=>ok(m)&&ep(m)&&yr(m),m=>ok(m)&&ep(m),ep,()=>true]);
+  const ep=m=>m.movie||!epMax||!m.episodes||m.episodes<=epMax,rt=m=>!m.movie||!m.runtime||(m.runtime>=rtMin&&m.runtime<=rtMax),yr=m=>!ym||!m.year||m.year>=ym,ok=m=>!m.genres.some(x=>wn.indexOf(x)>=0);
+  return tier(items,[m=>ok(m)&&ep(m)&&rt(m)&&yr(m)&&m.rating>=7,m=>ok(m)&&ep(m)&&rt(m)&&yr(m),m=>ok(m)&&ep(m),ep,()=>true]);
 }
-async function animeDetails(c){const w=await enrich(c.title,"anime");
-  return{title:c.title,year:c.year,episodes:c.episodes,overview:(w&&w.extract)||c.summary||"Trama non disponibile.",it:!!(w&&w.extract),poster:c.image||(w&&w.thumb),rl:"Anime",rv:c.rating,gt:(c.genres||[]).join(" · ")}}
-
-const SRC={film:{d:filmDiscover,t:filmDetails},serie:{d:tvDiscover,t:tvDetails},anime:{d:animeDiscover,t:animeDetails}};
+async function cartoniDiscover(a){
+  if(a.fmt==="movie")return filmDiscover(a,true);
+  if(a.fmt==="serie")return tvDiscover(a,true);
+  const r=await Promise.allSettled([tvDiscover(a,true),filmDiscover(a,true)]),ok=r.filter(x=>x.status==="fulfilled").map(x=>x.value);
+  if(!ok.length)throw r[0].reason;return[].concat(...ok);
+}
+const SRC={film:{d:a=>filmDiscover(a,false)},serie:{d:a=>tvDiscover(a,false)},anime:{d:animeDiscover},cartoni:{d:cartoniDiscover}};
+const detailsOf=c=>c.sl!=null?filmDetails(c):c.src==="tv"?tvDetails(c):animeDetails(c);
 
 /* ---------- Punteggio ---------- */
 const hit=(g,w)=>g&&w&&g.some(x=>w.indexOf(x)>=0)?1:0;
-const mainstream=(cat,m)=>cat==="film"?Math.max(0,Math.min(1,Math.log10(Math.max(2,m.sl))/2.6)):m.rating?Math.max(0,Math.min(1,(m.rating-4)/5)):.4;
+const GIT={"Comedy":"Commedia","Drama":"Drammatico","Romance":"Sentimentale","Horror":"Horror","Action":"Azione","Adventure":"Avventura","Fantasy":"Fantasy","Science-Fiction":"Fantascienza","Sci-Fi":"Fantascienza","Mystery":"Mistero","Thriller":"Thriller","Suspense":"Thriller","Crime":"Crime","Family":"Famiglia","Slice of Life":"Vita quotidiana","Supernatural":"Soprannaturale","Psychological":"Psicologico","War":"Guerra","Music":"Musica","Western":"Western","History":"Storico","Ecchi":"Ecchi","comedy film":"Commedia","drama film":"Drammatico","romance film":"Sentimentale","romantic comedy film":"Commedia romantica","romantic comedy":"Commedia romantica","romantic drama film":"Dramma sentimentale","horror film":"Horror","action film":"Azione","thriller film":"Thriller","adventure film":"Avventura","family film":"Famiglia","mystery film":"Mistero","psychological thriller film":"Thriller psicologico","psychological thriller":"Thriller psicologico","science fiction film":"Fantascienza","fantasy film":"Fantasy","war film":"Guerra"};
+const itg=a=>uniq((a||[]).map(x=>GIT[x]||x));
+const fmtMin=m=>m>=60?Math.floor(m/60)+" h"+(m%60?" "+String(m%60).padStart(2,"0"):""):m+" min";
+async function wdMeta(id){
+  if(!/^Q\d+$/.test(id))return{};
+  try{
+    const q='SELECT ?gl ?dl WHERE{OPTIONAL{wd:'+id+' wdt:P136 ?g. ?g rdfs:label ?gl. FILTER(LANG(?gl)="it")} OPTIONAL{wd:'+id+' wdt:P57 ?dr. ?dr rdfs:label ?dl. FILTER(LANG(?dl)="en")}}';
+    const rows=await Promise.race([sparql(q),sleep(8000).then(()=>{throw new Error("t")})]);
+    const gl=[],dr=[];
+    rows.forEach(b=>{if(b.gl)gl.push(b.gl.value.replace(/^film\s+(di\s+|d['’]\s*)?/i,"").replace(/^./,c=>c.toUpperCase()));if(b.dl)dr.push(b.dl.value)});
+    return{glist:uniq(gl).slice(0,4),dir:uniq(dr).slice(0,2).join(", ")};
+  }catch(e){return{}}
+}
+const mainstream=(cat,m)=>m.sl!=null?Math.max(0,Math.min(1,Math.log10(Math.max(2,m.sl))/2.6)):m.rating?Math.max(0,Math.min(1,(m.rating-4)/5)):.4;
 function score(cat,m,a){
-  const g=m.genres||[],gs=G[cat],ms=mainstream(cat,m),e=+a.effort;
+  const g=m.genres||[],gs=G[gkey(cat,a)],ms=mainstream(cat,m),e=+a.effort;
   const heavy=g.some(x=>gs.heavy.indexOf(x)>=0)||(m.rating||0)>=8.3,light=g.some(x=>gs.light.indexOf(x)>=0);
-  return 45*hit(g,gs.mood[a.mood])+20*(e===2?(heavy?1:.3):e===0?(light?1:.3):.75)+20*Math.max(0,1-Math.abs((1-ms)*100-a.risk)/70)+15*(cat==="film"?ms:m.rating?Math.max(0,Math.min(1,(m.rating-5)/4)):.5)+Math.random()*6;
+  return 45*hit(g,gs.mood[a.mood])+20*(e===2?(heavy?1:.3):e===0?(light?1:.3):.75)+20*Math.max(0,1-Math.abs((1-ms)*100-a.risk)/70)+15*(m.sl!=null?ms:m.rating?Math.max(0,Math.min(1,(m.rating-5)/4)):.5)+Math.random()*6;
 }
 const pct=s=>Math.round(Math.min(98,52+46*Math.pow(Math.max(0,s)/100,1.3)));
 
@@ -312,9 +339,9 @@ function renderCats(){
   $("cg").onclick=e=>{const b=e.target.closest(".card");if(!b)return;S.cat=b.dataset.v;S.step=0;S.a=resetA();S.cands=[];S.seen=[];renderStep()};
 }
 function renderStep(){
-  const cat=CATS[S.cat],st=STEPS[S.step];
+  const cat=CATS[S.cat],L=stepsFor(),st=L[S.step];TOTAL=L.length;$("bw").setAttribute("aria-valuemax",TOTAL);
   $("pill").hidden=false;$("pdot").style.background=cat.c;$("pname").textContent=cat.l;setProg(S.step+1,(S.step+1)+"/"+TOTAL);
-  const opts=st.byCat?st.byCat[S.cat]:st.o;
+  const opts=st.byCat?st.byCat[optKey()]:st.o;
   let h='<h1 class="q">'+esc(st.q)+"</h1>";
   if(st.slider){const r=S.a.risk;
     h+='<p class="hint">Più sale il cursore, più il titolo sarà lontano da ciò che guardi di solito.</p><div class="sl"><div class="rn"><span id="rn">'+r+'</span><sup>%</sup></div><div class="rt" id="rt">'+esc(riskLabel(r))+'</div><input type="range" id="risk" min="0" max="100" value="'+r+'" aria-label="Livello di sorpresa"><div class="ends"><span>Sul sicuro</span><span>Fuori dagli schemi</span></div></div>';
@@ -368,8 +395,8 @@ async function run(surprise,fresh){
     }
     let d,tries=0;
     for(;;){
-      S.seen.push(cand.m.id);d=await SRC[S.cat].t(cand.m);
-      if(S.cat!=="film"||d.it||tries++>=4)break;
+      S.seen.push(cand.m.id);d=await detailsOf(cand.m);
+      if(cand.m.sl==null||d.it||tries++>=4)break;
       const pool=ranked||S.cands,nx=pickFrom(pool,false);if(!nx)break;cand=nx;
     }
     await wait;stop();show({d,m:cand.m,s:cand.s},surprise);
@@ -378,11 +405,36 @@ async function run(surprise,fresh){
 const hue=s=>{let h=0;for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))%360;return h};
 const fbPoster=(t,y)=>{const h=hue(t);return'<div class="poster fb" role="img" aria-label="Copertina non disponibile" style="background:linear-gradient(165deg,hsl('+h+' 72% 42%),hsl('+((h+55)%360)+' 60% 14%) 85%)"><small>Stasera</small><h3>'+esc(t)+"</h3><em style=\"font-style:normal\">"+esc(y||"")+"</em></div>"};
 function why(r,sur){
-  const a=S.a,g=r.m.genres||[],o=[];
+  const a=S.a,d=r.d,m=r.m,g=m.genres||[],gk=gkey(S.cat,a),gs=G[gk],o=[],e=+a.effort;
+  const gl=(d.glist||[]).slice(0,3).join(", ").toLowerCase();
   if(sur)o.push("È una scelta volutamente fuori dai tuoi binari, come hai chiesto.");
-  o.push(hit(g,G[S.cat].mood[a.mood])?"Stasera volevi "+MOOD_TXT[a.mood]+" e questo titolo punta dritto lì.":"Non è la scelta più ovvia per chi vuole "+MOOD_TXT[a.mood]+", ma si sposa bene con il resto delle tue risposte.");
-  const e=+a.effort;o.push(e===2?"Hai chiesto qualcosa che ti lasci un segno, non solo intrattenimento passeggero.":e===0?"Per spegnere il cervello e divertirti, è facile da seguire.":"Ha il giusto equilibrio tra storia e leggerezza che cercavi.");
-  o.push("Funziona bene "+WHO_TXT[a.who]+".");return o.join(" ");
+  if(hit(g,gs.mood[a.mood]))o.push("Cercavi "+MOOD_TXT[a.mood]+(gl?" e i suoi generi ("+gl+") vanno in quella direzione.":"."));
+  else o.push("Non è il genere più ovvio per chi cerca "+MOOD_TXT[a.mood]+(gl?" ("+gl+")":"")+": lo propongo per gli altri criteri.");
+  if(d.movie&&d.runtime){
+    const t=a.time,rt=d.runtime;
+    o.push("Dura "+fmtMin(rt)+(t==="short"&&rt<=95?", dentro i tuoi 90 minuti.":t==="mid"&&rt>=85&&rt<=125?", giusto per un film normale.":t==="long"&&rt>=115?", lungo come volevi.":"."));
+  }else if(!d.movie&&d.episodes&&S.cat==="anime"){
+    const t=a.time,n=d.episodes;
+    o.push(n+" episodi"+(t==="short"&&n<=13?": una mini-serie, come chiedevi.":t==="mid"&&n<=26?": una stagione sola, come chiedevi.":t==="long"&&n>26?": una saga lunga, come volevi.":"."));
+  }else if(!d.movie&&d.runtime&&S.cat!=="anime"){
+    o.push("Episodi da circa "+d.runtime+" minuti"+(a.time==="short"&&d.runtime<=30?", comodi per un episodio e via.":"."));
+  }
+  if(d.rv){const v=+d.rv;o.push("Voto "+v.toFixed(1)+"/10"+(v>=8?": tra i più apprezzati del suo genere.":v>=7?": ben accolto dal pubblico.":": gradimento nella media."))}
+  if(d.pop!=null&&d.pop>=60)o.push("È molto conosciuto (voci Wikipedia in "+d.pop+" lingue): una scelta sicura.");
+  else if(d.pop!=null&&d.pop<=15&&a.risk>=50)o.push("È poco conosciuto (poche voci su Wikipedia), adatto a chi vuole scoprire qualcosa di nuovo.");
+  const ms=mainstream(S.cat,m);
+  if(d.pop==null&&a.risk>=60&&ms<.5)o.push("Non è un titolo di massa, quindi esce dai soliti binari.");
+  else if(d.pop==null&&a.risk<=30&&ms>=.6)o.push("È un titolo collaudato, per andare sul sicuro.");
+  const heavy=g.some(x=>gs.heavy.indexOf(x)>=0),light=g.some(x=>gs.light.indexOf(x)>=0);
+  if(e===2&&heavy)o.push("Ha un taglio intenso, di quelli che restano addosso.");
+  else if(e===0&&light)o.push("Tono leggero, si guarda senza impegno.");
+  if(a.who==="family")o.push("Ho escluso horror e contenuti per adulti perché lo guardi in famiglia.");
+  else if(a.who==="partner"&&a.mood==="love")o.push("Tema romantico: adatto da vedere in coppia.");
+  else if(a.who==="friends"&&(a.mood==="laugh"||a.mood==="thrill"||a.mood==="scare"))o.push("Si presta bene a una serata di gruppo.");
+  else if(a.who==="convince"&&d.rv&&+d.rv>=7.5)o.push("Molto ben valutato: ha buone chance anche con chi è difficile da accontentare.");
+  const L={horror:"horror",romance:"romance",violence:"violenza",sex:"contenuti sessuali",old:"titoli vecchi",long:"titoli lunghi"},ex=a.avoid.filter(x=>L[x]).map(x=>L[x]);
+  if(ex.length)o.push("Rispetta le tue esclusioni: niente "+ex.join(", ")+".");
+  return o.slice(0,5);
 }
 function show(r,sur){
   S.cur=r;const d=r.d;let p=pct(r.s);if(sur)p=Math.max(60,p-6);
@@ -390,12 +442,14 @@ function show(r,sur){
   const poster=d.poster?'<div class="poster"><img id="pimg" src="'+esc(d.poster)+'" alt="Copertina di '+esc(d.title)+'" referrerpolicy="no-referrer"></div>':fbPoster(d.title,d.year);
   let ch="";
   if(d.year)ch+='<span class="chip">'+esc(d.year)+"</span>";
-  if(d.runtime)ch+='<span class="chip">'+d.runtime+(S.cat==="film"?" min":" min/ep")+"</span>";
-  if(d.episodes)ch+='<span class="chip">'+d.episodes+" episodi</span>";
+  if(S.cat==="anime"||S.cat==="cartoni")ch+='<span class="chip">'+(d.movie?"🎬 Film":"📺 Serie")+"</span>";
+  if(d.dir)ch+='<span class="chip">Regia: '+esc(d.dir)+"</span>";
+  if(d.runtime)ch+='<span class="chip">'+d.runtime+(d.movie?" min":" min/ep")+"</span>";
+  if(d.episodes&&!d.movie)ch+='<span class="chip">'+d.episodes+" episodi</span>";
   if(d.rv)ch+='<span class="chip r">'+d.rl+" "+(+d.rv).toFixed(1)+"</span>";
   const h='<div class="res">'+(sur?'<span class="tag">🎲 Fuori dalla tua comfort zone</span>':"")+'<div class="hero">'+poster+'<div class="meta"><h2>'+esc(d.title)+'</h2><div class="chips">'+ch+"</div>"+(d.gt?'<div class="chips"><span class="chip">'+esc(d.gt)+"</span></div>":"")+
    '<div class="compat"><b>⭐ Compatibilità '+p+'%</b><div class="meter"><span style="width:'+p+'%"></span></div></div></div></div>'+
-   '<section class="block"><h3>Perché fa per te</h3><p>'+esc(why(r,sur))+"</p></section>"+
+   '<section class="block"><h3>Perché fa per te</h3><ul class="why">'+why(r,sur).map(x=>"<li><span>"+esc(x)+"</span></li>").join("")+"</ul></section>"+
    '<section class="block"><h3>Trama</h3><p>'+esc(d.overview)+'</p><p class="src">'+(d.it?"📖 Fonte: Wikipedia in italiano":"📖 Sinossi originale (nessuna voce italiana trovata)")+"</p></section>"+
    '<div class="row"><button class="btn" id="sur">🎲 Sorprendimi</button><button class="btn" id="oth">🔄 Un altro titolo</button><button class="btn" id="rst">'+CATS[S.cat].ic+" Cambia categoria</button></div></div>";
   swap(h);scrollTo(0,0);
