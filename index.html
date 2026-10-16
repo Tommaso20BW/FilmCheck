@@ -1,0 +1,505 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0c0a11">
+<meta name="color-scheme" content="dark">
+<title>Il Film Perfetto per Stasera</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&display=swap">
+<style>
+:root {
+  --bg: #0c0a11; --surface: #16121e; --surface-2: #1f1929; --line: #2f2740;
+  --fg: #f4effa; --muted: #a89fba; --red: #ff3d52; --violet: #9061f9; --gold: #f5c451;
+  --font-display: "Bricolage Grotesque", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Instrument Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body {
+  margin: 0; background: var(--bg);
+  background-image: radial-gradient(900px 500px at 85% -10%, rgba(144,97,249,.18), transparent 60%), radial-gradient(700px 420px at -10% 0%, rgba(255,61,82,.14), transparent 60%);
+  background-repeat: no-repeat; color: var(--fg); font-family: var(--font-body); font-size: 16px; line-height: 1.5;
+  padding-block: 20px 40px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; line-height: 1.1; }
+button, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+a { color: var(--gold); }
+
+.top { display: flex; flex-direction: column; gap: 12px; }
+.brand { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.brand b { font-family: var(--font-display); font-weight: 800; font-size: 15px; letter-spacing: .14em; text-transform: uppercase; }
+.brand b i { font-style: normal; color: var(--red); }
+.count { font-variant-numeric: tabular-nums; color: var(--muted); font-size: 14px; letter-spacing: .06em; }
+.bar { height: 6px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
+.bar > span { display: block; height: 100%; width: 0; border-radius: 99px; background: linear-gradient(90deg, var(--red), var(--violet)); transition: width .4s ease; }
+
+.stage { animation: rise .35s ease both; }
+@keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.q { font-size: clamp(26px, 6.5vw, 38px); font-weight: 800; letter-spacing: -.02em; margin-bottom: 8px; }
+.hint { color: var(--muted); margin: 0 0 18px; }
+.opts { display: grid; gap: 10px; grid-template-columns: minmax(0, 1fr); }
+.opts.two { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+.opt { display: flex; align-items: center; gap: 14px; text-align: left; min-width: 0; background: var(--surface); border: 1.5px solid var(--line); border-radius: 16px; padding: 16px; min-height: 64px; transition: border-color .15s, background .15s, transform .15s; }
+.opts.two .opt { flex-direction: column; align-items: flex-start; gap: 10px; padding: 18px 16px; }
+.opt:hover { border-color: var(--violet); transform: translateY(-1px); }
+.opt[aria-pressed="true"] { border-color: var(--red); background: linear-gradient(135deg, rgba(255,61,82,.16), rgba(144,97,249,.14)); }
+.emo { font-size: 28px; line-height: 1; flex: none; }
+.opts.two .emo { font-size: 32px; }
+.lab { min-width: 0; overflow-wrap: anywhere; }
+.lab strong { display: block; font-weight: 600; }
+.lab small { display: block; color: var(--muted); font-size: 14px; margin-top: 2px; }
+.nav { display: flex; gap: 10px; margin-top: 18px; align-items: center; flex-wrap: wrap; }
+.btn { border-radius: 14px; padding: 14px 20px; font-weight: 600; min-height: 48px; background: var(--surface-2); border: 1.5px solid var(--line); transition: transform .15s, border-color .15s; }
+.btn:hover { border-color: var(--violet); transform: translateY(-1px); }
+.btn.primary { background: linear-gradient(135deg, var(--red), #c42ddb 120%); border-color: transparent; color: #fff; }
+.btn.primary:hover { border-color: transparent; filter: brightness(1.08); }
+.btn.cta { flex: 1 1 220px; font-family: var(--font-display); font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.btn.ghost { background: transparent; }
+
+.slider-box { background: var(--surface); border: 1.5px solid var(--line); border-radius: 16px; padding: 22px 18px; display: flex; flex-direction: column; gap: 16px; }
+.risk-num { font-family: var(--font-display); font-weight: 800; font-size: 56px; line-height: 1; font-variant-numeric: tabular-nums; }
+.risk-num sup { font-size: 22px; color: var(--muted); vertical-align: top; margin-left: 2px; }
+.risk-txt { color: var(--gold); font-weight: 600; min-height: 3em; }
+input[type=range] { width: 100%; accent-color: var(--red); height: 32px; margin: 0; }
+.ends { display: flex; justify-content: space-between; gap: 12px; color: var(--muted); font-size: 13px; }
+
+.loading { min-height: 340px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; text-align: center; }
+.loading p { font-family: var(--font-display); font-size: 22px; font-weight: 700; margin: 0; min-height: 1.4em; }
+.clap { width: 110px; height: 110px; }
+.clap .arm { transform-origin: 14px 38px; animation: clap .9s ease-in-out infinite; }
+@keyframes clap { 0%, 55%, 100% { transform: rotate(-22deg); } 70% { transform: rotate(0deg); } }
+
+.setup, .errbox { background: var(--surface); border: 1.5px solid var(--line); border-radius: 16px; padding: 20px 18px; display: flex; flex-direction: column; gap: 14px; }
+.setup ol { margin: 0; padding-left: 20px; color: var(--muted); display: flex; flex-direction: column; gap: 6px; }
+.field { width: 100%; background: var(--surface-2); border: 1.5px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+.errbox { border-color: rgba(255,61,82,.5); }
+
+.res { display: flex; flex-direction: column; gap: 18px; }
+.tag { align-self: flex-start; font-size: 13px; letter-spacing: .1em; text-transform: uppercase; font-weight: 600; color: var(--gold); border: 1px solid rgba(245,196,81,.4); border-radius: 99px; padding: 4px 12px; }
+.hero { display: grid; grid-template-columns: minmax(0, 190px) minmax(0, 1fr); gap: 18px; align-items: start; }
+.poster { position: relative; width: 100%; aspect-ratio: 2 / 3; border-radius: 12px; overflow: hidden; box-shadow: 0 18px 40px rgba(0,0,0,.5), inset 0 0 0 1px rgba(255,255,255,.12); background: var(--surface-2); }
+.poster img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.poster.fallback { display: flex; flex-direction: column; justify-content: space-between; padding: 14px 12px; }
+.poster.fallback small { font-size: 10px; letter-spacing: .3em; text-transform: uppercase; opacity: .8; }
+.poster.fallback h3 { font-size: clamp(18px, 5vw, 24px); font-weight: 800; text-transform: uppercase; line-height: 1; overflow-wrap: anywhere; }
+.poster.fallback em { font-style: normal; font-family: var(--font-display); font-weight: 700; font-size: 18px; opacity: .9; }
+.meta { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.meta h2 { font-size: clamp(26px, 6vw, 34px); font-weight: 800; letter-spacing: -.02em; overflow-wrap: anywhere; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { background: var(--surface-2); border: 1px solid var(--line); border-radius: 99px; padding: 4px 12px; font-size: 14px; font-variant-numeric: tabular-nums; }
+.chip.imdb { color: var(--gold); border-color: rgba(245,196,81,.35); }
+.compat { display: flex; flex-direction: column; gap: 6px; }
+.compat b { font-family: var(--font-display); font-size: 15px; letter-spacing: .1em; text-transform: uppercase; color: var(--gold); }
+.compat .meter { height: 8px; background: var(--surface-2); border-radius: 99px; overflow: hidden; }
+.compat .meter span { display: block; height: 100%; background: linear-gradient(90deg, var(--gold), var(--red)); border-radius: 99px; }
+.block { background: var(--surface); border: 1.5px solid var(--line); border-radius: 16px; padding: 16px 18px; }
+.block h3 { font-size: 13px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); font-weight: 700; margin-bottom: 8px; }
+.block p { margin: 0; max-width: 65ch; }
+.block.verdict { background: linear-gradient(135deg, rgba(255,61,82,.14), rgba(144,97,249,.16)); border-color: rgba(255,61,82,.4); }
+.block.verdict p { font-family: var(--font-display); font-size: 20px; font-weight: 700; line-height: 1.3; }
+.prov { display: flex; flex-wrap: wrap; gap: 8px; }
+.prov .chip { background: var(--surface-2); }
+.actions { display: flex; flex-direction: column; gap: 10px; }
+.actions .row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+footer { color: var(--muted); font-size: 12.5px; text-align: center; display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+footer button { background: none; border: 0; color: var(--muted); text-decoration: underline; padding: 0; font-size: 12.5px; }
+
+@media (max-width: 520px) {
+  .hero { grid-template-columns: minmax(0, 130px) minmax(0, 1fr); gap: 14px; }
+  .poster.fallback { padding: 10px 9px; }
+  .poster.fallback h3 { font-size: 15px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .stage { animation: none; }
+  .clap .arm { animation: none; transform: rotate(-12deg); }
+  .bar > span, .opt, .btn { transition: none; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><b>Il film perfetto <i>per stasera</i></b><span class="count" id="count" aria-live="polite"></span></div>
+    <div class="bar" role="progressbar" aria-label="Avanzamento del quiz" aria-valuemin="0" aria-valuemax="7" id="barwrap"><span id="barfill"></span></div>
+  </header>
+  <main id="stage" class="stage"></main>
+  <footer>
+    <span>Dati: TMDB e JustWatch. Prodotto non approvato né certificato da TMDB.</span>
+  </footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ============ CONFIGURAZIONE ============
+     Metti la tua chiave TMDB qui sotto oppure lasciala vuota: il sito te la chiederà alla prima apertura
+     e la salverà solo nel tuo browser (consigliato se il repository è pubblico).
+*/
+  var CONFIG = { TMDB_KEY: "" };
+
+  var REGION = "IT";
+  var IMG = "https://image.tmdb.org/t/p/w500";
+
+  /* ---------- Domande ---------- */
+  var STEPS = [
+    { id: "vibe", q: "Che vibe hai stasera?", two: true, o: [
+      ["love", "❤️", "Voglio innamorarmi"], ["laugh", "😂", "Voglio ridere"], ["cry", "😭", "Voglio piangere"], ["scare", "😱", "Voglio avere paura"],
+      ["shock", "🤯", "Voglio rimanere sconvolta/o"], ["think", "🧠", "Voglio qualcosa che mi faccia pensare"], ["well", "✨", "Voglio semplicemente stare bene"], ["wild", "🔥", "Voglio qualcosa di completamente folle"] ] },
+    { id: "effort", q: "Quanto vuoi impegnarti emotivamente?", o: [
+      ["0", "🛋️", "Zero cervello", "Voglio solo rilassarmi e divertirmi."],
+      ["1", "🍿", "Medio", "Voglio una bella storia, ma senza soffrire troppo."],
+      ["2", "🧠", "Voglio soffrire", "Fammi uscire da questo film completamente diversa/o."] ] },
+    { id: "time", q: "Quanto tempo hai?", o: [
+      ["short", "⏱️", "Meno di 90 minuti"], ["mid", "🎬", "90–120 minuti"], ["long", "🍿", "Più di 2 ore"], ["any", "🔥", "Non mi interessa"] ] },
+    { id: "who", q: "Con chi guardi il film?", o: [
+      ["solo", "👤", "Da sola/o"], ["partner", "❤️", "Con il partner"], ["friends", "👯", "Con amici"], ["family", "👨‍👩‍👧‍👦", "Con la famiglia"],
+      ["convince", "😈", "Con qualcuno che devo convincere a guardare un film"] ] },
+    { id: "kind", q: "Che tipo di film vuoi?", o: [
+      ["hook", "🔥", "Un film che mi tenga incollata/o"], ["love", "💋", "Una grande storia d'amore"], ["disturb", "🚨", "Qualcosa di disturbante"], ["twist", "🤠", "Un plot twist assurdo"],
+      ["sexy", "👀", "Qualcosa di sexy"], ["smart", "😂", "Una commedia intelligente"], ["tears", "🥺", "Qualcosa che mi faccia piangere"], ["must", "🏆", "Un film che devo assolutamente recuperare"] ] },
+    { id: "risk", q: "Quanto vuoi uscire dalla tua comfort zone?", slider: true },
+    { id: "avoid", q: "Cosa non vuoi assolutamente?", multi: true, o: [
+      ["horror", "🚫", "Horror"], ["romance", "🚫", "Romance"], ["long", "🚫", "Film troppo lungo"], ["sad", "🚫", "Film troppo triste"],
+      ["old", "🚫", "Film troppo vecchio"], ["violence", "🚫", "Troppa violenza"], ["sex", "🚫", "Troppo sesso"], ["none", "✅", "Nessuna preferenza"] ] }
+  ];
+  var TOTAL = STEPS.length;
+  var LOAD_TXT = ["Incrocio le tue risposte...", "Sfoglio l'archivio...", "Ci siamo quasi..."];
+
+  /* Generi TMDB: 28 Azione, 12 Avventura, 16 Animazione, 35 Commedia, 80 Crime, 18 Dramma, 10751 Famiglia, 14 Fantasy,
+     27 Horror, 10402 Musica, 9648 Mistero, 10749 Romance, 878 Fantascienza, 53 Thriller, 10752 Guerra */
+  var VIBE_G = { love: [10749], laugh: [35], cry: [18, 10749], scare: [27], shock: [53, 9648], think: [878, 18, 9648], well: [35, 10751, 16, 10402], wild: [28, 878, 14, 35] };
+  var KIND_G = { hook: [53, 28, 12], love: [10749], disturb: [27, 53], twist: [9648, 53], sexy: [10749, 53], smart: [35], tears: [18, 10749], must: [18] };
+  var VIBE_TXT = { love: "innamorarti", laugh: "ridere", cry: "piangere", scare: "avere paura", shock: "rimanere sconvolta/o", think: "pensare", well: "stare bene", wild: "qualcosa di completamente folle" };
+  var KIND_TXT = { hook: "un film che ti tenga incollata/o", love: "una grande storia d'amore", disturb: "qualcosa di disturbante", twist: "un plot twist assurdo", sexy: "qualcosa di sexy", smart: "una commedia intelligente", tears: "qualcosa che ti faccia piangere", must: "un film da recuperare assolutamente" };
+  var WHO_TXT = { solo: "da sola/o", partner: "in coppia", friends: "con gli amici", family: "con la famiglia", convince: "con chi va convinto" };
+  var LANGS = ["ko", "ja", "fr", "es", "it", "de", "sv", "da", "pt", "hi"];
+
+  function riskLabel(n) {
+    if (n <= 15) return "Voglio andare sul sicuro.";
+    if (n <= 35) return "Una piccola sorpresa va bene.";
+    if (n <= 60) return "Sorprendimi, ma con giudizio.";
+    if (n <= 80) return "Fammi uscire dai binari.";
+    return "Portami dove non sono mai stata/o.";
+  }
+
+  var S = { step: 0, a: { vibe: null, effort: null, time: null, who: null, kind: null, risk: 50, avoid: [] }, cands: [], seen: [], cur: null };
+  var stage = document.getElementById("stage");
+  var countEl = document.getElementById("count");
+  var fill = document.getElementById("barfill");
+  var barwrap = document.getElementById("barwrap");
+
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function rand(n) { return Math.floor(Math.random() * n); }
+  function setProgress(n, label) { fill.style.width = (n / TOTAL * 100) + "%"; barwrap.setAttribute("aria-valuenow", n); countEl.textContent = label || ""; }
+  function swap(html) { stage.classList.remove("stage"); void stage.offsetWidth; stage.classList.add("stage"); stage.innerHTML = html; }
+
+  /* ---------- Chiave API ---------- */
+  function getKey() {
+    if (CONFIG.TMDB_KEY) return CONFIG.TMDB_KEY;
+    try { return localStorage.getItem("tmdb_key") || ""; } catch (e) { return ""; }
+  }
+  function saveKey(k) { try { localStorage.setItem("tmdb_key", k); } catch (e) {} }
+  function clearKey() { try { localStorage.removeItem("tmdb_key"); } catch (e) {} }
+
+  function renderSetup(msg) {
+    setProgress(0, "");
+    swap('<h1 class="q">Collega il database dei film</h1>' +
+      '<div class="setup">' + (msg ? '<p style="margin:0;color:var(--red)">' + esc(msg) + "</p>" : "") +
+      "<p style=\"margin:0\">Il sito usa TMDB, un database gratuito con trame e locandine in italiano. Serve una chiave personale, gratis:</p>" +
+      '<ol><li>Registrati su <a href="https://www.themoviedb.org/signup" target="_blank" rel="noopener">themoviedb.org</a></li>' +
+      '<li>Vai in Impostazioni → <a href="https://www.themoviedb.org/settings/api" target="_blank" rel="noopener">API</a> e richiedi una chiave (uso personale)</li>' +
+      "<li>Copia la «Chiave API» oppure il «Token di lettura API» e incollala qui sotto</li></ol>" +
+      '<input class="field" id="keyin" type="password" autocomplete="off" spellcheck="false" placeholder="Incolla qui la chiave" aria-label="Chiave API TMDB">' +
+      '<button type="button" class="btn primary cta" id="keysave">Salva e inizia</button>' +
+      '<p style="margin:0;color:var(--muted);font-size:13px">La chiave resta salvata solo in questo browser.</p></div>');
+    document.getElementById("keysave").onclick = function () {
+      var v = document.getElementById("keyin").value.trim();
+      if (v.length < 20) { renderSetup("La chiave sembra troppo corta. Controlla di averla copiata tutta."); return; }
+      saveKey(v); S.step = 0; renderStep();
+    };
+  }
+
+  /* ---------- Quiz ---------- */
+  function renderStep() {
+    if (!getKey()) { renderSetup(); return; }
+    var st = STEPS[S.step];
+    setProgress(S.step + 1, (S.step + 1) + "/" + TOTAL);
+    var h = '<h1 class="q">' + esc(st.q) + "</h1>";
+    if (st.slider) {
+      var r = S.a.risk;
+      h += '<p class="hint">Trascina il cursore: più sale, più il film sarà lontano da ciò che guardi di solito.</p>' +
+        '<div class="slider-box"><div class="risk-num"><span id="rn">' + r + '</span><sup>%</sup></div><div class="risk-txt" id="rt">' + esc(riskLabel(r)) + "</div>" +
+        '<input type="range" id="risk" min="0" max="100" step="1" value="' + r + '" aria-label="Livello di rischio da 0 a 100">' +
+        '<div class="ends"><span>Sul sicuro</span><span>Fuori dagli schemi</span></div></div>';
+    } else {
+      if (st.multi) h += '<p class="hint">Puoi sceglierne più di una.</p>';
+      h += '<div class="opts' + (st.two ? " two" : "") + '" id="opts">';
+      st.o.forEach(function (o) {
+        var on = st.multi ? S.a.avoid.indexOf(o[0]) >= 0 : S.a[st.id] === o[0];
+        h += '<button type="button" class="opt" data-v="' + o[0] + '" aria-pressed="' + on + '"><span class="emo" aria-hidden="true">' + o[1] + '</span><span class="lab"><strong>' + esc(o[2]) + "</strong>" + (o[3] ? "<small>" + esc(o[3]) + "</small>" : "") + "</span></button>";
+      });
+      h += "</div>";
+    }
+    h += '<div class="nav">';
+    if (S.step > 0) h += '<button type="button" class="btn ghost" id="back">← Indietro</button>';
+    if (st.slider) h += '<button type="button" class="btn primary cta" id="next">Avanti →</button>';
+    if (st.multi) h += '<button type="button" class="btn primary cta" id="go">🎬 Trova il mio film</button>';
+    h += "</div>";
+    swap(h);
+
+    var back = document.getElementById("back");
+    if (back) back.onclick = function () { S.step--; renderStep(); };
+    if (st.slider) {
+      var rg = document.getElementById("risk");
+      rg.oninput = function () { S.a.risk = +rg.value; document.getElementById("rn").textContent = rg.value; document.getElementById("rt").textContent = riskLabel(+rg.value); };
+      document.getElementById("next").onclick = function () { S.step++; renderStep(); };
+      return;
+    }
+    var box = document.getElementById("opts");
+    box.onclick = function (e) {
+      var b = e.target.closest(".opt"); if (!b) return;
+      var v = b.getAttribute("data-v");
+      if (st.multi) {
+        var av = S.a.avoid;
+        if (v === "none") { S.a.avoid = av.indexOf("none") >= 0 ? [] : ["none"]; }
+        else { av = av.filter(function (x) { return x !== "none"; }); var i = av.indexOf(v); if (i >= 0) av.splice(i, 1); else av.push(v); S.a.avoid = av; }
+        Array.prototype.forEach.call(box.children, function (c) { c.setAttribute("aria-pressed", S.a.avoid.indexOf(c.getAttribute("data-v")) >= 0); });
+      } else {
+        S.a[st.id] = v;
+        Array.prototype.forEach.call(box.children, function (c) { c.setAttribute("aria-pressed", c === b); });
+        setTimeout(function () { S.step++; renderStep(); }, 260);
+      }
+    };
+    if (st.multi) document.getElementById("go").onclick = startSearch;
+  }
+
+  /* ---------- Caricamento ---------- */
+  function clapper() {
+    return '<svg class="clap" viewBox="0 0 110 110" aria-hidden="true"><rect x="14" y="44" width="82" height="52" rx="6" fill="#1f1929" stroke="#9061f9" stroke-width="3"/>' +
+      '<g class="arm"><rect x="14" y="26" width="82" height="16" rx="4" fill="#f4effa"/><path d="M26 26 l10 16 M46 26 l10 16 M66 26 l10 16 M86 26 l10 16" stroke="#ff3d52" stroke-width="7"/></g>' +
+      '<path d="M14 52 h82" stroke="#9061f9" stroke-width="2"/><path d="M28 66 h54 M28 78 h36" stroke="#a89fba" stroke-width="3" stroke-linecap="round"/></svg>';
+  }
+  function showLoading() {
+    setProgress(TOTAL, ""); countEl.textContent = "7/7";
+    swap('<div class="loading">' + clapper() + '<p id="lt" aria-live="polite">' + LOAD_TXT[0] + "</p></div>");
+    var lt = document.getElementById("lt"), i = 0;
+    var iv = setInterval(function () { i = (i + 1) % LOAD_TXT.length; if (lt.isConnected) lt.textContent = LOAD_TXT[i]; }, 1300);
+    return function () { clearInterval(iv); };
+  }
+  function showError(err) {
+    var key = err && err.message === "KEY";
+    var msg = key ? "TMDB ha rifiutato la chiave. Controlla di averla copiata bene."
+      : err && err.message === "EMPTY" ? "Nessun film trovato con queste regole. Prova a togliere qualche esclusione."
+      : "Non riesco a contattare il database dei film. Controlla la connessione e riprova.";
+    setProgress(TOTAL, "");
+    swap('<div class="errbox"><h2>Qualcosa non va</h2><p style="margin:0">' + esc(msg) + '</p><div class="nav" style="margin-top:0">' +
+      '<button type="button" class="btn primary" id="retry">Riprova</button>' + (key ? '<button type="button" class="btn" id="newkey">Cambia chiave</button>' : "") +
+      '<button type="button" class="btn ghost" id="toquiz">Torna al quiz</button></div></div>');
+    document.getElementById("retry").onclick = startSearch;
+    var nk = document.getElementById("newkey"); if (nk) nk.onclick = function () { clearKey(); renderSetup(); };
+    document.getElementById("toquiz").onclick = function () { S.step = TOTAL - 1; renderStep(); };
+  }
+
+  /* ---------- TMDB ---------- */
+  function tmdb(path, params) {
+    var key = getKey();
+    var url = new URL("https://api.themoviedb.org/3" + path);
+    var headers = {};
+    if (key.indexOf("eyJ") === 0) headers.Authorization = "Bearer " + key; else url.searchParams.set("api_key", key);
+    url.searchParams.set("language", "it-IT");
+    Object.keys(params || {}).forEach(function (k) { var v = params[k]; if (v !== undefined && v !== null && v !== "") url.searchParams.set(k, v); });
+    return fetch(url.toString(), { headers: headers }).then(function (r) {
+      if (r.status === 401) throw new Error("KEY");
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.json();
+    });
+  }
+
+  function filters(a) {
+    var av = a.avoid, without = [];
+    function add() { for (var i = 0; i < arguments.length; i++) if (without.indexOf(arguments[i]) < 0) without.push(arguments[i]); }
+    if (av.indexOf("horror") >= 0) add(27);
+    if (av.indexOf("romance") >= 0) add(10749);
+    if (av.indexOf("sad") >= 0) add(10752);
+    if (av.indexOf("violence") >= 0) add(27, 80, 10752);
+    if (a.who === "family") add(27, 53, 80, 10752);
+    var rtMin, rtMax;
+    if (a.time === "short") rtMax = 90; else if (a.time === "mid") { rtMin = 90; rtMax = 120; } else if (a.time === "long") rtMin = 120;
+    if (av.indexOf("long") >= 0) rtMax = Math.min(rtMax || 999, 130);
+    return { without: without, rtMin: rtMin, rtMax: rtMax, dateMin: av.indexOf("old") >= 0 ? "1990-01-01" : undefined };
+  }
+
+  function discover(a, surprise, relax) {
+    var f = filters(a);
+    var risk = surprise ? Math.max(a.risk + 30, 85) : a.risk;
+    var vc = risk < 30 ? 3000 : risk < 60 ? 1200 : risk < 80 ? 400 : 150;
+    if (relax) vc = Math.max(100, Math.floor(vc / 3));
+    var lang = (!relax && risk >= 75 && Math.random() < (surprise ? 0.7 : 0.5)) ? LANGS[rand(LANGS.length)] : undefined;
+    var sort = (a.effort === "0" && !surprise) ? "popularity.desc" : "vote_average.desc";
+    var jobs = [];
+    [VIBE_G[a.vibe], KIND_G[a.kind]].forEach(function (set) {
+      var gens = set.filter(function (g) { return f.without.indexOf(g) < 0; });
+      var pages = relax ? [1, 2] : [1 + rand(3), 4 + rand(3)];
+      pages.forEach(function (pg) {
+        jobs.push(tmdb("/discover/movie", {
+          include_adult: "false", "vote_count.gte": vc, sort_by: sort, page: pg,
+          with_genres: gens.join("|"), without_genres: f.without.join("|"),
+          "with_runtime.gte": f.rtMin, "with_runtime.lte": f.rtMax, "primary_release_date.gte": f.dateMin, with_original_language: lang
+        }).then(function (d) { return d.results || []; }, function (e) { if (e.message === "KEY") throw e; return []; }));
+      });
+    });
+    return Promise.all(jobs).then(function (lists) {
+      var map = {};
+      lists.forEach(function (l) { l.forEach(function (m) { if (m.poster_path && m.overview !== undefined) map[m.id] = m; }); });
+      return Object.keys(map).map(function (k) { return map[k]; }).filter(function (m) {
+        var g = m.genre_ids || [];
+        return !g.some(function (x) { return f.without.indexOf(x) >= 0; });
+      });
+    });
+  }
+
+  function hit(genres, list) {
+    var i = -1;
+    for (var k = 0; k < genres.length; k++) { var j = list.indexOf(genres[k]); if (j >= 0 && (i < 0 || j < i)) i = j; }
+    return i < 0 ? 0 : i === 0 ? 1 : 0.6;
+  }
+  function score(m, a) {
+    var g = m.genre_ids || [];
+    var s = 0;
+    s += 35 * hit(g, VIBE_G[a.vibe]);
+    s += 25 * hit(g, KIND_G[a.kind]);
+    var e = +a.effort;
+    var heavy = g.indexOf(18) >= 0 || g.indexOf(9648) >= 0 || m.vote_average >= 7.6 ? 1 : 0.3;
+    var light = g.indexOf(35) >= 0 || g.indexOf(28) >= 0 || g.indexOf(10751) >= 0 || g.indexOf(16) >= 0 ? 1 : 0.3;
+    s += 15 * (e === 2 ? heavy : e === 0 ? light : 0.75);
+    var mainstream = Math.max(0, Math.min(1, Math.log10(Math.max(10, m.vote_count)) / 5));
+    s += 15 * Math.max(0, 1 - Math.abs((1 - mainstream) * 100 - a.risk) / 70);
+    s += 10 * Math.max(0, Math.min(1, (m.vote_average - 5) / 4));
+    return s;
+  }
+  function pctOf(s) { return Math.round(Math.min(98, 52 + 46 * Math.pow(Math.max(0, s) / 100, 1.3))); }
+
+  function details(id) {
+    return tmdb("/movie/" + id, { append_to_response: "external_ids,watch/providers" }).then(function (d) {
+      if (d.overview) return d;
+      return tmdb("/movie/" + id, { language: "en-US" }).then(function (en) { d.overview = en.overview || ""; return d; }, function () { return d; });
+    });
+  }
+
+  /* ---------- Ricerca ---------- */
+  function newCands(surprise) {
+    return discover(S.a, surprise, false).then(function (c) {
+      if (c.length >= 4) return c;
+      return discover(S.a, surprise, true).then(function (c2) { return c.concat(c2); });
+    }).then(function (c) {
+      var seen = {}; c = c.filter(function (m) { if (seen[m.id]) return false; seen[m.id] = 1; return true; });
+      if (!c.length) throw new Error("EMPTY");
+      var ranked = c.map(function (m) { return { m: m, s: score(m, S.a) }; }).sort(function (x, y) { return y.s - x.s; });
+      return ranked;
+    });
+  }
+  function pickFrom(ranked, surprise) {
+    var pool = ranked.filter(function (x) { return S.seen.indexOf(x.m.id) < 0; });
+    if (!pool.length) return null;
+    if (surprise) { pool = pool.slice(0, 10); return pool[rand(pool.length)]; }
+    return pool[0];
+  }
+  function run(surprise, fresh) {
+    var stop = showLoading();
+    var wait = new Promise(function (r) { setTimeout(r, 2200); });
+    var job = Promise.resolve().then(function () {
+      var pick = !fresh && !surprise ? pickFrom(S.cands, false) : null;
+      if (pick) return pick;
+      return newCands(surprise).then(function (ranked) {
+        if (!surprise) S.cands = ranked;
+        return pickFrom(ranked, surprise) || ranked[rand(ranked.length)];
+      });
+    }).then(function (pick) {
+      S.seen.push(pick.m.id);
+      return details(pick.m.id).then(function (d) { return { d: d, cand: pick.m, s: pick.s }; });
+    });
+    Promise.all([job, wait]).then(function (r) { stop(); showResult(r[0], surprise); }, function (e) { stop(); showError(e); });
+  }
+  function startSearch() { S.seen = []; S.cands = []; run(false, true); }
+
+  /* ---------- Risultato ---------- */
+  function hue(str) { var h = 0; for (var i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) % 360; return h; }
+  function fallbackPoster(t, y) {
+    var h = hue(t);
+    return '<div class="poster fallback" role="img" aria-label="Locandina non disponibile" style="background:linear-gradient(165deg,hsl(' + h + ' 72% 42%),hsl(' + ((h + 55) % 360) + ' 60% 14%) 85%)"><small>Stasera al cinema</small><h3>' + esc(t) + "</h3><em>" + esc(y) + "</em></div>";
+  }
+  function why(r, surprise) {
+    var a = S.a, g = r.cand.genre_ids || [], out = [];
+    if (surprise) out.push("È una scelta volutamente fuori dai tuoi binari, come hai chiesto.");
+    if (hit(g, VIBE_G[a.vibe]) > 0) out.push("Stasera volevi " + VIBE_TXT[a.vibe] + " e questo film punta dritto lì.");
+    else out.push("Non è la scelta più ovvia per chi vuole " + VIBE_TXT[a.vibe] + ", ma si sposa bene con il resto delle tue risposte.");
+    if (hit(g, KIND_G[a.kind]) > 0) out.push("Cercavi " + KIND_TXT[a.kind] + ": ci siamo.");
+    var e = +a.effort;
+    if (e === 2) out.push("Hai chiesto un film che ti lasci qualcosa addosso: il pubblico lo ha premiato con un " + r.d.vote_average.toFixed(1) + " su 10.");
+    else if (e === 0) out.push("Per spegnere il cervello e divertirti, è una scelta leggera da seguire.");
+    else out.push("Ha il giusto equilibrio tra storia e leggerezza che cercavi.");
+    out.push("Funziona bene " + WHO_TXT[a.who] + ".");
+    if (a.time !== "any" && r.d.runtime) out.push("Dura " + r.d.runtime + " minuti, in linea con il tempo che hai.");
+    return out.join(" ");
+  }
+  function verdict(d) {
+    if (d.tagline) return d.tagline;
+    var v = d.vote_average, n = (d.vote_count || 0).toLocaleString("it-IT");
+    var lead = v >= 8 ? "Uno dei film più amati dal pubblico" : v >= 7.3 ? "Un film che piace davvero" : "Un film che divide, nel modo giusto";
+    return lead + ": " + v.toFixed(1) + " su 10 da " + n + " voti.";
+  }
+  function providers(d) {
+    var p = d["watch/providers"] && d["watch/providers"].results && d["watch/providers"].results[REGION];
+    if (!p) return "";
+    var groups = [["flatrate", "In streaming"], ["rent", "A noleggio"], ["buy", "Da acquistare"]], h = "";
+    groups.forEach(function (g) {
+      var l = p[g[0]]; if (!l || !l.length) return;
+      h += '<p style="margin:10px 0 6px;color:var(--muted);font-size:14px">' + g[1] + '</p><div class="prov">' +
+        l.slice(0, 8).map(function (x) { return '<span class="chip">' + esc(x.provider_name) + "</span>"; }).join("") + "</div>";
+    });
+    return h ? '<section class="block"><h3>Dove guardarlo in Italia</h3>' + h + "</section>" : "";
+  }
+  function showResult(r, surprise) {
+    S.cur = r;
+    var d = r.d, pct = pctOf(r.s); if (surprise) pct = Math.max(60, pct - 6); r.pct = pct;
+    var year = (d.release_date || "").slice(0, 4);
+    var gen = (d.genres || []).map(function (g) { return g.name; }).join(" · ");
+    setProgress(TOTAL, ""); countEl.textContent = "Fatto";
+    var posterHtml = d.poster_path ? '<div class="poster"><img id="pimg" src="' + IMG + esc(d.poster_path) + '" alt="Locandina di ' + esc(d.title) + '"></div>' : fallbackPoster(d.title, year);
+    var rating = '<span class="chip imdb">TMDB ' + d.vote_average.toFixed(1) + "</span>";
+    var h = '<div class="res">' + (surprise ? '<span class="tag">🎲 Fuori dalla tua comfort zone</span>' : "") +
+      '<div class="hero">' + posterHtml + '<div class="meta"><h2>' + esc(d.title) + '</h2><div class="chips">' +
+      (year ? '<span class="chip">' + year + "</span>" : "") + (d.runtime ? '<span class="chip">' + d.runtime + " min</span>" : "") + rating + "</div>" +
+      (gen ? '<div class="chips"><span class="chip">' + esc(gen) + "</span></div>" : "") +
+      '<div class="compat"><b>⭐ Compatibilità ' + pct + '%</b><div class="meter"><span style="width:' + pct + '%"></span></div></div></div></div>' +
+      '<section class="block"><h3>Perché fa per te</h3><p>' + esc(why(r, surprise)) + "</p></section>" +
+      '<section class="block"><h3>Trama</h3><p>' + esc(d.overview || "Trama non disponibile.") + "</p></section>" +
+      '<section class="block verdict"><h3>Il verdetto</h3><p>“' + esc(verdict(d)) + "”</p></section>" + providers(d) +
+      '<div class="actions">' +
+      '<div class="row"><button type="button" class="btn" id="surprise">🎲 Sorprendimi</button><button type="button" class="btn" id="another">🔄 Trovami un altro film</button><button type="button" class="btn" id="restart">🎬 Ricomincia il test</button></div></div></div>';
+    swap(h);
+    window.scrollTo(0, 0);
+    var img = document.getElementById("pimg");
+    if (img) img.onerror = function () { img.parentNode.outerHTML = fallbackPoster(d.title, year); };
+    document.getElementById("another").onclick = function () { run(false, false); };
+    document.getElementById("surprise").onclick = function () { run(true, false); };
+    document.getElementById("restart").onclick = restart;
+  }
+  function restart() {
+    S.step = 0; S.a = { vibe: null, effort: null, time: null, who: null, kind: null, risk: 50, avoid: [] };
+    S.cands = []; S.seen = []; S.cur = null; renderStep(); window.scrollTo(0, 0);
+  }
+  renderStep();
+})();
+</script>
+</body>
+</html>
