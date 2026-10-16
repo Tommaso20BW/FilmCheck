@@ -260,11 +260,15 @@ async function jikanItems(want,ex){
   }
   if(!out.length&&err)throw err;return out;
 }
+const KN={"Science Fiction":"Sci-Fi","Thriller":"Suspense"};
 async function kitsuItems(want){
   const out=[];let err=null;
-  for(const g of want){const slug=KIT[g];if(!slug)continue;
-    try{const r=await fj("https://kitsu.io/api/edge/anime?filter[categories]="+slug+"&sort=-averageRating&page[limit]=20&page[offset]="+rand(4)*20,12000);
-      (r.data||[]).forEach(x=>{const t=x.attributes;if(t.nsfw)return;out.push({id:"k"+x.id,title:(t.titles&&(t.titles.en||t.titles.en_us))||t.canonicalTitle,year:t.startDate?+t.startDate.slice(0,4):"",genres:[g],rating:t.averageRating?+t.averageRating/10:null,episodes:t.episodeCount,image:t.posterImage&&(t.posterImage.large||t.posterImage.medium),summary:t.synopsis})})}catch(e){err=e}}
+  await Promise.all(want.map(async g=>{const slug=KIT[g];if(!slug)return;
+    try{const r=await fj("https://kitsu.io/api/edge/anime?filter[categories]="+slug+"&sort=-averageRating&include=categories&page[limit]=20&page[offset]="+rand(4)*20,12000);
+      const cat={};(r.included||[]).forEach(i=>{if(i.type==="categories")cat[i.id]=KN[i.attributes.title]||i.attributes.title});
+      (r.data||[]).forEach(x=>{const t=x.attributes;if(t.nsfw)return;
+        const gl=((x.relationships&&x.relationships.categories&&x.relationships.categories.data)||[]).map(c=>cat[c.id]).filter(Boolean);
+        out.push({id:"k"+x.id,title:(t.titles&&(t.titles.en||t.titles.en_us))||t.canonicalTitle,year:t.startDate?+t.startDate.slice(0,4):"",genres:uniq(gl.concat([g])),rating:t.averageRating?+t.averageRating/10:null,episodes:t.episodeCount,image:t.posterImage&&(t.posterImage.large||t.posterImage.medium),summary:t.synopsis})})}catch(e){err=e}}));
   if(!out.length&&err)throw err;return out;
 }
 async function animeDiscover(a){
@@ -273,11 +277,11 @@ async function animeDiscover(a){
   const ex=wn.filter(x=>JID[x]).map(x=>JID[x]).join(","),ym=a.avoid.indexOf("old")>=0?1995:0;
   const epMax=a.time==="short"?13:a.time==="mid"?26:a.avoid.indexOf("long")>=0?26:0;
   let all=[],e1=null;
-  try{all=await jikanItems(want,ex)}catch(e){e1=e}
-  if(!all.length){try{all=await kitsuItems(want)}catch(e){throw new Error("Jikan: "+(e1&&e1.message||"nessun dato")+" / Kitsu: "+e.message)}}
+  try{all=await kitsuItems(want)}catch(e){e1=e}
+  if(!all.length){try{all=await jikanItems(want,ex)}catch(e){throw new Error("Kitsu: "+(e1&&e1.message||"nessun dato")+" / Jikan: "+e.message)}}
   const seen={},items=all.filter(m=>{if(seen[m.id])return false;seen[m.id]=1;return true});
-  const ep=m=>!epMax||!m.episodes||m.episodes<=epMax,yr=m=>!ym||!m.year||m.year>=ym;
-  return tier(items,[m=>ep(m)&&yr(m)&&m.rating>=7,m=>ep(m)&&yr(m),ep,()=>true]);
+  const ep=m=>!epMax||!m.episodes||m.episodes<=epMax,yr=m=>!ym||!m.year||m.year>=ym,ok=m=>!m.genres.some(x=>wn.indexOf(x)>=0);
+  return tier(items,[m=>ok(m)&&ep(m)&&yr(m)&&m.rating>=7,m=>ok(m)&&ep(m)&&yr(m),m=>ok(m)&&ep(m),ep,()=>true]);
 }
 async function animeDetails(c){const w=await enrich(c.title,"anime");
   return{title:c.title,year:c.year,episodes:c.episodes,overview:(w&&w.extract)||c.summary||"Trama non disponibile.",it:!!(w&&w.extract),poster:(w&&w.thumb)||c.image,rl:"MyAnimeList",rv:c.rating,gt:(c.genres||[]).join(" · ")}}
