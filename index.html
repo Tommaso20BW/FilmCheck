@@ -256,7 +256,7 @@ async function jikanItems(want,ex){
     const u=new URL("https://api.jikan.moe/v4/anime");
     u.searchParams.set("genres",JID[want[i]]);if(ex)u.searchParams.set("genres_exclude",ex);
     u.searchParams.set("order_by","score");u.searchParams.set("sort","desc");u.searchParams.set("min_score","6.3");u.searchParams.set("page",1+rand(3));u.searchParams.set("limit","25");u.searchParams.set("sfw","true");
-    try{const r=await jr(u.toString());(r.data||[]).forEach(m=>out.push({id:m.mal_id,title:m.title_english||m.title,year:(m.aired&&m.aired.prop&&m.aired.prop.from&&m.aired.prop.from.year)||"",genres:(m.genres||[]).concat(m.themes||[]).map(g=>g.name),rating:m.score,episodes:m.episodes,image:m.images&&m.images.jpg&&(m.images.jpg.large_image_url||m.images.jpg.image_url),summary:m.synopsis}))}catch(e){err=e}
+    try{const r=await jr(u.toString());(r.data||[]).filter(m=>!m.type||m.type==="TV"||m.type==="Movie").forEach(m=>out.push({id:m.mal_id,title:m.title_english||m.title,year:(m.aired&&m.aired.prop&&m.aired.prop.from&&m.aired.prop.from.year)||"",genres:(m.genres||[]).concat(m.themes||[]).map(g=>g.name),rating:m.score,episodes:m.episodes,image:m.images&&m.images.jpg&&(m.images.jpg.large_image_url||m.images.jpg.image_url),summary:m.synopsis}))}catch(e){err=e}
   }
   if(!out.length&&err)throw err;return out;
 }
@@ -266,11 +266,12 @@ async function kitsuItems(want){
   await Promise.all(want.map(async g=>{const slug=KIT[g];if(!slug)return;
     try{const r=await fj("https://kitsu.io/api/edge/anime?filter[categories]="+slug+"&sort=-averageRating&include=categories&page[limit]=20&page[offset]="+rand(4)*20,12000);
       const cat={};(r.included||[]).forEach(i=>{if(i.type==="categories")cat[i.id]=KN[i.attributes.title]||i.attributes.title});
-      (r.data||[]).forEach(x=>{const t=x.attributes;if(t.nsfw)return;
+      (r.data||[]).forEach(x=>{const t=x.attributes;if(t.nsfw||(t.subtype&&["TV","movie"].indexOf(t.subtype)<0))return;
         const gl=((x.relationships&&x.relationships.categories&&x.relationships.categories.data)||[]).map(c=>cat[c.id]).filter(Boolean);
         out.push({id:"k"+x.id,title:(t.titles&&(t.titles.en||t.titles.en_us))||t.canonicalTitle,year:t.startDate?+t.startDate.slice(0,4):"",genres:uniq(gl.concat([g])),rating:t.averageRating?+t.averageRating/10:null,episodes:t.episodeCount,image:t.posterImage&&(t.posterImage.large||t.posterImage.medium),summary:t.synopsis})})}catch(e){err=e}}));
   if(!out.length&&err)throw err;return out;
 }
+const SEQ=/\b(season|stagione|saison|cour)\s*\d|\b\d+(st|nd|rd|th)\s+season|\b(part|parte)\s*\d|\b(second|third|fourth|final)\s+season|\b(II|III|IV|V|VI|VII)\s*$|\s[2-9]$|\b(OVA|OAD|ONA|special|recap|specials)\b|:\s*.*\b(arc|chapter)\b/i;
 async function animeDiscover(a){
   const wn=without("anime",a);
   let want=(G.anime.mood[a.mood]||["Drama"]).filter(x=>JID[x]&&wn.indexOf(x)<0).slice(0,3);if(!want.length)want=["Comedy"];
@@ -279,7 +280,8 @@ async function animeDiscover(a){
   let all=[],e1=null;
   try{all=await kitsuItems(want)}catch(e){e1=e}
   if(!all.length){try{all=await jikanItems(want,ex)}catch(e){throw new Error("Kitsu: "+(e1&&e1.message||"nessun dato")+" / Jikan: "+e.message)}}
-  const seen={},items=all.filter(m=>{if(seen[m.id])return false;seen[m.id]=1;return true});
+  const seen={};let items=all.filter(m=>{if(seen[m.id])return false;seen[m.id]=1;return true});
+  const first=items.filter(m=>!SEQ.test(m.title));if(first.length>=3)items=first;
   const ep=m=>!epMax||!m.episodes||m.episodes<=epMax,yr=m=>!ym||!m.year||m.year>=ym,ok=m=>!m.genres.some(x=>wn.indexOf(x)>=0);
   return tier(items,[m=>ok(m)&&ep(m)&&yr(m)&&m.rating>=7,m=>ok(m)&&ep(m)&&yr(m),m=>ok(m)&&ep(m),ep,()=>true]);
 }
