@@ -195,12 +195,12 @@ const vals=l=>l.map(x=>'"'+x+'"@en').join(" ");
 async function wdFilms(a,strict){
   const g=G.film,wn=without("film",a),genres=(g.mood[a.mood]||["drama film"]).filter(x=>wn.indexOf(x)<0);
   const minL=(a.risk<30?40:a.risk<60?18:a.risk<80?8:3)/(strict?1:3);
-  const q="SELECT ?film ?filmLabel ?sl ?d ?rt WHERE{VALUES ?gl{"+vals(genres.length?genres:["drama film","comedy film"])+"} ?g rdfs:label ?gl. ?film wdt:P31 wd:Q11424; wdt:P136 ?g; wikibase:sitelinks ?sl. FILTER(?sl>="+Math.max(2,Math.round(minL))+") "+
+  const q="SELECT ?film ?filmLabel ?sl ?d ?rt ?img WHERE{VALUES ?gl{"+vals(genres.length?genres:["drama film","comedy film"])+"} ?g rdfs:label ?gl. ?film wdt:P31 wd:Q11424; wdt:P136 ?g; wikibase:sitelinks ?sl. FILTER(?sl>="+Math.max(2,Math.round(minL))+") "+
    (strict&&wn.length?"FILTER NOT EXISTS{?film wdt:P136 ?b. ?b rdfs:label ?bl. VALUES ?bl{"+vals(wn)+"}} ":"")+
-   "OPTIONAL{?film wdt:P577 ?d} OPTIONAL{?film wdt:P2047 ?rt} SERVICE wikibase:label{bd:serviceParam wikibase:language \"it,en\"}} LIMIT 200";
+   "OPTIONAL{?film wdt:P577 ?d} OPTIONAL{?film wdt:P2047 ?rt} OPTIONAL{?film wdt:P18 ?img} SERVICE wikibase:label{bd:serviceParam wikibase:language \"it,en\"}} LIMIT 200";
   const seen={},out=[];
   (await sparql(q)).forEach(b=>{const id=b.film.value.split("/").pop(),t=b.filmLabel&&b.filmLabel.value;if(seen[id]||!t||/^Q\d+$/.test(t))return;seen[id]=1;
-    out.push({id,title:t,year:b.d?b.d.value.slice(0,4):"",sl:+b.sl.value,runtime:b.rt?Math.round(+b.rt.value):null,genres:genres})});
+    out.push({id,title:t,year:b.d?b.d.value.slice(0,4):"",sl:+b.sl.value,runtime:b.rt?Math.round(+b.rt.value):null,img:b.img?b.img.value.replace(/^http:/,"https:")+"?width=500":null,genres:genres})});
   return out;
 }
 async function wpFilms(a){
@@ -225,7 +225,7 @@ async function filmDiscover(a){
 }
 async function filmDetails(c){
   const w=c.pre||await enrich(c.title,"film");
-  return{title:c.title,year:c.year,runtime:c.runtime,overview:(w&&w.extract)||"Trama non ancora disponibile su Wikipedia in italiano.",it:!!(w&&w.extract),poster:w&&w.thumb,pop:c.sl};
+  return{title:c.title,year:c.year,runtime:c.runtime,overview:(w&&w.extract)||"Trama non ancora disponibile su Wikipedia in italiano.",it:!!(w&&w.extract),poster:(w&&w.thumb)||c.img,pop:c.sl};
 }
 
 /* ---------- SERIE TV: TVmaze ---------- */
@@ -243,7 +243,7 @@ async function tvDiscover(a){
     m=>ov(m)&&!bad(m), m=>ov(m)]);
 }
 async function tvDetails(c){const w=await enrich(c.title,"serie televisiva");
-  return{title:c.title,year:c.year,runtime:c.runtime,overview:(w&&w.extract)||c.summary||"Trama non disponibile.",it:!!(w&&w.extract),poster:(w&&w.thumb)||c.image,rl:"TVmaze",rv:c.rating,gt:(c.genres||[]).join(" · ")}}
+  return{title:c.title,year:c.year,runtime:c.runtime,overview:(w&&w.extract)||c.summary||"Trama non disponibile.",it:!!(w&&w.extract),poster:c.image||(w&&w.thumb),rl:"TVmaze",rv:c.rating,gt:(c.genres||[]).join(" · ")}}
 
 /* ---------- ANIME: Jikan, una richiesta per genere (evita l'AND dei generi) ---------- */
 const JID={"Action":1,"Adventure":2,"Comedy":4,"Drama":8,"Fantasy":10,"Horror":14,"Mystery":7,"Romance":22,"Sci-Fi":24,"Slice of Life":36,"Supernatural":37,"Suspense":41,"Psychological":40,"Ecchi":9,"Hentai":12,"Gore":58};
@@ -284,7 +284,7 @@ async function animeDiscover(a){
   return tier(items,[m=>ok(m)&&ep(m)&&yr(m)&&m.rating>=7,m=>ok(m)&&ep(m)&&yr(m),m=>ok(m)&&ep(m),ep,()=>true]);
 }
 async function animeDetails(c){const w=await enrich(c.title,"anime");
-  return{title:c.title,year:c.year,episodes:c.episodes,overview:(w&&w.extract)||c.summary||"Trama non disponibile.",it:!!(w&&w.extract),poster:(w&&w.thumb)||c.image,rl:"MyAnimeList",rv:c.rating,gt:(c.genres||[]).join(" · ")}}
+  return{title:c.title,year:c.year,episodes:c.episodes,overview:(w&&w.extract)||c.summary||"Trama non disponibile.",it:!!(w&&w.extract),poster:c.image||(w&&w.thumb),rl:"Anime",rv:c.rating,gt:(c.genres||[]).join(" · ")}}
 
 const SRC={film:{d:filmDiscover,t:filmDetails},serie:{d:tvDiscover,t:tvDetails},anime:{d:animeDiscover,t:animeDetails}};
 
