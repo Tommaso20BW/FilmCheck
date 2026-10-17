@@ -810,7 +810,7 @@ function openLb(el){
   const sh="0 "+(24*ik)+"px "+(50*ik)+"px rgba(0,0,0,.6),0 0 "+(40*ik)+"px rgba(143,98,248,.25)";
   card.style.cssText="left:"+T.x+"px;top:"+T.y+"px;width:"+T.w+"px;height:"+T.h+"px;border-radius:"+R+"px;box-shadow:"+sh;
   const im=el.querySelector("img");
-  if(im)card.style.cssText+=";box-sizing:border-box;border:"+ik+"px solid var(--line2);background:var(--s2)";
+  if(im)card.style.cssText+=";box-sizing:border-box;border:1px solid var(--line2);background:var(--s2)";
   let ring=null;
   if(im){
     card.innerHTML='<img alt="" referrerpolicy="no-referrer">';
