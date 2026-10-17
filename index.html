@@ -46,7 +46,7 @@ img{display:block;max-width:100%}
 
 /* sfondo ambientale */
 body::before,body::after{content:"";position:absolute;z-index:-1;pointer-events:none;width:110vmax;height:110vmax;border-radius:50%;}
-body::before{left:-60vmax;top:-70vmax;background:radial-gradient(closest-side,rgba(143,98,248,.24),transparent)}
+body::before{left:-60vmax;top:-48vmax;background:radial-gradient(closest-side,rgba(143,98,248,.24),transparent)}
 body::after{right:-60vmax;bottom:-75vmax;background:radial-gradient(closest-side,rgba(255,61,82,.17),transparent)}
 
 /* backdrop sfocato (solo nel risultato) */
@@ -222,7 +222,7 @@ a.more{display:inline-block;margin-top:14px;font-size:.82rem;color:var(--gold);t
 body.locked #app,body.locked #bd{visibility:hidden}
 #lg{position:fixed;inset:0;z-index:300;display:flex;align-items:center;justify-content:center;overflow:auto;
   padding:calc(var(--sat) + 24px) var(--gut) calc(var(--sab) + 24px);
-  background:radial-gradient(120% 60% at 50% 0,rgba(143,98,248,.22),transparent 60%),radial-gradient(90% 50% at 100% 100%,rgba(255,61,82,.14),transparent 60%),var(--bg)}
+  background:radial-gradient(120% 55% at 50% 38%,rgba(143,98,248,.16),transparent 62%),radial-gradient(90% 50% at 100% 100%,rgba(255,61,82,.14),transparent 60%),var(--bg)}
 #lg[hidden]{display:none}
 .lgc{width:100%;max-width:360px;display:flex;flex-direction:column;gap:14px}
 .lgc>*{animation:btnIn .7s cubic-bezier(.22,1,.36,1) backwards}
@@ -239,26 +239,21 @@ body.locked #app,body.locked #bd{visibility:hidden}
 @keyframes shake{0%,100%{transform:none}20%{transform:translateX(-9px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(3px)}}
 .lgc.bad .lgi{animation:shake .45s ease;border-color:var(--red)}
 /* sfondo vivo del login: macchie colorate che si muovono lentamente */
-.lgbg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.lgbg{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none}
 .lgbg i{position:absolute;border-radius:50%;filter:blur(70px);will-change:transform}
-.lgbg i:nth-child(1){width:46vmax;height:46vmax;left:-14vmax;top:-18vmax;background:#c13bd9;opacity:.5;animation:fA 22s ease-in-out infinite alternate}
+.lgbg i:nth-child(1){width:46vmax;height:46vmax;left:-14vmax;top:12vmax;background:#c13bd9;opacity:.38;animation:fA 22s ease-in-out infinite alternate}
 .lgbg i:nth-child(2){width:40vmax;height:40vmax;right:-14vmax;bottom:-16vmax;background:#8f62f8;opacity:.42;animation:fB 26s ease-in-out infinite alternate}
-.lgbg i:nth-child(3){width:26vmax;height:26vmax;right:6%;top:10%;background:#ff3d52;opacity:.22;animation:fC 18s ease-in-out infinite alternate}
+.lgbg i:nth-child(3){width:26vmax;height:26vmax;right:6%;top:22%;background:#ff3d52;opacity:.16;animation:fC 18s ease-in-out infinite alternate}
 @keyframes fA{to{transform:translate3d(9vmax,7vmax,0) scale(1.12)}}
 @keyframes fB{to{transform:translate3d(-8vmax,-6vmax,0) scale(1.1)}}
 @keyframes fC{to{transform:translate3d(-6vmax,9vmax,0) scale(.9)}}
 .lgc{position:relative;z-index:1}
-/* sfumatura nera in alto: unisce lo sfondo alla barra di stato, niente taglio netto */
-.lgbg::after,#tf{content:"";position:fixed;left:0;right:0;top:0;height:90px;pointer-events:none;background:linear-gradient(#000,rgba(0,0,0,.55) 35%,transparent)}
-#tf{z-index:0}
+
 /* logo: leggero galleggiamento; durante l'accesso pulsa con un anello che si espande */
-.lgbrand .mark{position:relative;animation:mkFloat 5s ease-in-out infinite}
-.lgbrand .mark::after{content:"";position:absolute;inset:0;border-radius:inherit;border:2px solid #ff3d52;opacity:0;pointer-events:none}
-.lgc.busy .mark{animation:mkBeat .9s ease-in-out infinite}
-.lgc.busy .mark::after{animation:mkRing .9s ease-out infinite}
-@keyframes mkFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
-@keyframes mkBeat{0%,100%{transform:scale(1);box-shadow:0 3px 12px rgba(255,61,82,.45)}50%{transform:scale(1.16);box-shadow:0 8px 34px rgba(255,61,82,.8)}}
-@keyframes mkRing{0%{transform:scale(1);opacity:.85}100%{transform:scale(1.9);opacity:0}}
+@keyframes mkBreath{0%,100%{transform:scale(1)}50%{transform:scale(1.045)}}
+.lgbrand{position:relative;isolation:isolate}
+.lgc>*:not(.lgbrand){position:relative;z-index:1}
+.lgbrand .mark{position:relative;z-index:-1;animation:mkBreath 4.2s ease-in-out infinite;will-change:transform}
 /* sfondo dell'app: le due luci si muovono piano */
 body::before{animation:fA 28s ease-in-out infinite alternate}
 body::after{animation:fB 32s ease-in-out infinite alternate}
@@ -281,7 +276,6 @@ body::after{animation:fB 32s ease-in-out infinite alternate}
 </head>
 <body>
 <div id="bd"><i></i></div>
-<div id="tf" aria-hidden="true"></div>
 <div id="app">
   <header class="top">
     <div class="top-in">
@@ -1128,12 +1122,17 @@ async function authHash(u,p){
 const isAuthed=()=>{try{return localStorage.getItem(AUTH_KEY)===AUTH_HASH;}catch(e){return false;}};
 const lg=$("lg");
 function lockApp(){
-  document.body.classList.add("locked");lg.hidden=false;
+  document.body.classList.add("locked");lg.hidden=false;lgFit();
   $("lgu").value="";$("lgp").value="";$("lge").textContent="";$("lgb").disabled=false;
   const c=$("lgf");c.classList.remove("bad","busy");
   if(!RM()&&lg.animate)lg.animate([{opacity:0,filter:"blur(14px)"},{opacity:1,filter:"blur(0)"}],{duration:600,easing:"cubic-bezier(.22,1,.36,1)"});
   setTimeout(()=>{try{$("lgu").focus();}catch(e){}},50);
 }
+function lgFit(){
+  if(lg.hidden||!window.visualViewport)return;
+  const v=visualViewport;lg.style.top=v.offsetTop+"px";lg.style.bottom="auto";lg.style.height=v.height+"px";
+}
+if(window.visualViewport){visualViewport.addEventListener("resize",lgFit);visualViewport.addEventListener("scroll",lgFit);}
 function resetScroll(){try{scrollTo(0,0);document.documentElement.scrollTop=0;document.body.scrollTop=0;}catch(e){}}
 function unlockApp(){
   document.body.classList.remove("locked");
