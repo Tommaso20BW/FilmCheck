@@ -509,8 +509,9 @@ const STEPS=[
   {k:"fmt",q:()=>S.cat==="anime"?"Film o serie anime?":"Film o serie animata?",get:()=>FMT,skip:()=>!isAnim()},
   {k:"mood",q:"Che voglia hai?",get:()=>MOOD},
   {k:"time",q:()=>(S.cat==="film"||S.fmt==="movie")?"Quanto dura la serata?":S.cat==="anime"?"Quanto è lunga la serie?":"Quante puntate?",get:timeOpts,skip:()=>isAnim()&&(S.fmt||"any")==="any"},
-  {k:"who",q:"Con chi guardi?",get:()=>WHO}
-  // energia, epoca e "famoso/nascosto" tolti dal percorso (max 5 domande): restano ai valori di default (energia normale, qualsiasi epoca, un po' di tutto)
+  {k:"who",q:"Con chi guardi?",get:()=>WHO},
+  {k:"style",q:"Famoso o da scoprire?",get:()=>STYLE}
+  // energia ed epoca restano ai valori di default (energia normale, qualsiasi epoca)
 ];
 const steps=()=>STEPS.filter(s=>!(s.skip&&s.skip()));
 function gkey(cat,a){cat=cat==="cartoni"?(a&&a.fmt==="movie"?"film":"serie"):cat; return cat==="film"?"film":cat==="anime"?"anime":"serie";}
@@ -528,7 +529,7 @@ function home(anim){
   if(S.step>ST.length-1)S.step=ST.length-1;
   const dx=DIR*100;DIR=1;
   // contatore fisso (4 tappe) che non cambia in base alla categoria: "film o serie" fa parte della prima tappa, "durata" se saltata lascia solo un numero in meno
-  const CNT=["cat","mood","time","who"],PI=Math.max(0,CNT.indexOf(ST[S.step].k==="fmt"?"cat":ST[S.step].k));
+  const CNT=["cat","mood","time","who","style"],PI=Math.max(0,CNT.indexOf(ST[S.step].k==="fmt"?"cat":ST[S.step].k));
   const st=ST[S.step],items=st.get(),n=items.length,q=typeof st.q==="function"?st.q():st.q;
   swap('<div class="page"><h1>'+esc(q)+'</h1><div class="opts n'+n+'" role="group" aria-label="'+esc(q)+'">'+items.map((o,i)=>opt(st.k,o,S[st.k]===o[0],i)).join('')+'</div></div>',anim,dx);
   ui({
@@ -779,16 +780,22 @@ const KWC={};
 async function tmKw(q){if(KWC[q]!==undefined)return KWC[q];try{const r=await tm("/3/search/keyword",{query:q,page:1});KWC[q]=(r.results&&r.results[0]&&r.results[0].id)||null;}catch(e){KWC[q]=null;}return KWC[q];}
 async function tmDiscover(kind,a,anim,ja){
   const film=kind==="film",r=a.risk,narrow=(!!a.era&&a.era!=="any");
-  let minVotes=ja?(r<30?500:r<60?150:r<80?50:20):(r<30?2000:r<60?500:r<80?150:50),maxPage=r<30?4:r<60?10:r<80?18:30;
+  // fascia di notorieta' (numero di voti): famoso / un po' di tutto / poco conosciuto
+  const tier=r<30?0:r<60?1:2;
+  const BANDS=ja?[[1500,0],[300,1500],[40,300]]:film?[[4000,0],[800,4000],[100,800]]:[[2500,0],[400,2500],[60,400]];
+  const band=BANDS[tier];
+  let maxPage=tier===0?4:6;
   if(narrow)maxPage=Math.min(maxPage,5);
-  const p={sort_by:"popularity.desc",include_adult:"false","vote_count.gte":minVotes,"vote_average.gte":6};
+  const p={sort_by:tier===2?"vote_average.desc":"popularity.desc",include_adult:"false","vote_count.gte":band[0],"vote_average.gte":tier===2?6.4:6};
+  if(band[1])p["vote_count.lte"]=band[1];
   const mood=(film?TM_MOOD_FILM:TM_MOOD_TV)[a.mood]||"18";
   if(anim){p.with_genres="16,"+pick(mood.split("|"));if(ja)p.with_original_language="ja";}
-  else{p.with_genres=mood;p.without_genres="16";}
-  if(a.who==="family"){
-    const ex=(film?[27,10752,80]:[80,10768]).filter(x=>mood.split("|").indexOf(String(x))<0);
-    if(ex.length)p.without_genres=(p.without_genres?p.without_genres+"|":"")+ex.join("|");
-  }
+  else{p.with_genres=mood;}
+  // generi da escludere in base all'umore (es. "ridere" senza horror/thriller, "lacrime" senza commedie)
+  const MEX=film?{feelgood:[27,53,10752,80],laugh:[27,53,10752,80],love:[27,53,10752],cry:[35,27],scare:[35,10751,10749],thrill:[10749,10751,35],mindbend:[10749,35,10751],epic:[10749]}
+    :{feelgood:[80,9648,10768],laugh:[80,9648,10768],love:[80,9648,10768],cry:[35,10751],scare:[35,10751],thrill:[35,10751],mindbend:[35,10751],epic:[35]};
+  const exAll=uniq((MEX[a.mood]||[]).concat(a.who==="family"?(film?[27,10752,80]:[80,10768]):[]).concat(anim?[]:[16])).filter(x=>mood.split("|").indexOf(String(x))<0);
+  if(exAll.length)p.without_genres=exAll.join("|");
   if(film){
     if(a.time==="short")p["with_runtime.lte"]=90;
     if(a.time==="mid"){p["with_runtime.gte"]=85;p["with_runtime.lte"]=125;}
@@ -811,10 +818,14 @@ async function tmDiscover(kind,a,anim,ja){
     // nessun risultato con i filtri: li allargo un po' alla volta invece di dare errore
     const loose=Object.assign({},p,{"vote_average.gte":0,"vote_count.gte":10});
     const looser=Object.assign({},loose,{"vote_count.gte":3});delete looser.with_keywords;delete looser["with_runtime.lte"];delete looser["with_runtime.gte"];
-    for(const q of [p,loose,looser]){const x=await tm(path,Object.assign({page:1},q));raw=x.results||[];if(raw.length)break;}
+    const widest=Object.assign({},looser,{"vote_count.gte":5});delete widest["vote_count.lte"];delete widest.without_genres;widest.sort_by="popularity.desc";
+    for(const q of [p,loose,looser,widest]){const x=await tm(path,Object.assign({page:1},q));raw=x.results||[];if(raw.length)break;}
   }
   const gen=ids=>ja?[].concat(...(ids||[]).map(i=>TM_ANIME[i]||[])):film?(ids||[]).map(i=>TM_FILM[i]).filter(Boolean):[].concat(...(ids||[]).map(i=>TM_TV[i]||[]));
-  return raw.filter(m=>m.overview&&m.overview.length>25&&(!anim||ja||m.original_language!=="ja")).map(m=>({
+  let base=raw.filter(m=>m.overview&&m.overview.length>25&&(!anim||ja||m.original_language!=="ja"));
+  const okEx=base.filter(m=>!(m.genre_ids||[]).some(g=>exAll.indexOf(g)>=0));if(okEx.length>=3)base=okEx;
+  const okBand=base.filter(m=>(m.vote_count||0)>=band[0]&&(!band[1]||(m.vote_count||0)<=band[1]));if(okBand.length>=3)base=okBand;
+  return base.map(m=>({
     id:"tm"+kind+m.id,tid:m.id,src:"tmdb",movie:film,anim:!!anim,title:film?m.title:m.name,
     year:((film?m.release_date:m.first_air_date)||"").slice(0,4),genres:gen(m.genre_ids),
     rating:m.vote_average||0,vc:m.vote_count||0,image:m.poster_path?TMDB_IMG+m.poster_path:null,summary:m.overview}));
