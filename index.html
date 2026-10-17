@@ -810,8 +810,8 @@ function openLb(el){
   const sh="0 "+(24*ik)+"px "+(50*ik)+"px rgba(0,0,0,.6),0 0 "+(40*ik)+"px rgba(143,98,248,.25)";
   card.style.cssText="left:"+T.x+"px;top:"+T.y+"px;width:"+T.w+"px;height:"+T.h+"px;border-radius:"+R+"px;box-shadow:"+sh;
   const im=el.querySelector("img");
-  if(im)card.style.cssText+=";box-sizing:border-box;border:1px solid var(--line2);background:var(--s2)";
-  let ring=null;
+  if(im)card.style.cssText+=";box-sizing:border-box;padding:1px;background:var(--s2)";
+  let ring=null,edge=null;
   if(im){
     card.innerHTML='<img alt="" referrerpolicy="no-referrer">';
     const ci=card.firstChild;ci.src=im.currentSrc||im.src;
@@ -822,21 +822,25 @@ function openLb(el){
     ring.style.cssText="position:absolute;left:0;top:0;width:"+(sr.width-2)+"px;height:"+(sr.height-2)+"px;transform:scale("+ik+");transform-origin:0 0;border-radius:"+R+"px;pointer-events:none";
     const zc=el.querySelector(".zoom");if(zc)ring.appendChild(zc.cloneNode(true));
     card.appendChild(ring);
+    edge=document.createElement("div");
+    edge.style.cssText="position:absolute;left:0;top:0;right:0;bottom:0;border-radius:inherit;pointer-events:none;z-index:3;box-shadow:inset 0 0 0 1px rgba(255,255,255,.18)";
+    card.appendChild(edge);
   }else{
     const cl=el.cloneNode(true);cl.style.fontSize=(16*T.w/Math.max(60,sr.width))+"px";
     card.innerHTML="";card.appendChild(cl);
   }
-  LB={el,T,card,lb,moved:false,R,ring};
+  LB={el,T,card,lb,moved:false,R,ring,edge};
   lb.classList.add("on");void lb.offsetWidth;lb.classList.add("show");
   el.classList.add("lbhide");     // nasconde solo immagine/bordo: l'ombra resta sulla locandina, SOTTO il titolo
   el.getAnimations().forEach(x=>x.cancel());
   el.animate([{boxShadow:SH1},{boxShadow:SH0}],{duration:RM()?1:560,easing:"ease-out",fill:"forwards"});
   const D=RM()?1:780;
   const oa=card.animate([
-    {transform:fromTo(sr,T),borderRadius:(R/k)+"px",borderWidth:ik+"px"},
-    {transform:"translate(0,0) scale(1)",borderRadius:R+"px",borderWidth:"1px"}
+    {transform:fromTo(sr,T),borderRadius:(R/k)+"px",padding:ik+"px"},
+    {transform:"translate(0,0) scale(1)",borderRadius:R+"px",padding:"1px"}
   ],{duration:D,easing:EASE});
   OA=oa;
+  if(edge)edge.animate([{boxShadow:"inset 0 0 0 "+ik+"px rgba(255,255,255,.18)"},{boxShadow:"inset 0 0 0 1px rgba(255,255,255,.18)"}],{duration:D,easing:EASE});
   if(ring)ring.animate([{opacity:1},{opacity:0,offset:.35},{opacity:0}],{duration:D,easing:"linear",fill:"forwards"});
   try{history.pushState({lb:1},"");}catch(e){}
 }
@@ -862,10 +866,11 @@ function doCloseLb(){
   L.el.getAnimations().forEach(x=>x.cancel());
   L.el.animate([{boxShadow:SH0},{boxShadow:SH0,offset:.3},{boxShadow:SH1}],{duration:D,easing:"ease-in-out"});
   const a=L.card.animate([
-    {transform:(cur&&cur!=="none")?cur:"translate(0,0) scale(1)",borderRadius:L.R+"px",borderWidth:"1px"},
-    {transform:fromTo(sr,L.T),borderRadius:(L.R/k)+"px",borderWidth:(1/k)+"px"}
+    {transform:(cur&&cur!=="none")?cur:"translate(0,0) scale(1)",borderRadius:L.R+"px",padding:"1px"},
+    {transform:fromTo(sr,L.T),borderRadius:(L.R/k)+"px",padding:(1/k)+"px"}
   ],{duration:D,easing:EASE,fill:"forwards"});
   if(L.ring){L.ring.getAnimations().forEach(x=>x.cancel());L.ring.animate([{opacity:0},{opacity:0,offset:.6},{opacity:1}],{duration:D,easing:"linear",fill:"forwards"});}
+  if(L.edge){L.edge.getAnimations().forEach(x=>x.cancel());L.edge.animate([{boxShadow:"inset 0 0 0 1px rgba(255,255,255,.18)"},{boxShadow:"inset 0 0 0 "+(1/k)+"px rgba(255,255,255,.18)"}],{duration:D,easing:EASE,fill:"forwards"});}
   PEND=fin;a.onfinish=fin;setTimeout(fin,1000);
 }
 (function(){
