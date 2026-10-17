@@ -427,10 +427,8 @@ const STEPS=[
   {k:"fmt",q:()=>S.cat==="anime"?"Film o serie anime?":"Film o serie animata?",get:()=>FMT,skip:()=>!isAnim()},
   {k:"mood",q:"Che voglia hai?",get:()=>MOOD},
   {k:"time",q:()=>(S.cat==="film"||S.fmt==="movie")?"Quanto dura la serata?":S.cat==="anime"?"Quanto è lunga la serie?":"Quante puntate?",get:timeOpts,skip:()=>isAnim()&&(S.fmt||"any")==="any"},
-  {k:"who",q:"Con chi guardi?",get:()=>WHO},
-  {k:"effort",q:"Quanta energia hai?",get:()=>EFFORT},
-  {k:"era",q:"Di che epoca?",get:()=>ERA},
-  {k:"style",q:"Famoso o nascosto?",get:()=>STYLE}
+  {k:"who",q:"Con chi guardi?",get:()=>WHO}
+  // energia, epoca e "famoso/nascosto" tolti dal percorso (max 5 domande): restano ai valori di default (energia normale, qualsiasi epoca, un po' di tutto)
 ];
 const steps=()=>STEPS.filter(s=>!(s.skip&&s.skip()));
 function gkey(cat,a){cat=cat==="cartoni"?(a&&a.fmt==="movie"?"film":"serie"):cat; return cat==="film"?"film":cat==="anime"?"anime":"serie";}
