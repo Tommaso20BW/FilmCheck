@@ -819,7 +819,8 @@ function rectOf(el){const t=el.style.transition,f=el.style.transform;el.style.tr
 const EDGE_C="rgba(255,255,255,.18)";
 // campiona l'animazione: a ogni istante raggio e cornice sono divisi per la scala, quindi a schermo restano costanti (uguali a locandina piccola)
 function kfs(f,t,R,N,edge,clip,opening){const o=[];for(let i=0;i<=N;i++){const p=i/N,s=f.s+(t.s-f.s)*p,x=f.x+(t.x-f.x)*p,y=f.y+(t.y-f.y)*p;
-  o.push(edge?{offset:p,boxShadow:"inset 0 0 0 "+(1/s)+"px "+EDGE_C}:{offset:p,transform:"translate("+x+"px,"+y+"px) scale("+s+")",borderRadius:(R/s)+"px",padding:(1/s)+"px",clipPath:clip?"inset("+[clip.t,clip.r,clip.b,clip.l].map(c=>(c*(opening?1-p:p)/s)+"px").join(" ")+")":"none"});}return o;}
+  const sm=v=>{v=Math.max(0,Math.min(1,v));return v*v*(3-2*v);},q=opening?1-sm(p/.4):sm((p-.6)/.4);
+  o.push(edge?{offset:p,boxShadow:"inset 0 0 0 "+(1/s)+"px "+EDGE_C}:{offset:p,transform:"translate("+x+"px,"+y+"px) scale("+s+")",borderRadius:(R/s)+"px",padding:(1/s)+"px",clipPath:clip?"inset("+[clip.t,clip.r,clip.b,clip.l].map(c=>(c*q/s)+"px").join(" ")+")":"none"});}return o;}
 // parte della locandina visibile (tagliata dal contenitore con scroll): la card in animazione deve avere lo stesso taglio
 function visClip(el,sr){let t=sr.top,b=sr.bottom,l=sr.left,r=sr.right;
   for(let n=el.parentElement;n&&n!==document.documentElement;n=n.parentElement){const cs=getComputedStyle(n);
