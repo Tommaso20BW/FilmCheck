@@ -36,7 +36,7 @@
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{height:100%;margin:0;background:var(--bg);-webkit-text-size-adjust:100%}
-html,body{overflow:hidden;overscroll-behavior:none;touch-action:pan-x pan-y;-ms-touch-action:pan-x pan-y;-ms-content-zooming:none}
+html,body{overflow:hidden;overscroll-behavior:none;touch-action:pan-x pan-y}
 body{margin:0;height:100%;font:16px/1.45 var(--fb);color:var(--fg);background:transparent;
   -webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 button{font:inherit;color:inherit;cursor:pointer;-webkit-appearance:none;appearance:none;touch-action:manipulation;margin:0;border:0;background:none;padding:0}
@@ -250,6 +250,33 @@ a.more{display:inline-block;margin-top:14px;font-size:.82rem;color:var(--gold);t
   <div class="hint">Tocca per chiudere</div>
 </div>
 
+<script>
+/* NO ZOOM / NIENTE ZOOM: telefono + PC */
+(function(){
+  var o={passive:false};
+  // iOS Safari + Safari Mac pinch
+  ["gesturestart","gesturechange","gestureend"].forEach(function(t){
+    document.addEventListener(t,function(e){e.preventDefault();},o);
+  });
+  // two-finger pinch on touch screens
+  document.addEventListener("touchmove",function(e){
+    if(e.touches&&e.touches.length>1)e.preventDefault();
+  },o);
+  // double-tap zoom (iOS)
+  var last=0;
+  document.addEventListener("touchend",function(e){
+    var n=Date.now();
+    if(n-last<300&&!(e.target.closest&&e.target.closest("button,a,[role=button]")))e.preventDefault();
+    last=n;
+  },o);
+  // Ctrl + mouse wheel / trackpad pinch (Chrome, Edge, Firefox)
+  window.addEventListener("wheel",function(e){if(e.ctrlKey)e.preventDefault();},o);
+  // Ctrl/Cmd + + - 0 =
+  window.addEventListener("keydown",function(e){
+    if((e.ctrlKey||e.metaKey)&&["+","-","=","0","_"].indexOf(e.key)>-1)e.preventDefault();
+  });
+})();
+</script>
 <script>
 (function(){
 "use strict";
@@ -903,37 +930,6 @@ $("ibtn").onclick=()=>{ib.hidden=true;if(dp){dp.prompt();dp=null;}};
 $("ix").onclick=()=>{ib.hidden=true;try{localStorage.setItem("stasera_ix","1");}catch(x){}};
 try{const ios=/iphone|ipad|ipod/i.test(navigator.userAgent),stand=navigator.standalone===true||matchMedia("(display-mode: standalone)").matches;if(ios&&!stand&&!localStorage.getItem("stasera_ix")){ib.querySelector("p").innerHTML="Per usarla come app: tocca <b>Condividi</b> ⬆️ e poi <b>Aggiungi a Home</b>.";$("ibtn").hidden=true;ib.hidden=false;}}catch(e){}
 addEventListener("appinstalled",()=>{ib.hidden=true;});
-})();
-</script>
-<script>
-/* Blocca i metodi di zoom della pagina che il documento può intercettare. */
-(function(){
-  function preventZoom(e){
-    if (e.cancelable) e.preventDefault();
-  }
-
-  // Gesti di zoom di Safari/iOS, dove questi eventi sono supportati.
-  ['gesturestart', 'gesturechange', 'gestureend'].forEach(function(type){
-    document.addEventListener(type, preventZoom, {capture:true, passive:false});
-  });
-
-  // Zoom con Ctrl+rotellina su Windows/Linux e Cmd+rotellina su macOS.
-  window.addEventListener('wheel', function(e){
-    if ((e.ctrlKey || e.metaKey) && e.cancelable) e.preventDefault();
-  }, {capture:true, passive:false});
-
-  // Scorciatoie comuni per lo zoom, quando intercettabili dalla pagina.
-  window.addEventListener('keydown', function(e){
-    if (!(e.ctrlKey || e.metaKey)) return;
-    var key = String(e.key || '').toLowerCase();
-    var code = String(e.code || '').toLowerCase();
-    var zoomKeys = ['+', '=', '-', '_', '0', 'add', 'subtract'];
-    var zoomCodes = ['numpadadd', 'numpadsubtract', 'numpad0', 'equal', 'minus', 'digit0'];
-    if (zoomKeys.indexOf(key) !== -1 || zoomCodes.indexOf(code) !== -1) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-  }, true);
 })();
 </script>
 </body>
