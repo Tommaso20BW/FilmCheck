@@ -130,6 +130,16 @@ body::after{right:-60vmax;bottom:-75vmax;background:radial-gradient(closest-side
 .opt.on .ck::after{content:"";width:6px;height:11px;border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg) translate(-1px,-1px)}
 @media (hover:hover){.opt:hover{border-color:var(--line2)}}
 
+/* pagina dettagli: righe di scelte compatte */
+.det{display:flex;flex-direction:column;gap:22px;padding-bottom:6px}
+.dg small{display:block;margin:0 0 10px;font:700 .7rem var(--fb);letter-spacing:.16em;text-transform:uppercase;color:var(--mut)}
+.seg{display:flex;flex-wrap:wrap;gap:8px}
+.sg{display:flex;align-items:center;gap:8px;min-height:48px;padding:0 16px 0 12px;border-radius:999px;border:1px solid var(--line);background:linear-gradient(160deg,var(--s2),var(--s1));font-weight:600;font-size:.95rem;transition:transform .1s,border-color .15s,background .15s,box-shadow .2s}
+.sg:active{transform:scale(.96)}
+.sg .em{font-size:1.2rem;line-height:1}
+.sg.on{border-color:var(--red);background:linear-gradient(135deg,rgba(255,61,82,.26),rgba(143,98,248,.22));box-shadow:0 0 0 1px var(--red) inset,0 8px 22px rgba(255,61,82,.18)}
+.dh{margin:8px 2px 0;min-height:1.3em;font-size:.82rem;color:var(--mut)}
+
 /* caricamento / errore */
 .load{min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;text-align:center}
 .spin{position:relative;width:84px;height:84px}
@@ -402,10 +412,11 @@ const MOOD=[
 ];
 const FMT=[["movie","🎬","Film","Si chiude in una serata"],["tv","📺","Serie","Episodi da seguire"],["any","🔥","Indifferente","Film o serie, scegli tu"]];
 const TIME_FILM=[["short","⏱️","Corto","Sotto 90 minuti"],["mid","🎬","Normale","Tra 90 e 120 minuti"],["long","🍿","Lungo","Oltre 2 ore"],["any","🔥","Non importa","Qualsiasi durata"]];
-const TIME_SERIE=[["short","⏱️","Un episodio","Una puntata e basta"],["mid","🎬","2–4 episodi","Una serata piena"],["long","🍿","Binge","Maratona"],["any","🔥","Non importa","Qualsiasi durata"]];
+const TIME_SERIE=[["short","⏱️","Brevi","Puntate sotto i 30 minuti"],["mid","🎬","Normali","Puntate da 30 a 50 minuti"],["long","🍿","Lunghe","Puntate oltre i 50 minuti"],["any","🔥","Non importa","Qualsiasi durata"]];
 const TIME_ANIME_TV=[["short","⚡","Breve","Fino a 13 episodi"],["mid","📺","Una stagione","Fino a 26 episodi"],["long","🍿","Saga lunga","Oltre 26 episodi"],["any","🔥","Non importa","Qualsiasi lunghezza"]];
 const isAnim=()=>S.cat==="anime"||S.cat==="cartoni";
-const timeOpts=()=>(S.cat==="film"||S.fmt==="movie")?TIME_FILM:S.cat==="anime"?TIME_ANIME_TV:TIME_SERIE;
+const timeShown=()=>S.cat==="film"||S.cat==="serie"||(isAnim()&&S.fmt==="movie");
+const timeOpts=()=>(S.cat==="film"||S.fmt==="movie")?TIME_FILM:TIME_SERIE;
 const WHO=[["solo","🧍","Da solo","Decido solo io"],["couple","💑","In coppia","Serata a due"],["friends","🍻","Con amici","In compagnia"],["family","👨‍👩‍👧","In famiglia","Adatto ai ragazzi"]];
 const EFFORT=[["0","🥱","Sono cotto","Niente da capire"],["1","🙂","Normale","Si segue bene"],["2","🧐","Sono sveglio","Qualcosa di profondo"]];
 const ERA=[["new","🆕","Recente","Dal 2015 a oggi"],["mid","📼","2000–2014","Né vecchio né nuovo"],["old","🎞️","Classico","Prima del 2000"],["any","🔥","Non importa","Qualsiasi epoca"]];
@@ -425,7 +436,7 @@ const MOOD_TXT={feelgood:"qualcosa di leggero",laugh:"ridere",love:"una storia d
 let DIR=1,FIRST=true;
 const S={cat:"",fmt:"",mood:"",time:"",who:"",effort:"",era:"",style:"",step:0,seen:[],cands:[],cur:null,a:null};
 const buildA=()=>({
-  cat:S.cat,mood:S.mood,time:(isAnim()&&(S.fmt||"any")==="any")?"any":(S.time||"any"),effort:S.effort||"1",who:S.who||"solo",avoid:[],risk:RISK[S.style]||55,
+  cat:S.cat,mood:S.mood,time:timeShown()?(S.time||"any"):"any",effort:S.effort||"1",who:S.who||"solo",avoid:[],risk:RISK[S.style]||55,
   era:S.era||"any",
   fmt:isAnim()?(S.fmt||"any"):null
 });
@@ -506,14 +517,33 @@ function setBd(u){const b=$("bd");if(u){b.firstElementChild.style.backgroundImag
 /* ---------- Scelta a pagine ---------- */
 const STEPS=[
   {k:"cat",q:"Cosa guardi stasera?",get:()=>CATS},
-  {k:"fmt",q:()=>S.cat==="anime"?"Film o serie anime?":"Film o serie animata?",get:()=>FMT,skip:()=>!isAnim()},
   {k:"mood",q:"Che voglia hai?",get:()=>MOOD},
-  {k:"time",q:()=>(S.cat==="film"||S.fmt==="movie")?"Quanto dura la serata?":S.cat==="anime"?"Quanto è lunga la serie?":"Quante puntate?",get:timeOpts,skip:()=>isAnim()&&(S.fmt||"any")==="any"},
-  {k:"who",q:"Con chi guardi?",get:()=>WHO},
-  {k:"style",q:"Famoso o da scoprire?",get:()=>STYLE}
-  // energia ed epoca restano ai valori di default (energia normale, qualsiasi epoca)
+  {k:"det"}
 ];
-const steps=()=>STEPS.filter(s=>!(s.skip&&s.skip()));
+const steps=()=>STEPS;
+const PREF="stasera_prefs";
+const loadPrefs=()=>{try{return JSON.parse(localStorage.getItem(PREF))||{};}catch(e){return {};}};
+const savePrefs=()=>{try{localStorage.setItem(PREF,JSON.stringify({who:S.who,style:S.style}));}catch(e){}};
+function detGroups(){
+  const g=[];
+  if(isAnim())g.push(["fmt",S.cat==="anime"?"Film o serie anime":"Film o serie animata",FMT]);
+  if(timeShown())g.push(["time",(S.cat==="film"||S.fmt==="movie")?"Durata del film":"Durata delle puntate",timeOpts()]);
+  g.push(["who","Con chi guardi",WHO]);
+  g.push(["style","Famoso o da scoprire",STYLE]);
+  return g;
+}
+function detDefaults(){
+  const pf=loadPrefs();
+  if(isAnim()&&!S.fmt)S.fmt="any";
+  if(!timeShown())S.time="any";else if(!S.time)S.time="any";
+  if(!S.who)S.who=pf.who||"solo";
+  if(!S.style)S.style=pf.style||"balanced";
+}
+const seg=(g,o,on)=>'<button type="button" class="sg'+(on?' on':'')+'" data-g="'+g+'" data-v="'+o[0]+'" aria-pressed="'+(on?'true':'false')+'"><span class="em">'+o[1]+'</span>'+esc(o[2])+'</button>';
+function detGroupHtml(g){
+  const cur=g[2].find(o=>o[0]===S[g[0]]);
+  return '<div class="dg" id="dg-'+g[0]+'"><small>'+esc(g[1])+'</small><div class="seg" role="group" aria-label="'+esc(g[1])+'">'+g[2].map(o=>seg(g[0],o,S[g[0]]===o[0])).join('')+'</div><p class="dh">'+esc(cur&&cur[3]||'')+'</p></div>';
+}
 function gkey(cat,a){cat=cat==="cartoni"?(a&&a.fmt==="movie"?"film":"serie"):cat; return cat==="film"?"film":cat==="anime"?"anime":"serie";}
 const without=(cat,a)=>{cat=gkey(cat,a);let w=[];(a.avoid||[]).forEach(k=>{if(G[cat].avoid[k]) w=w.concat(G[cat].avoid[k]);}); if(a.who==="family") w=w.concat(cat==="film"?["horror film","erotic film","war film"]:cat==="anime"?["Horror","Ecchi","Hentai"]:["Horror","War","Crime"]); return uniq(w);};
 
@@ -528,24 +558,46 @@ function home(anim){
   const ST=steps();
   if(S.step>ST.length-1)S.step=ST.length-1;
   const dx=DIR*100;DIR=1;
-  // contatore fisso (4 tappe) che non cambia in base alla categoria: "film o serie" fa parte della prima tappa, "durata" se saltata lascia solo un numero in meno
-  const CNT=["cat","mood","time","who","style"],PI=Math.max(0,CNT.indexOf(ST[S.step].k==="fmt"?"cat":ST[S.step].k));
-  const st=ST[S.step],items=st.get(),n=items.length,q=typeof st.q==="function"?st.q():st.q;
-  swap('<div class="page"><h1>'+esc(q)+'</h1><div class="opts n'+n+'" role="group" aria-label="'+esc(q)+'">'+items.map((o,i)=>opt(st.k,o,S[st.k]===o[0],i)).join('')+'</div></div>',anim,dx);
-  ui({
+  const st=ST[S.step],last=st.k==="det";
+  const base={
     l:S.step>0?tbtn('back','back','Indietro'):tbtn('logout','out','Esci'),
     r:(S.step===0&&tmdbOn())?tbtn('search','search','Cerca un titolo'):'',
-    d:bb('sur',IC.dice+'Sorprendimi','primary'),
-    p:isAnim()?[STEPS.length,STEPS.indexOf(ST[S.step])]:[ST.length,S.step],
-    a:{back:()=>{if(S.step>0){S.step--;DIR=-1;home();}},sur:surpriseAll,logout:doLogout,search:searchPage}
-  });
+    p:[ST.length,S.step]
+  };
+  const go=()=>{savePrefs();S.seen=[];S.cands=[];run(false,true);};
+  const acts={back:()=>{if(S.step>0){S.step--;DIR=-1;home();}},sur:surpriseAll,logout:doLogout,search:searchPage,go};
+  if(last){
+    detDefaults();
+    const gs=detGroups();
+    swap('<div class="page"><h1>Ultimi dettagli</h1><div class="det" id="det">'+gs.map(detGroupHtml).join('')+'</div></div>',anim,dx);
+    ui(Object.assign(base,{d:bb('sur',IC.dice+'Sorprendimi')+bb('go',IC.play+'Trova il titolo','primary'),a:acts}));
+    const det=$("det");
+    det.onclick=e=>{
+      const b=e.target.closest&&e.target.closest(".sg");if(!b)return;
+      tap();const g=b.dataset.g,v=b.dataset.v;S[g]=v;
+      if(g==="fmt"){S.time="any";const old=$("dg-time"),want=timeShown();
+        if(want){const html=detGroupHtml(["time","Durata del film",timeOpts()]);
+          if(old)old.outerHTML=html;else $("dg-fmt").insertAdjacentHTML("afterend",html);}
+        else if(old)old.remove();}
+      const dg=$("dg-"+g);
+      dg.querySelectorAll(".sg").forEach(x=>{const on=x===b;x.classList.toggle("on",on);x.setAttribute("aria-pressed",on?"true":"false");});
+      const o=detGroups().find(x=>x[0]===g)[2].find(x=>x[0]===v);
+      const h=dg.querySelector(".dh");if(h)h.textContent=(o&&o[3])||"";
+    };
+    return;
+  }
+  const items=st.get(),n=items.length,q=st.q;
+  swap('<div class="page"><h1>'+esc(q)+'</h1><div class="opts n'+n+'" role="group" aria-label="'+esc(q)+'">'+items.map((o,i)=>opt(st.k,o,S[st.k]===o[0],i)).join('')+'</div></div>',anim,dx);
+  ui(Object.assign(base,{d:bb('sur',IC.dice+'Sorprendimi','primary'),a:acts}));
   let lock=false;
   stage.querySelectorAll('.opt').forEach(b=>{b.onclick=()=>{
     if(lock)return;lock=true;tap();
-    const g=b.dataset.g,v=b.dataset.v;S[g]=v;if(g==="cat"){S.time="";S.fmt="";}if(g==="fmt")S.time="";
+    const g=b.dataset.g,v=b.dataset.v;
+    if(g==="cat"&&S.cat!==v){S.time="";S.fmt="";}
+    S[g]=v;
     stage.querySelectorAll('.opt').forEach(x=>{const on=x===b;x.classList.toggle('on',on);x.setAttribute('aria-pressed',on?'true':'false');});
     b.classList.add('hit');
-        setTimeout(()=>{if(S.step<steps().length-1){S.step++;home();}else{S.seen=[];S.cands=[];run(false,true);}},230);
+    setTimeout(()=>{S.step++;home();},230);
   };});
 }
 
@@ -801,6 +853,9 @@ async function tmDiscover(kind,a,anim,ja){
     if(a.time==="mid"){p["with_runtime.gte"]=85;p["with_runtime.lte"]=125;}
     if(a.time==="long")p["with_runtime.gte"]=115;
   }else if(!anim){
+    if(a.time==="short")p["with_runtime.lte"]=30;
+    if(a.time==="mid"){p["with_runtime.gte"]=30;p["with_runtime.lte"]=55;}
+    if(a.time==="long")p["with_runtime.gte"]=50;
     const kw=a.mood==="scare"?await tmKw("horror"):a.mood==="love"?await tmKw("romance"):null;
     if(kw)p.with_keywords=kw;
   }
