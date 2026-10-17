@@ -37,7 +37,7 @@
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{height:100%;margin:0;background:var(--bg);-webkit-text-size-adjust:100%}
 html,body{overflow:hidden;overscroll-behavior:none;touch-action:pan-x pan-y}
-body{margin:0;height:100%;font:16px/1.45 var(--fb);color:var(--fg);background:transparent;
+body{margin:0;position:fixed;inset:0;width:100%;height:100%;font:16px/1.45 var(--fb);color:var(--fg);background:transparent;
   -webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 button{font:inherit;color:inherit;cursor:pointer;-webkit-appearance:none;appearance:none;touch-action:manipulation;margin:0;border:0;background:none;padding:0}
 a{color:inherit;touch-action:manipulation}
@@ -482,9 +482,9 @@ function home(anim){
   swap('<div class="page"><h1>'+esc(q)+'</h1><div class="opts n'+n+'" role="group" aria-label="'+esc(q)+'">'+items.map((o,i)=>opt(st.k,o,S[st.k]===o[0],i)).join('')+'</div></div>',anim,dx);
   ui({
     l:S.step>0?tbtn('back','back','Indietro'):tbtn('logout','out','Esci'),
-    r:'<span class="cnt"><b>'+(PI+1)+'</b>/'+CNT.length+'</span>',
+    r:'',
     d:bb('sur',IC.dice+'Sorprendimi','primary'),
-    p:[CNT.length,PI],
+    p:[ST.length,S.step],
     a:{back:()=>{if(S.step>0){S.step--;DIR=-1;home();}},sur:surpriseAll,logout:doLogout}
   });
   let lock=false;
@@ -804,8 +804,8 @@ function provUrl(name,title,fb){
 // stesso servizio venduto anche come "canale" dentro Prime Video / Apple TV (es. Paramount+, Paramount+ Amazon Channel, Paramount Plus Apple TV Channel): un solo logo
 const CH_RE=/\s+(Apple\s*TV|Amazon|Prime\s*Video)(\s+Amazon)?\s+Channel$/i;
 const provBase=n=>String(n||"").replace(CH_RE,"").trim();
-const provKey=n=>provBase(n).toLowerCase().replace(/\+/g,"plus").replace(/[^a-z0-9]+/g,"");
-function dedupeProv(arr){const m=new Map();arr.forEach(p=>{const k=provKey(p.provider_name),ch=CH_RE.test(p.provider_name||"");const o=m.get(k);if(!o)m.set(k,{p,ch});else if(o.ch&&!ch)m.set(k,{p,ch});});return Array.from(m.values()).map(x=>x.p);}
+const provKey=n=>{let k=provBase(n).toLowerCase().replace(/\+/g,"plus").replace(/with ads|con pubblicit[aà]/g,"").replace(/[^a-z0-9]+/g,"");if(/^(amazon)?primevideo$/.test(k))k="primevideo";return k;};
+function dedupeProv(arr){const m=new Map();arr.forEach(p=>{const k=provKey(p.provider_name),ch=CH_RE.test(p.provider_name||"")||/with ads|con pubblicit/i.test(p.provider_name||"");const o=m.get(k);if(!o)m.set(k,{p,ch});else if(o.ch&&!ch)m.set(k,{p,ch});});return Array.from(m.values()).map(x=>x.p);}
 function provHtml(d){
   if(d.rl!=="TMDB"||!d.provKnown)return "";
   const groups=[["flat","In abbonamento"],["ads","Gratis con pubblicità"],["rent","Noleggio"],["buy","Acquisto"]];
@@ -1084,7 +1084,9 @@ function fit(){
   document.documentElement.style.setProperty("--bandb",band+"px");
 }
 fit();[150,600,1500].forEach(t=>setTimeout(fit,t));
-addEventListener("resize",fit);addEventListener("pageshow",fit);
+addEventListener("resize",()=>{fit();if(!(document.activeElement&&/INPUT/.test(document.activeElement.tagName)))resetScroll();});
+if(window.visualViewport)visualViewport.addEventListener("scroll",()=>{if(!(document.activeElement&&/INPUT/.test(document.activeElement.tagName)))resetScroll();});
+addEventListener("pageshow",fit);
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)setTimeout(fit,200);});
 addEventListener("orientationchange",()=>setTimeout(fit,300));
 
@@ -1106,9 +1108,11 @@ function lockApp(){
   if(!RM()&&lg.animate)lg.animate([{opacity:0,filter:"blur(14px)"},{opacity:1,filter:"blur(0)"}],{duration:600,easing:"cubic-bezier(.22,1,.36,1)"});
   setTimeout(()=>{try{$("lgu").focus();}catch(e){}},50);
 }
+function resetScroll(){try{scrollTo(0,0);document.documentElement.scrollTop=0;document.body.scrollTop=0;}catch(e){}}
 function unlockApp(){
   document.body.classList.remove("locked");
   try{document.activeElement&&document.activeElement.blur();}catch(e){}
+  resetScroll();[100,300,600,1000].forEach(t=>setTimeout(()=>{resetScroll();fit();},t));
   if(!RM()&&lg.animate){lg.animate([{opacity:1,filter:"blur(0)"},{opacity:0,filter:"blur(16px)"}],{duration:600,easing:"cubic-bezier(.4,0,.6,1)",fill:"forwards"}).onfinish=()=>{lg.hidden=true;lg.getAnimations().forEach(x=>x.cancel());};setTimeout(()=>{lg.hidden=true;},900);}
   else lg.hidden=true;
   home();   // la prima pagina compare con la sfocatura incrociata mentre il login svanisce
