@@ -795,8 +795,13 @@ function rad(el){const r=parseFloat(getComputedStyle(el).borderTopLeftRadius);re
 function rectOf(el){const t=el.style.transition,f=el.style.transform;el.style.transition="none";el.style.transform="none";const r=el.getBoundingClientRect();el.style.transform=f;el.style.transition=t;return r;}
 const EDGE_C="rgba(255,255,255,.18)";
 // campiona l'animazione: a ogni istante raggio e cornice sono divisi per la scala, quindi a schermo restano costanti (uguali a locandina piccola)
-function kfs(f,t,R,N,edge){const o=[];for(let i=0;i<=N;i++){const p=i/N,s=f.s+(t.s-f.s)*p,x=f.x+(t.x-f.x)*p,y=f.y+(t.y-f.y)*p;
-  o.push(edge?{offset:p,boxShadow:"inset 0 0 0 "+(1/s)+"px "+EDGE_C}:{offset:p,transform:"translate("+x+"px,"+y+"px) scale("+s+")",borderRadius:(R/s)+"px",padding:(1/s)+"px"});}return o;}
+function kfs(f,t,R,N,edge,clip,opening){const o=[];for(let i=0;i<=N;i++){const p=i/N,s=f.s+(t.s-f.s)*p,x=f.x+(t.x-f.x)*p,y=f.y+(t.y-f.y)*p;
+  o.push(edge?{offset:p,boxShadow:"inset 0 0 0 "+(1/s)+"px "+EDGE_C}:{offset:p,transform:"translate("+x+"px,"+y+"px) scale("+s+")",borderRadius:(R/s)+"px",padding:(1/s)+"px",clipPath:clip?"inset("+[clip.t,clip.r,clip.b,clip.l].map(c=>(c*(opening?1-p:p)/s)+"px").join(" ")+")":"none"});}return o;}
+// parte della locandina visibile (tagliata dal contenitore con scroll): la card in animazione deve avere lo stesso taglio
+function visClip(el,sr){let t=sr.top,b=sr.bottom,l=sr.left,r=sr.right;
+  for(let n=el.parentElement;n&&n!==document.documentElement;n=n.parentElement){const cs=getComputedStyle(n);
+    if(/(hidden|auto|scroll|clip)/.test(cs.overflowY+cs.overflowX)){const q=n.getBoundingClientRect();t=Math.max(t,q.top);b=Math.min(b,q.bottom);l=Math.max(l,q.left);r=Math.min(r,q.right);}}
+  const z=v=>Math.max(0,v);return{t:z(t-sr.top),b:z(sr.bottom-b),l:z(l-sr.left),r:z(sr.right-r)};}
 function fromTo(sr,T){const k=sr.width/T.w;return "translate("+(sr.left-T.x)+"px,"+(sr.top-T.y)+"px) scale("+k+")";}
 
 function openLb(el){
@@ -837,7 +842,8 @@ function openLb(el){
   el.animate([{boxShadow:SH1},{boxShadow:SH0}],{duration:RM()?1:560,easing:"ease-out",fill:"forwards"});
   const D=RM()?1:780;
   const F0={x:sr.left-T.x,y:sr.top-T.y,s:k},F1={x:0,y:0,s:1};
-  const oa=card.animate(kfs(F0,F1,R,24),{duration:D,easing:EASE});
+  const VC=visClip(el,sr);
+  const oa=card.animate(kfs(F0,F1,R,24,false,VC,true),{duration:D,easing:EASE});
   OA=oa;
   if(edge)edge.animate(kfs(F0,F1,R,24,true),{duration:D,easing:EASE});
   if(ring)ring.animate([{opacity:1},{opacity:0,offset:.35},{opacity:0}],{duration:D,easing:"linear",fill:"forwards"});
@@ -866,7 +872,8 @@ function doCloseLb(){
   L.el.animate([{boxShadow:SH0},{boxShadow:SH0,offset:.3},{boxShadow:SH1}],{duration:D,easing:"ease-in-out"});
   let m0;try{m0=new DOMMatrix(cur&&cur!=="none"?cur:"none");}catch(e){m0=new DOMMatrix();}
   const C0={x:m0.e,y:m0.f,s:m0.a||1},C1={x:sr.left-L.T.x,y:sr.top-L.T.y,s:k};
-  const a=L.card.animate(kfs(C0,C1,L.R,24),{duration:D,easing:EASE,fill:"forwards"});
+  const VC=visClip(L.el,sr);
+  const a=L.card.animate(kfs(C0,C1,L.R,24,false,VC,false),{duration:D,easing:EASE,fill:"forwards"});
   if(L.ring){L.ring.getAnimations().forEach(x=>x.cancel());L.ring.animate([{opacity:0},{opacity:0,offset:.6},{opacity:1}],{duration:D,easing:"linear",fill:"forwards"});}
   if(L.edge){L.edge.getAnimations().forEach(x=>x.cancel());L.edge.animate(kfs(C0,C1,L.R,24,true),{duration:D,easing:EASE,fill:"forwards"});}
   PEND=fin;a.onfinish=fin;setTimeout(fin,1000);
