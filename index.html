@@ -200,6 +200,7 @@ body::after{right:-60vmax;bottom:-75vmax;background:radial-gradient(closest-side
 .in .why li b{display:inline-block;animation:ckpop .5s cubic-bezier(.3,1.6,.5,1) backwards;animation-delay:inherit}
 .in .pv{animation:chipIn .45s cubic-bezier(.3,1.5,.5,1) backwards;animation-delay:calc(.5s + var(--c,0)*45ms)}
 
+a.pv{color:inherit;text-decoration:none}a.pv:active{transform:scale(.92)}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-delay:0s!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}
 </style>
 </head>
@@ -559,13 +560,27 @@ function why(r,sur){
   if(a.risk>=70)o.push('È abbastanza fuori dagli schemi da risultare interessante.');
   return o.slice(0,4);
 }
+function provUrl(name,title,fb){
+  const q=encodeURIComponent(title||""),n=String(name||"").toLowerCase();
+  if(/netflix/.test(n))return "https://www.netflix.com/search?q="+q;
+  if(/prime video|amazon/.test(n))return "https://www.primevideo.com/search/?phrase="+q;
+  if(/disney/.test(n))return "https://www.disneyplus.com/it-it/search?q="+q;
+  if(/apple tv/.test(n))return "https://tv.apple.com/it/search?term="+q;
+  if(/paramount/.test(n))return "https://www.paramountplus.com/it/search/?q="+q;
+  if(/^now\b/.test(n))return "https://www.nowtv.it/watch/search?q="+q;
+  if(/raiplay/.test(n))return "https://www.raiplay.it/ricerca.html?q="+q;
+  if(/infinity/.test(n))return "https://www.mediasetinfinity.mediaset.it/search?q="+q;
+  if(/youtube/.test(n))return "https://www.youtube.com/results?search_query="+q;
+  if(/google play/.test(n))return "https://play.google.com/store/search?c=movies&q="+q;
+  return fb||("https://www.justwatch.com/it/cerca?q="+q);
+}
 function provHtml(d){
   if(d.rl!=="TMDB"||!d.provKnown)return "";
   const groups=[["flat","In abbonamento"],["ads","Gratis con pubblicità"],["rent","Noleggio"],["buy","Acquisto"]];
   let h="";
   groups.forEach(g=>{
     const arr=(d.prov&&d.prov[g[0]])||[];if(!arr.length)return;
-    h+='<div class="pg"><small>'+g[1]+'</small><div class="pl">'+arr.map(p=>'<span class="pv">'+(p.logo_path?'<img src="https://image.tmdb.org/t/p/w92'+esc(p.logo_path)+'" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">':'')+'<em>'+esc(p.provider_name)+'</em></span>').join('')+'</div></div>';
+    h+='<div class="pg"><small>'+g[1]+'</small><div class="pl">'+arr.map(p=>'<a class="pv" href="'+esc(provUrl(p.provider_name,d.title,d.prov&&d.prov.link))+'" target="_blank" rel="noopener">'+(p.logo_path?'<img src="https://image.tmdb.org/t/p/w92'+esc(p.logo_path)+'" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">':'')+'<em>'+esc(p.provider_name)+'</em></a>').join('')+'</div></div>';
   });
   if(!h)h='<p>Al momento non risulta disponibile in Italia su piattaforme di streaming, noleggio o acquisto.</p>';
   else if(d.prov&&d.prov.link)h+='<a class="more" href="'+esc(d.prov.link)+'" target="_blank" rel="noopener">Tutte le opzioni ↗</a>';
