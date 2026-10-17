@@ -433,13 +433,13 @@ const buildA=()=>({
 const stage=$("stage");
 
 /* ---------- UI: stage, barra alta, dock ---------- */
-/* regole: tra due domande, avanti e indietro = stessa dissolvenza. Altrove: scorrimento solo per tornare indietro, in avanti dissolvenza */
+/* regole: tra due domande scorrimento (avanti e indietro, come in origine). Ovunque altrove dissolvenza, sia in apertura che tornando indietro */
 let SWQ=false;
 function swap(h,anim,dx){
   const old=stage.innerHTML,app=$("app");
   const prevQ=!!stage.querySelector(".opts"),toQ=SWQ;SWQ=false;
   document.querySelectorAll(".ghost").forEach(g=>g.remove());
-  const back=typeof dx==="number"&&dx<0,fade=dx==="fade"||(prevQ&&toQ)||!back,move=anim!==false&&!RM()&&!fade;
+  const fade=dx==="fade"||!(prevQ&&toQ),move=anim!==false&&!RM()&&!fade;
   let ghost=null;
   if(move&&old.trim()){
     const ar=app.getBoundingClientRect(),sr=stage.getBoundingClientRect();
