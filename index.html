@@ -218,6 +218,27 @@ a.more{display:inline-block;margin-top:14px;font-size:.82rem;color:var(--gold);t
 #lb .hint{position:absolute;left:0;right:0;bottom:calc(var(--sab) + 22px);text-align:center;font-size:.8rem;color:var(--mut);opacity:0;transition:opacity .5s .3s}
 #lb.show .hint{opacity:1}
 
+/* accesso */
+body.locked #app,body.locked #bd{visibility:hidden}
+#lg{position:fixed;inset:0;z-index:300;display:flex;align-items:center;justify-content:center;overflow:auto;
+  padding:calc(var(--sat) + 24px) var(--gut) calc(var(--sab) + 24px);
+  background:radial-gradient(120% 60% at 50% 0,rgba(143,98,248,.22),transparent 60%),radial-gradient(90% 50% at 100% 100%,rgba(255,61,82,.14),transparent 60%),var(--bg)}
+#lg[hidden]{display:none}
+.lgc{width:100%;max-width:360px;display:flex;flex-direction:column;gap:14px}
+.lgc>*{animation:btnIn .7s cubic-bezier(.22,1,.36,1) backwards}
+.lgc>:nth-child(2){animation-delay:.08s}.lgc>:nth-child(3){animation-delay:.14s}.lgc>:nth-child(4){animation-delay:.2s}.lgc>:nth-child(5){animation-delay:.26s}
+.lgbrand{display:flex;flex-direction:column;align-items:center;gap:14px;margin-bottom:14px;font-family:var(--fd);font-weight:800;font-size:1.05rem;letter-spacing:.22em;text-transform:uppercase;padding-left:.22em}
+.lgbrand .mark{width:64px;height:64px;border-radius:20px}
+.lgbrand .mark svg{width:26px;height:26px;margin-left:5px}
+.lgi{display:block;width:100%;height:56px;border-radius:18px;border:1px solid var(--line2);background:var(--s2);color:var(--fg);font:600 16px var(--fb);padding:0 18px;outline:none;transition:border-color .2s,box-shadow .2s}
+.lgi:focus{border-color:var(--vio);box-shadow:0 0 0 3px rgba(143,98,248,.25)}
+.lgi::placeholder{color:var(--dim);font-weight:500}
+.lgerr{margin:0;min-height:1.3em;text-align:center;font-size:.86rem;color:var(--red)}
+#lg .btn{flex:none;width:100%}
+#lg .btn:disabled{opacity:.6}
+@keyframes shake{0%,100%{transform:none}20%{transform:translateX(-9px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(3px)}}
+.lgc.bad .lgi{animation:shake .45s ease;border-color:var(--red)}
+
 /* animazioni */
 @keyframes rise{from{opacity:0;transform:translate3d(var(--dx,0px),var(--dy,16px),0) scale(.985)}}
 @keyframes rowIn{from{opacity:0;transform:translateY(16px) scale(.96)}}
@@ -255,6 +276,15 @@ a.more{display:inline-block;margin-top:14px;font-size:.82rem;color:var(--gold);t
     </div>
     <div class="dock-in" id="dockin"></div>
   </div>
+</div>
+<div id="lg" hidden>
+  <form class="lgc" id="lgf" autocomplete="on">
+    <div class="lgbrand"><span class="mark"><svg viewBox="0 0 12 12"><path d="M1 0l11 6L1 12z" fill="#fff"/></svg></span>Stasera</div>
+    <input class="lgi" id="lgu" name="username" type="text" placeholder="Nome utente" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" required>
+    <input class="lgi" id="lgp" name="password" type="password" placeholder="Password" autocomplete="current-password" required>
+    <p class="lgerr" id="lge" role="alert"></p>
+    <button type="submit" class="btn primary" id="lgb">Entra</button>
+  </form>
 </div>
 <div id="lb" aria-modal="true" role="dialog" aria-label="Locandina">
   <div class="bg"></div>
@@ -309,6 +339,7 @@ const IC={
   restart:sv('<path d="M3 12a9 9 0 109-9 9.7 9.7 0 00-6.7 2.8L3 8"/><path d="M3 3v5h5"/>'),
   next:sv('<path d="M5 12h14M13 6l6 6-6 6"/>'),
   play:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13a1 1 0 001.5.86l11-6.5a1 1 0 000-1.72l-11-6.5A1 1 0 008 5.5z"/></svg>',
+  out:sv('<path d="M15 4h3a2 2 0 012 2v12a2 2 0 01-2 2h-3M10 17l-5-5 5-5M5 12h11"/>'),
   expand:sv('<path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/>'),
   edit:sv('<path d="M15 5l-7 7 7 7"/>')
 };
@@ -445,14 +476,16 @@ function home(anim){
   const ST=steps();
   if(S.step>ST.length-1)S.step=ST.length-1;
   const dx=DIR*100;DIR=1;
+  // contatore fisso (4 tappe) che non cambia in base alla categoria: "film o serie" fa parte della prima tappa, "durata" se saltata lascia solo un numero in meno
+  const CNT=["cat","mood","time","who"],PI=Math.max(0,CNT.indexOf(ST[S.step].k==="fmt"?"cat":ST[S.step].k));
   const st=ST[S.step],items=st.get(),n=items.length,q=typeof st.q==="function"?st.q():st.q;
   swap('<div class="page"><h1>'+esc(q)+'</h1><div class="opts n'+n+'" role="group" aria-label="'+esc(q)+'">'+items.map((o,i)=>opt(st.k,o,S[st.k]===o[0],i)).join('')+'</div></div>',anim,dx);
   ui({
-    l:S.step>0?tbtn('back','back','Indietro'):'',
-    r:'<span class="cnt"><b>'+(S.step+1)+'</b>/'+ST.length+'</span>',
+    l:S.step>0?tbtn('back','back','Indietro'):tbtn('logout','out','Esci'),
+    r:'<span class="cnt"><b>'+(PI+1)+'</b>/'+CNT.length+'</span>',
     d:bb('sur',IC.dice+'Sorprendimi','primary'),
-    p:[ST.length,S.step],
-    a:{back:()=>{if(S.step>0){S.step--;DIR=-1;home();}},sur:surpriseAll}
+    p:[CNT.length,PI],
+    a:{back:()=>{if(S.step>0){S.step--;DIR=-1;home();}},sur:surpriseAll,logout:doLogout}
   });
   let lock=false;
   stage.querySelectorAll('.opt').forEach(b=>{b.onclick=()=>{
@@ -1056,7 +1089,49 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden)setTimeout
 addEventListener("orientationchange",()=>setTimeout(fit,300));
 
 /* ---------- Avvio e installazione ---------- */
-home();
+/* ---------- Accesso (il dispositivo resta autorizzato) ---------- */
+// Nel file ci sono solo sale + impronta PBKDF2 delle credenziali: nome utente e password non sono scritti in chiaro.
+const AUTH_SALT="stasera-v1-e6a19200dd53b736",AUTH_HASH="9e9b0a27b4792394b2150ac7fb5694b5ddc96498063b88f8ec2bdfa2d253fd32",AUTH_KEY="stasera_auth";
+const hex=b=>Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,"0")).join("");
+async function authHash(u,p){
+  const enc=new TextEncoder(),k=await crypto.subtle.importKey("raw",enc.encode(u.trim().toLowerCase()+":"+p),"PBKDF2",false,["deriveBits"]);
+  return hex(await crypto.subtle.deriveBits({name:"PBKDF2",salt:enc.encode(AUTH_SALT),iterations:200000,hash:"SHA-256"},k,256));
+}
+const isAuthed=()=>{try{return localStorage.getItem(AUTH_KEY)===AUTH_HASH;}catch(e){return false;}};
+const lg=$("lg");
+function lockApp(){
+  document.body.classList.add("locked");lg.hidden=false;
+  $("lgu").value="";$("lgp").value="";$("lge").textContent="";$("lgb").disabled=false;
+  const c=lg.firstElementChild;c.classList.remove("bad");
+  if(!RM()&&lg.animate)lg.animate([{opacity:0,filter:"blur(14px)"},{opacity:1,filter:"blur(0)"}],{duration:600,easing:"cubic-bezier(.22,1,.36,1)"});
+  setTimeout(()=>{try{$("lgu").focus();}catch(e){}},50);
+}
+function unlockApp(){
+  document.body.classList.remove("locked");
+  try{document.activeElement&&document.activeElement.blur();}catch(e){}
+  if(!RM()&&lg.animate){lg.animate([{opacity:1,filter:"blur(0)"},{opacity:0,filter:"blur(16px)"}],{duration:600,easing:"cubic-bezier(.4,0,.6,1)",fill:"forwards"}).onfinish=()=>{lg.hidden=true;lg.getAnimations().forEach(x=>x.cancel());};setTimeout(()=>{lg.hidden=true;},900);}
+  else lg.hidden=true;
+  home();   // la prima pagina compare con la sfocatura incrociata mentre il login svanisce
+}
+function doLogout(){
+  try{localStorage.removeItem(AUTH_KEY);}catch(e){}
+  Object.assign(S,{cat:"",fmt:"",mood:"",time:"",who:"",effort:"",era:"",style:"",step:0,seen:[],cands:[],cur:null});
+  stage.innerHTML="";FIRST=true;
+  lockApp();
+}
+let lgBusy=false;
+$("lgf").addEventListener("submit",async e=>{
+  e.preventDefault();if(lgBusy)return;lgBusy=true;
+  const c=lg.firstElementChild,er=$("lge"),btn=$("lgb");btn.disabled=true;er.textContent="";c.classList.remove("bad");
+  let ok=false,fail="";
+  try{ok=(await authHash($("lgu").value,$("lgp").value))===AUTH_HASH;}
+  catch(x){fail="Impossibile verificare l'accesso su questa connessione.";}
+  lgBusy=false;
+  if(ok){try{localStorage.setItem(AUTH_KEY,AUTH_HASH);}catch(x){}unlockApp();return;}
+  btn.disabled=false;er.textContent=fail||"Nome utente o password non corretti.";
+  void c.offsetWidth;c.classList.add("bad");$("lgp").value="";try{$("lgp").focus();}catch(x){}
+});
+if(isAuthed())home();else lockApp();
 let dp=null;const ib=$("ib");
 addEventListener("beforeinstallprompt",e=>{e.preventDefault();dp=e;try{if(!localStorage.getItem("stasera_ix"))ib.hidden=false;}catch(x){ib.hidden=false;}});
 $("ibtn").onclick=()=>{ib.hidden=true;if(dp){dp.prompt();dp=null;}};
