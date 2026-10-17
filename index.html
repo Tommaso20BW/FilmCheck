@@ -549,22 +549,7 @@ function searchPage(){
   // niente focus durante lo scorrimento: farebbe saltare la pagina a metà animazione
   setTimeout(()=>{try{if($("sq")===inp)inp.focus({preventScroll:true});}catch(e){}},780);
 }
-/* La ricerca prova tre strade: TMDB (multi) -> TMDB (film + serie) -> Wikidata (poi i dettagli arrivano comunque da TMDB) */
-async function searchWd(q){
-  const s=await fjr("https://www.wikidata.org/w/api.php?action=wbsearchentities&format=json&origin=*&language=it&uselang=it&type=item&limit=40&search="+encodeURIComponent(q),9000);
-  const ids=(s.search||[]).map(x=>x.id);
-  if(!ids.length)return [];
-  const e=await fjr("https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&origin=*&props=claims|labels|descriptions&languages=it|en&ids="+ids.join("|"),10000);
-  const out=[];
-  ids.forEach(id=>{
-    const en=e.entities&&e.entities[id];if(!en||!en.claims)return;
-    const g=p=>{const c=en.claims[p];return c&&c[0]&&c[0].mainsnak&&c[0].mainsnak.datavalue&&c[0].mainsnak.datavalue.value;};
-    const m=g("P4947"),t=g("P4983"),lab=((en.labels&&(en.labels.it||en.labels.en))||{}).value,desc=((en.descriptions&&(en.descriptions.it||en.descriptions.en))||{}).value||"",y=(desc.match(/\b(18|19|20)\d\d\b/)||[""])[0];
-    if(m&&lab)out.push({media_type:"movie",id:+m,title:lab,release_date:y});
-    else if(t&&lab)out.push({media_type:"tv",id:+t,name:lab,first_air_date:y});
-  });
-  return out;
-}
+/* Ricerca solo TMDB: prima la ricerca generale, poi film e serie separati */
 async function searchTitles(q){
   const P={query:q,include_adult:"false",page:1};
   let err=null;
@@ -579,7 +564,7 @@ async function searchTitles(q){
       return m.concat(t).sort((x,y)=>(y.popularity||0)-(x.popularity||0));
     }
   }catch(e){}
-  try{return await searchWd(q);}catch(e){throw err||e;}
+  throw err||new Error("ricerca TMDB non disponibile");
 }
 async function doSearch(q){
   const my=++SRUN,box=$("sres");
@@ -590,11 +575,12 @@ async function doSearch(q){
     const list=await searchTitles(q);
     if(my!==SRUN||!$("sres"))return;
     SLIST=list.slice(0,20);
-    $("sres").innerHTML=SLIST.length?SLIST.map((x,i)=>{
+    const row=(x,i)=>{
       const film=x.media_type==="movie",title=film?x.title:x.name,year=((film?x.release_date:x.first_air_date)||"").slice(0,4);
-      const th=x.poster_path?'<img src="https://image.tmdb.org/t/p/w92'+esc(x.poster_path)+'" alt="" loading="lazy" referrerpolicy="no-referrer">':(film?"🎬":"📺");
+      const th=x.poster_path?'<img src="https://image.tmdb.org/t/p/w154'+esc(x.poster_path)+'" alt="" loading="lazy" referrerpolicy="no-referrer">':'';
       return '<button type="button" class="sr" data-i="'+i+'"><span class="th">'+th+'</span><span class="tx"><span class="t">'+esc(title||"Senza titolo")+'</span><span class="s">'+(year?year+" · ":"")+(film?"Film":"Serie TV")+'</span></span></button>';
-    }).join(""):'<p class="smsg">Nessun risultato.</p>';
+    };
+    $("sres").innerHTML=SLIST.length?SLIST.map(row).join(""):'<p class="smsg">Nessun risultato.</p>';
   }catch(e){
     if(my!==SRUN||!$("sres"))return;
     $("sres").innerHTML='<p class="smsg">Ricerca non riuscita'+(navigator.onLine===false?': sei offline':' ('+esc((e&&e.message)||"errore")+')')+'. Riprova tra poco.</p>';
