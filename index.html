@@ -828,11 +828,16 @@ function doCloseLb(){
   L.lb.classList.remove("show");bg.style.opacity="";
   let done=false;
   const fin=()=>{if(done)return;done=true;PEND=null;try{L.card.getAnimations().forEach(x=>x.cancel());}catch(e){}
-    L.el.style.visibility="";L.lb.classList.remove("on");L.card.innerHTML="";L.card.style.transform="";};
+    try{L.el.getAnimations().forEach(x=>x.cancel());}catch(e){}L.el.style.visibility="";L.lb.classList.remove("on");L.card.innerHTML="";L.card.style.transform="";};
+  const D=RM()?1:340,X=RM()?1:160;
+  // la locandina originale riappare con dissolvenza (niente "pop"), mentre la card si dissolve
+  L.el.style.visibility="";
+  L.el.animate([{opacity:0},{opacity:1}],{duration:X,delay:D-X,easing:"ease-out",fill:"both"});
   const a=L.card.animate([
-    {transform:(cur&&cur!=="none")?cur:"translate(0,0) scale(1)",borderRadius:L.R+"px"},
-    {transform:fromTo(sr,L.T),borderRadius:(L.R/k)+"px"}
-  ],{duration:RM()?1:340,easing:EASE,fill:"forwards"});
+    {transform:(cur&&cur!=="none")?cur:"translate(0,0) scale(1)",borderRadius:L.R+"px",opacity:1,offset:0},
+    {opacity:1,offset:1-X/D*0.9},
+    {transform:fromTo(sr,L.T),borderRadius:(L.R/k)+"px",opacity:0,offset:1}
+  ],{duration:D,easing:EASE,fill:"forwards"});
   PEND=fin;a.onfinish=fin;setTimeout(fin,600);
 }
 (function(){
