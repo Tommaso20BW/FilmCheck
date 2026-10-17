@@ -196,9 +196,9 @@ a.more{display:inline-block;margin-top:14px;font-size:.82rem;color:var(--gold);t
 /* lightbox locandina */
 #lb{position:fixed;inset:0;z-index:100;display:none}
 #lb.on{display:block}
-#lb .bg{position:absolute;inset:0;background:rgba(5,3,10,.92);opacity:0;transition:opacity .34s ease;will-change:opacity}
+#lb .bg{position:absolute;inset:0;background:rgba(5,3,10,.92);opacity:0;transition:opacity .5s ease;will-change:opacity}
 #lb.show .bg{opacity:1}
-#lb .card2{position:absolute;left:0;top:0;transform-origin:0 0;border-radius:var(--r2);overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.7),0 0 60px rgba(143,98,248,.3);touch-action:none;will-change:transform,border-radius;isolation:isolate;-webkit-backface-visibility:hidden;backface-visibility:hidden;-webkit-mask-image:-webkit-radial-gradient(white,black)}
+#lb .card2{position:absolute;left:0;top:0;transform-origin:0 0;border-radius:var(--r2);overflow:hidden;box-shadow:0 24px 50px rgba(0,0,0,.6),0 0 40px rgba(143,98,248,.25);touch-action:none;will-change:transform,border-radius;isolation:isolate;-webkit-backface-visibility:hidden;backface-visibility:hidden;-webkit-mask-image:-webkit-radial-gradient(white,black)}
 #lb .card2 img{width:100%;height:100%;object-fit:cover}
 #lb .card2 .poster{width:100%;height:100%;border-radius:0;box-shadow:none;cursor:default;border:0}
 #lb .x{position:absolute;top:calc(var(--sat) + 12px);right:14px;opacity:0;transition:opacity .4s .15s}
@@ -779,14 +779,14 @@ async function share(){
 }
 
 /* ---------- Locandina grande (lightbox con animazione di ingrandimento) ---------- */
-let LB=null,PEND=null;
-const EASE="cubic-bezier(.2,.85,.25,1)";
+let LB=null,PEND=null,OA=null;
+const EASE="cubic-bezier(.32,.72,0,1)";
 const bigUrl=u=>String(u||"").replace("/t/p/w500/","/t/p/w780/").replace(/\?width=\d+$/,"?width=900");
 function rad(el){const r=parseFloat(getComputedStyle(el).borderTopLeftRadius);return isNaN(r)?16:r;}
 // misura la locandina "a riposo" (ignora l'effetto di pressione scale(.97))
 function rectOf(el){const t=el.style.transition,f=el.style.transform;el.style.transition="none";el.style.transform="none";const r=el.getBoundingClientRect();el.style.transform=f;el.style.transition=t;return r;}
 function fromTo(sr,T){const k=sr.width/T.w;return "translate("+(sr.left-T.x)+"px,"+(sr.top-T.y)+"px) scale("+k+")";}
-const SH_ON="0 30px 80px rgba(0,0,0,.7),0 0 60px rgba(143,98,248,.3)",SH_OFF="0 24px 50px rgba(0,0,0,.6),0 0 40px rgba(143,98,248,.25)";
+
 function openLb(el){
   if(LB)return;
   if(PEND)PEND();
@@ -802,7 +802,7 @@ function openLb(el){
     card.innerHTML='<img alt="" referrerpolicy="no-referrer">';
     const ci=card.firstChild;ci.src=im.currentSrc||im.src;
     const bu=bigUrl(im.currentSrc||im.src);
-    if(bu!==ci.src){const pre=new Image();pre.referrerPolicy="no-referrer";pre.onload=()=>{if(LB)ci.src=bu;};pre.src=bu;}
+    if(bu!==ci.src){const pre=new Image();pre.referrerPolicy="no-referrer";pre.onload=()=>{const go=()=>{if(LB&&LB.card===card)ci.src=bu;};(OA&&OA.finished?OA.finished.then(go,go):Promise.resolve().then(go));};pre.src=bu;}
   }else{
     const cl=el.cloneNode(true);cl.style.fontSize=(16*T.w/Math.max(60,sr.width))+"px";
     card.innerHTML="";card.appendChild(cl);
@@ -811,10 +811,11 @@ function openLb(el){
   LB={el,T,card,lb,moved:false,R,zi};
   lb.classList.add("on");void lb.offsetWidth;lb.classList.add("show");
   // NON nascondo la locandina originale: resta sotto la card (ombra e bordo non "scattano" mai)
-  card.animate([
-    {transform:fromTo(sr,T),borderRadius:(R/k)+"px",boxShadow:SH_OFF},
-    {transform:"translate(0,0) scale(1)",borderRadius:R+"px",boxShadow:SH_ON}
-  ],{duration:RM()?1:420,easing:EASE});
+  const oa=card.animate([
+    {transform:fromTo(sr,T),borderRadius:(R/k)+"px"},
+    {transform:"translate(0,0) scale(1)",borderRadius:R+"px"}
+  ],{duration:RM()?1:640,easing:EASE});
+  OA=oa;
   try{history.pushState({lb:1},"");}catch(e){}
 }
 function closeLb(){
@@ -837,10 +838,10 @@ function doCloseLb(){
     if(L.zi){void L.zi.offsetWidth;L.zi.style.transition="opacity .22s ease";L.zi.style.opacity="";setTimeout(()=>{L.zi.style.transition="";},300);}
     L.lb.classList.remove("on");L.card.innerHTML="";L.card.style.transform="";};
   const a=L.card.animate([
-    {transform:(cur&&cur!=="none")?cur:"translate(0,0) scale(1)",borderRadius:L.R+"px",boxShadow:SH_ON},
-    {transform:fromTo(sr,L.T),borderRadius:(L.R/k)+"px",boxShadow:SH_OFF}
-  ],{duration:RM()?1:340,easing:EASE,fill:"forwards"});
-  PEND=fin;a.onfinish=fin;setTimeout(fin,600);
+    {transform:(cur&&cur!=="none")?cur:"translate(0,0) scale(1)",borderRadius:L.R+"px"},
+    {transform:fromTo(sr,L.T),borderRadius:(L.R/k)+"px"}
+  ],{duration:RM()?1:520,easing:EASE,fill:"forwards"});
+  PEND=fin;a.onfinish=fin;setTimeout(fin,800);
 }
 (function(){
   const lb=$("lb"),card=$("lbc"),bg=lb.querySelector(".bg");
