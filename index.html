@@ -478,6 +478,10 @@ function swap(h,anim,dx){
   if(ghost){const g=ghost;g.animate([{transform:"none"},{transform:"translate3d("+(-d)+"%,0,0)"}],Object.assign({fill:"forwards"},o)).onfinish=()=>g.remove();setTimeout(()=>g.remove(),1000);}
 }
 let ACT={};
+/* gesto/tasto "indietro" del telefono = tasto indietro dell'app (una voce di cronologia per ogni schermata non iniziale) */
+let ARMED=false,SKIP=0;
+function armBack(){if(ARMED)return;ARMED=true;try{history.pushState({app:1},"");}catch(e){ARMED=false;}}
+function unarmBack(){if(!ARMED)return;ARMED=false;SKIP++;try{history.back();}catch(e){SKIP--;}}
 const tbtn=(act,ic,label)=>'<button type="button" class="tb" data-act="'+act+'" aria-label="'+label+'">'+IC[ic]+'</button>';
 const bb=(act,label,cls)=>'<button type="button" class="btn'+(cls?' '+cls:'')+'" data-act="'+act+'">'+label+'</button>';
 function ui(o){
@@ -503,12 +507,14 @@ function ui(o){
     requestAnimationFrame(()=>requestAnimationFrame(()=>{pg.firstChild.style.width=w;}));
   }else pg.classList.add("off");
   ACT=o.a||{};
+  if(ACT.back)armBack();else unarmBack();
 }
 document.addEventListener("click",e=>{
   const y=e.target.closest&&e.target.closest("[data-yt]");
   if(y){openYt(e,y.dataset.yt);return;}
   const b=e.target.closest&&e.target.closest("[data-act]");
   if(!b||b.disabled)return;
+  if(b.dataset.act==="back"&&ARMED&&!LB&&ACT.back){tap();try{history.back();}catch(x){ACT.back();}return;}
   const f=ACT[b.dataset.act];if(f){tap();try{f();}catch(x){}}
 });
 const tap=()=>{try{navigator.vibrate&&navigator.vibrate(8);}catch(e){}};
@@ -566,6 +572,7 @@ function home(anim){
   };
   const go=()=>{savePrefs();S.seen=[];S.cands=[];run(false,true);};
   const acts={back:()=>{if(S.step>0){S.step--;DIR=-1;home();}},sur:surpriseAll,logout:doLogout,search:searchPage,go};
+  if(S.step===0)delete acts.back;
   if(last){
     detDefaults();
     const gs=detGroups();
@@ -728,7 +735,7 @@ function loading(){
   setBd(null);
   const t=["Cerco un titolo adatto a te...","Controllo i tuoi gusti...","Ci siamo quasi..."];
   const cancel=()=>{RUN++;DIR=-1;home();};
-  ui({l:tbtn('cancel','x','Annulla'),r:'',d:bb('cancel','Annulla'),p:[1,1],a:{cancel}});
+  ui({l:tbtn('cancel','x','Annulla'),r:'',d:bb('cancel','Annulla'),p:[1,1],a:{cancel,back:cancel}});
   swap('<div class="load"><div class="spin" aria-hidden="true"><i></i><i></i><b></b></div><p id="lt">'+esc(t[0])+'</p></div>');
   let i=0;const iv=setInterval(()=>{i=(i+1)%t.length;const p=$('lt');if(p){p.textContent=t[i];if(p.animate)p.animate([{opacity:0,transform:'translateY(8px)'},{opacity:1,transform:'none'}],{duration:320,easing:'ease-out'});}},1300);
   return ()=>clearInterval(iv);
@@ -1230,7 +1237,6 @@ function doCloseLb(){
   card.addEventListener("pointerup",up);card.addEventListener("pointercancel",up);
   lb.addEventListener("click",()=>{if(LB&&LB.moved){LB.moved=false;return;}closeLb();});
   $("lbx").addEventListener("click",e=>{e.stopPropagation();closeLb();});
-  addEventListener("popstate",()=>{if(LB)doCloseLb();});
   addEventListener("keydown",e=>{if(e.key==="Escape")closeLb();});
 })();
 
@@ -1319,6 +1325,15 @@ function show(r,sur,man,quiet){
   });
 }
 
+
+addEventListener("popstate",()=>{
+  if(SKIP>0){SKIP--;return;}
+  if(LB){doCloseLb();return;}
+  ARMED=false;
+  if(document.body.classList.contains("locked"))return;
+  const f=ACT.back;
+  if(f){tap();try{f();}catch(e){}if(ACT.back&&!ARMED)armBack();}
+});
 
 /* ---------- Altezza reale dell'app (iOS: a volte la pagina finisce sopra il bordo basso) ---------- */
 /* Se iOS lascia una fascia sotto l'area della pagina, quella fascia fa già da margine di sicurezza:
