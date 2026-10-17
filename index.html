@@ -778,16 +778,18 @@ async function share(){
 }
 
 /* ---------- Locandina grande (lightbox con animazione di ingrandimento) ---------- */
-let LB=null;
+let LB=null,PEND=null;
 const EASE="cubic-bezier(.2,.85,.25,1)";
 const bigUrl=u=>String(u||"").replace("/t/p/w500/","/t/p/w780/").replace(/\?width=\d+$/,"?width=900");
 function fromTo(sr,T){return "translate("+(sr.left-T.x)+"px,"+(sr.top-T.y)+"px) scale("+(sr.width/T.w)+","+(sr.height/T.h)+")";}
 function openLb(el){
   if(LB)return;
+  if(PEND)PEND(); // FIX: termina subito una chiusura ancora in corso
   const lb=$("lb"),card=$("lbc"),sr=el.getBoundingClientRect();
   const vw=innerWidth,vh=innerHeight,padX=20,padT=76,padB=64;
   const maxW=vw-padX*2,maxH=vh-padT-padB;
   const w=Math.min(maxW,maxH*2/3,520),h=w*1.5,T={x:(vw-w)/2,y:padT+(maxH-h)/2,w,h};
+  card.getAnimations().forEach(x=>x.cancel()); // FIX: elimina animazioni vecchie rimaste
   card.style.cssText="left:"+T.x+"px;top:"+T.y+"px;width:"+T.w+"px;height:"+T.h+"px";
   const im=el.querySelector("img");
   if(im){
@@ -815,9 +817,9 @@ function doCloseLb(){
   const L=LB;LB=null;
   const sr=L.el.getBoundingClientRect(),cur=getComputedStyle(L.card).transform;
   L.lb.classList.remove("show");
-  let done=false;const fin=()=>{if(done)return;done=true;L.lb.classList.remove("on");L.card.innerHTML="";L.el.style.visibility="";};
+  let done=false;const fin=()=>{if(done)return;done=true;PEND=null;try{L.card.getAnimations().forEach(x=>x.cancel());}catch(e){}L.lb.classList.remove("on");L.card.innerHTML="";L.el.style.visibility="";};
   const a=L.card.animate([{transform:cur==="none"?"none":cur},{transform:fromTo(sr,L.T)}],{duration:RM()?1:360,easing:EASE,fill:"forwards"});
-  a.onfinish=fin;setTimeout(fin,700);
+  PEND=fin;a.onfinish=fin;setTimeout(fin,700);
 }
 (function(){
   const lb=$("lb"),card=$("lbc");
