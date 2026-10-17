@@ -437,7 +437,7 @@ function ui(o){
   if(o.p){
     if(!pg.firstChild)pg.innerHTML='<b></b>';
     pg.classList.remove("off");
-    const w=((o.p[1]+1)/o.p[0]*100)+"%";
+    const w=(o.p[1]/o.p[0]*100)+"%";
     requestAnimationFrame(()=>requestAnimationFrame(()=>{pg.firstChild.style.width=w;}));
   }else pg.classList.add("off");
   ACT=o.a||{};
@@ -484,7 +484,7 @@ function home(anim){
     l:S.step>0?tbtn('back','back','Indietro'):tbtn('logout','out','Esci'),
     r:'',
     d:bb('sur',IC.dice+'Sorprendimi','primary'),
-    p:[ST.length,S.step],
+    p:isAnim()?[STEPS.length,STEPS.indexOf(ST[S.step])]:[ST.length,S.step],
     a:{back:()=>{if(S.step>0){S.step--;DIR=-1;home();}},sur:surpriseAll,logout:doLogout}
   });
   let lock=false;
@@ -501,7 +501,7 @@ function loading(){
   setBd(null);
   const t=["Cerco un titolo adatto a te...","Controllo i tuoi gusti...","Ci siamo quasi..."];
   const cancel=()=>{RUN++;DIR=-1;home();};
-  ui({l:tbtn('cancel','x','Annulla'),r:'',d:bb('cancel','Annulla'),a:{cancel}});
+  ui({l:tbtn('cancel','x','Annulla'),r:'',d:bb('cancel','Annulla'),p:[1,1],a:{cancel}});
   swap('<div class="load"><div class="spin" aria-hidden="true"><i></i><i></i><b></b></div><p id="lt">'+esc(t[0])+'</p></div>');
   let i=0;const iv=setInterval(()=>{i=(i+1)%t.length;const p=$('lt');if(p){p.textContent=t[i];if(p.animate)p.animate([{opacity:0,transform:'translateY(8px)'},{opacity:1,transform:'none'}],{duration:320,easing:'ease-out'});}},1300);
   return ()=>clearInterval(iv);
