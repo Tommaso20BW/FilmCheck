@@ -28,7 +28,7 @@
   --red:#ff3d52;--pink:#c13bd9;--vio:#8f62f8;--gold:#f6c653;
   --grad:linear-gradient(135deg,#ff3d52,#c13bd9 62%,#8f62f8);
   --r1:14px;--r2:20px;--r3:26px;--gut:18px;
-  --sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px);
+  --sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px);--bandb:0px;
   --ease:cubic-bezier(.2,.85,.25,1);
   --fd:"Bricolage Grotesque","Arial Narrow",Arial,sans-serif;
   --fb:"Instrument Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
@@ -81,7 +81,7 @@ body::after{right:-60vmax;bottom:-75vmax;background:radial-gradient(closest-side
 .ghost{position:absolute;z-index:1;box-sizing:border-box;overflow:hidden;padding:10px var(--gut) 20px;pointer-events:none;will-change:transform;-webkit-mask-image:linear-gradient(transparent,#000 14px);mask-image:linear-gradient(transparent,#000 14px)}
 
 /* dock inferiore: resta SOPRA la zona della home-indicator, così i tasti si toccano sempre */
-#dock{flex:none;position:relative;z-index:6;padding:12px var(--gut) calc(var(--sab)*.55 + 14px)}
+#dock{flex:none;position:relative;z-index:6;padding:12px var(--gut) calc(max(0px,var(--sab) - var(--bandb))*.55 + 16px)}
 #dock::before{content:"";position:absolute;left:0;right:0;top:-26px;height:26px;pointer-events:none;background:linear-gradient(transparent,var(--bg))}
 #dock{background:var(--bg)}
 .dock-in{display:flex;gap:8px}
@@ -876,12 +876,23 @@ try{
 }catch(e){}
 
 /* ---------- Altezza reale dell'app (iOS: a volte la pagina finisce sopra il bordo basso) ---------- */
+/* Se iOS lascia una fascia sotto l'area della pagina, quella fascia fa già da margine di sicurezza:
+   la misuriamo e il tasto resta vicino al suo bordo, così sopra e sotto gli spazi si bilanciano. */
 const isApp=()=>{try{return navigator.standalone===true||matchMedia("(display-mode: standalone)").matches||matchMedia("(display-mode: fullscreen)").matches;}catch(e){return false;}};
 function fit(){
-  /* l'altezza reale la decide iOS: estendere la pagina oltre l'area visibile taglia il tasto, quindi non forziamo nulla */
   $("app").style.bottom="0px";
+  let band=0;
+  if(isApp()){
+    const portrait=innerHeight>=innerWidth,sh=portrait?Math.max(screen.width,screen.height):Math.min(screen.width,screen.height);
+    const g=Math.round(sh-innerHeight);
+    if(g>6&&g<140)band=g;
+  }
+  document.documentElement.style.setProperty("--bandb",band+"px");
 }
-fit();
+fit();[150,600,1500].forEach(t=>setTimeout(fit,t));
+addEventListener("resize",fit);addEventListener("pageshow",fit);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)setTimeout(fit,200);});
+addEventListener("orientationchange",()=>setTimeout(fit,300));
 
 /* ---------- Avvio e installazione ---------- */
 home();
