@@ -660,17 +660,20 @@ async function tmdbDetails(c){
     ytKey:tv?tv.key:"",prov:prov,provKnown:!!wpAll,
     tmdbUrl:"https://www.themoviedb.org/"+(c.movie?"movie":"tv")+"/"+c.tid};
 }
-async function animeNew(a){const kinds=a.fmt==='movie'?['film']:a.fmt==='any'?['film','tv']:['tv'];const r=await Promise.allSettled(kinds.map(k=>tmDiscover(k,a,true,true)));const list=[];r.forEach(x=>{if(x.status==='fulfilled')list.push(...x.value);});if(list.length<3)throw new Error('poche');return list;}
+async function animeNew(a){const kinds=a.fmt==='movie'?['film']:a.fmt==='any'?['film','tv']:['tv'];const r=await Promise.allSettled(kinds.map(k=>tmDiscover(k,a,true,true)));const list=[];r.forEach(x=>{if(x.status==='fulfilled')list.push(...x.value);});if(!list.length&&r.every(x=>x.status==='rejected'))throw new Error('TMDB non raggiungibile');return list;}
+// TMDB è l'unica fonte: le altre (Wikidata, TVmaze, AniList, Jikan) servono solo se TMDB non risponde proprio
 async function viaTmdb(fn,fallback,a){
   if(!tmdbOn())return fallback();
-  try{const l=await fn();if(l&&l.length>=(a.prov?1:3))return l;if(a.prov)throw new Error("EMPTY");}
-  catch(e){if(e&&e.message==="EMPTY")throw e;}
-  return fallback();
+  let l;
+  try{l=await fn();}
+  catch(e){if(e&&e.message==="EMPTY")throw e;return fallback();}   // errore di rete/proxy = TMDB "morto"
+  if(l&&l.length)return l;
+  throw new Error("EMPTY");                                          // TMDB vivo ma senza risultati: niente altre fonti
 }
 const isFilmItem=m=>m.sl!=null||(m.src==="tmdb"&&m.movie);
 const detailsOf=c=>c.src==="tmdb"?tmdbDetails(c):c.sl!=null?filmDetails(c):c.src==="tv"?tvDetails(c):animeDetails(c);
 async function cartoniOld(a){const r=await Promise.allSettled([a.fmt==="tv"?Promise.resolve([]):filmDiscover(a,true),a.fmt==="movie"?Promise.resolve([]):tvDiscover(a,true)]);const list=[];let err=null;r.forEach(x=>{if(x.status==="fulfilled")list.push(...x.value);else err=err||x.reason;});if(!list.length&&err)throw err;return list;}
-async function cartoniNew(a){const r=await Promise.allSettled([a.fmt==="tv"?Promise.resolve([]):tmDiscover("film",a,true),a.fmt==="movie"?Promise.resolve([]):tmDiscover("tv",a,true)]);const list=[];r.forEach(x=>{if(x.status==="fulfilled")list.push(...x.value);});if(list.length<3)throw new Error("poche");return list;}
+async function cartoniNew(a){const r=await Promise.allSettled([a.fmt==="tv"?Promise.resolve([]):tmDiscover("film",a,true),a.fmt==="movie"?Promise.resolve([]):tmDiscover("tv",a,true)]);const list=[];r.forEach(x=>{if(x.status==="fulfilled")list.push(...x.value);});if(!list.length&&r.every(x=>x.status==="rejected"))throw new Error("TMDB non raggiungibile");return list;}
 const SRC={
   film:a=>viaTmdb(()=>tmDiscover("film",a,false),()=>filmDiscover(a,false),a),
   serie:a=>viaTmdb(()=>tmDiscover("tv",a,false),()=>tvDiscover(a,false),a),
