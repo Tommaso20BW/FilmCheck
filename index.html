@@ -130,16 +130,6 @@ body::after{right:-60vmax;bottom:-75vmax;background:radial-gradient(closest-side
 .opt.on .ck::after{content:"";width:6px;height:11px;border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg) translate(-1px,-1px)}
 @media (hover:hover){.opt:hover{border-color:var(--line2)}}
 
-/* pagina dettagli: righe di scelte compatte */
-.det{display:flex;flex-direction:column;gap:22px;padding-bottom:6px}
-.dg small{display:block;margin:0 0 10px;font:700 .7rem var(--fb);letter-spacing:.16em;text-transform:uppercase;color:var(--mut)}
-.seg{display:flex;flex-wrap:wrap;gap:8px}
-.sg{display:flex;align-items:center;gap:8px;min-height:48px;padding:0 16px 0 12px;border-radius:999px;border:1px solid var(--line);background:linear-gradient(160deg,var(--s2),var(--s1));font-weight:600;font-size:.95rem;transition:transform .1s,border-color .15s,background .15s,box-shadow .2s}
-.sg:active{transform:scale(.96)}
-.sg .em{font-size:1.2rem;line-height:1}
-.sg.on{border-color:var(--red);background:linear-gradient(135deg,rgba(255,61,82,.26),rgba(143,98,248,.22));box-shadow:0 0 0 1px var(--red) inset,0 8px 22px rgba(255,61,82,.18)}
-.dh{margin:8px 2px 0;min-height:1.3em;font-size:.82rem;color:var(--mut)}
-
 /* caricamento / errore */
 .load{min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;text-align:center}
 .spin{position:relative;width:84px;height:84px}
@@ -446,7 +436,7 @@ const stage=$("stage");
 function swap(h,anim,dx){
   const old=stage.innerHTML,app=$("app");
   document.querySelectorAll(".ghost").forEach(g=>g.remove());
-  const fade=dx==="fade",move=anim!==false&&!RM()&&!fade;
+  const fade=dx==="fade"||(typeof dx==="number"&&dx<0),move=anim!==false&&!RM()&&!fade;
   let ghost=null;
   if(move&&old.trim()){
     const ar=app.getBoundingClientRect(),sr=stage.getBoundingClientRect();
@@ -471,7 +461,7 @@ function swap(h,anim,dx){
     return;
   }
   FIRST=false;
-  if(fade){if(!RM()&&stage.animate)stage.animate([{opacity:0},{opacity:1}],{duration:380,easing:"ease-out"});return;}
+  if(fade){if(!RM()&&stage.animate)stage.animate([{opacity:0,transform:"scale(.985)"},{opacity:1,transform:"none"}],{duration:260,easing:"cubic-bezier(.22,1,.36,1)"});return;}
   if(!move)return;
   const d=dx==null?100:dx,o={duration:650,easing:"cubic-bezier(.45,.05,.2,1)"};
   stage.animate([{transform:"translate3d("+d+"%,0,0)"},{transform:"none"}],o);
@@ -523,33 +513,13 @@ function setBd(u){const b=$("bd");if(u){b.firstElementChild.style.backgroundImag
 /* ---------- Scelta a pagine ---------- */
 const STEPS=[
   {k:"cat",q:"Cosa guardi stasera?",get:()=>CATS},
+  {k:"fmt",q:()=>S.cat==="anime"?"Film o serie anime?":"Film o serie animata?",get:()=>FMT,skip:()=>!isAnim()},
   {k:"mood",q:"Che voglia hai?",get:()=>MOOD},
-  {k:"det"}
+  {k:"time",q:()=>(S.cat==="film"||S.fmt==="movie")?"Quanto dura la serata?":"Quanto durano le puntate?",get:timeOpts,skip:()=>!timeShown()},
+  {k:"who",q:"Con chi guardi?",get:()=>WHO},
+  {k:"style",q:"Famoso o da scoprire?",get:()=>STYLE}
 ];
-const steps=()=>STEPS;
-const PREF="stasera_prefs";
-const loadPrefs=()=>{try{return JSON.parse(localStorage.getItem(PREF))||{};}catch(e){return {};}};
-const savePrefs=()=>{try{localStorage.setItem(PREF,JSON.stringify({who:S.who,style:S.style}));}catch(e){}};
-function detGroups(){
-  const g=[];
-  if(isAnim())g.push(["fmt",S.cat==="anime"?"Film o serie anime":"Film o serie animata",FMT]);
-  if(timeShown())g.push(["time",(S.cat==="film"||S.fmt==="movie")?"Durata del film":"Durata delle puntate",timeOpts()]);
-  g.push(["who","Con chi guardi",WHO]);
-  g.push(["style","Famoso o da scoprire",STYLE]);
-  return g;
-}
-function detDefaults(){
-  const pf=loadPrefs();
-  if(isAnim()&&!S.fmt)S.fmt="any";
-  if(!timeShown())S.time="any";else if(!S.time)S.time="any";
-  if(!S.who)S.who=pf.who||"solo";
-  if(!S.style)S.style=pf.style||"balanced";
-}
-const seg=(g,o,on)=>'<button type="button" class="sg'+(on?' on':'')+'" data-g="'+g+'" data-v="'+o[0]+'" aria-pressed="'+(on?'true':'false')+'"><span class="em">'+o[1]+'</span>'+esc(o[2])+'</button>';
-function detGroupHtml(g){
-  const cur=g[2].find(o=>o[0]===S[g[0]]);
-  return '<div class="dg" id="dg-'+g[0]+'"><small>'+esc(g[1])+'</small><div class="seg" role="group" aria-label="'+esc(g[1])+'">'+g[2].map(o=>seg(g[0],o,S[g[0]]===o[0])).join('')+'</div><p class="dh">'+esc(cur&&cur[3]||'')+'</p></div>';
-}
+const steps=()=>STEPS.filter(s=>!(s.skip&&s.skip()));
 function gkey(cat,a){cat=cat==="cartoni"?(a&&a.fmt==="movie"?"film":"serie"):cat; return cat==="film"?"film":cat==="anime"?"anime":"serie";}
 const without=(cat,a)=>{cat=gkey(cat,a);let w=[];(a.avoid||[]).forEach(k=>{if(G[cat].avoid[k]) w=w.concat(G[cat].avoid[k]);}); if(a.who==="family") w=w.concat(cat==="film"?["horror film","erotic film","war film"]:cat==="anime"?["Horror","Ecchi","Hentai"]:["Horror","War","Crime"]); return uniq(w);};
 
@@ -564,47 +534,27 @@ function home(anim){
   const ST=steps();
   if(S.step>ST.length-1)S.step=ST.length-1;
   const dx=DIR*100;DIR=1;
-  const st=ST[S.step],last=st.k==="det";
-  const base={
+  const st=ST[S.step],items=st.get(),n=items.length,q=typeof st.q==="function"?st.q():st.q;
+  swap('<div class="page"><h1>'+esc(q)+'</h1><div class="opts n'+n+'" role="group" aria-label="'+esc(q)+'">'+items.map((o,i)=>opt(st.k,o,S[st.k]===o[0],i)).join('')+'</div></div>',anim,dx);
+  const acts={back:()=>{if(S.step>0){S.step--;DIR=-1;home();}},sur:surpriseAll,logout:doLogout,search:searchPage};
+  if(S.step===0)delete acts.back;
+  ui({
     l:S.step>0?tbtn('back','back','Indietro'):tbtn('logout','out','Esci'),
     r:(S.step===0&&tmdbOn())?tbtn('search','search','Cerca un titolo'):'',
-    p:[ST.length,S.step]
-  };
-  const go=()=>{savePrefs();S.seen=[];S.cands=[];run(false,true);};
-  const acts={back:()=>{if(S.step>0){S.step--;DIR=-1;home();}},sur:surpriseAll,logout:doLogout,search:searchPage,go};
-  if(S.step===0)delete acts.back;
-  if(last){
-    detDefaults();
-    const gs=detGroups();
-    swap('<div class="page"><h1>Ultimi dettagli</h1><div class="det" id="det">'+gs.map(detGroupHtml).join('')+'</div></div>',anim,dx);
-    ui(Object.assign(base,{d:bb('sur',IC.dice+'Sorprendimi')+bb('go',IC.play+'Trova il titolo','primary'),a:acts}));
-    const det=$("det");
-    det.onclick=e=>{
-      const b=e.target.closest&&e.target.closest(".sg");if(!b)return;
-      tap();const g=b.dataset.g,v=b.dataset.v;S[g]=v;
-      if(g==="fmt"){S.time="any";const old=$("dg-time"),want=timeShown();
-        if(want){const html=detGroupHtml(["time","Durata del film",timeOpts()]);
-          if(old)old.outerHTML=html;else $("dg-fmt").insertAdjacentHTML("afterend",html);}
-        else if(old)old.remove();}
-      const dg=$("dg-"+g);
-      dg.querySelectorAll(".sg").forEach(x=>{const on=x===b;x.classList.toggle("on",on);x.setAttribute("aria-pressed",on?"true":"false");});
-      const o=detGroups().find(x=>x[0]===g)[2].find(x=>x[0]===v);
-      const h=dg.querySelector(".dh");if(h)h.textContent=(o&&o[3])||"";
-    };
-    return;
-  }
-  const items=st.get(),n=items.length,q=st.q;
-  swap('<div class="page"><h1>'+esc(q)+'</h1><div class="opts n'+n+'" role="group" aria-label="'+esc(q)+'">'+items.map((o,i)=>opt(st.k,o,S[st.k]===o[0],i)).join('')+'</div></div>',anim,dx);
-  ui(Object.assign(base,{d:bb('sur',IC.dice+'Sorprendimi','primary'),a:acts}));
+    d:bb('sur',IC.dice+'Sorprendimi','primary'),
+    p:(()=>{const tot=isAnim()?STEPS.length:STEPS.length-1;let ix=STEPS.indexOf(st);if(!isAnim()&&ix>1)ix--;return [tot+1,ix];})(),
+    a:acts
+  });
   let lock=false;
   stage.querySelectorAll('.opt').forEach(b=>{b.onclick=()=>{
     if(lock)return;lock=true;tap();
     const g=b.dataset.g,v=b.dataset.v;
     if(g==="cat"&&S.cat!==v){S.time="";S.fmt="";}
+    if(g==="fmt"&&S.fmt!==v)S.time="";
     S[g]=v;
     stage.querySelectorAll('.opt').forEach(x=>{const on=x===b;x.classList.toggle('on',on);x.setAttribute('aria-pressed',on?'true':'false');});
     b.classList.add('hit');
-    setTimeout(()=>{S.step++;home();},230);
+    setTimeout(()=>{if(S.step<steps().length-1){S.step++;home();}else{S.seen=[];S.cands=[];run(false,true);}},230);
   };});
 }
 
