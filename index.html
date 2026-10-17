@@ -322,7 +322,7 @@ async function animeDiscover(a){
 }
 async function animeDetails(c){const w=await enrich(c.title,c.movie?"film anime":"anime");return{movie:!!c.movie,title:c.title,year:c.year,runtime:c.runtime,episodes:c.episodes,overview:(w&&w.extract)||c.summary||"Trama non disponibile.",it:!!(w&&w.extract),poster:c.image||(w&&w.thumb),rl:"Jikan",rv:c.rating,glist:itg(c.genres),gt:itg(c.genres).join(" · ")};}
 /* ---------- TMDB (tramite proxy: la chiave NON è in questo file) ---------- */
-const TMDB_PROXY="";   /* es. "https://stasera-tmdb.tuonome.workers.dev"  (vedi GUIDA-TMDB.md) */
+const TMDB_PROXY="https://stasera-tmdb.tommaso2000bw.workers.dev";   /* es. "https://stasera-tmdb.tuonome.workers.dev"  (vedi GUIDA-TMDB.md) */
 const TMDB_IMG="https://image.tmdb.org/t/p/w500";
 const tmdbOn=()=>/^https:\/\//.test(TMDB_PROXY);
 const tm=(path,params)=>fjr(TMDB_PROXY.replace(/\/+$/,"")+path+"?"+new URLSearchParams(Object.assign({language:"it-IT"},params||{})).toString(),10000);
