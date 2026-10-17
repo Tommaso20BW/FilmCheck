@@ -65,7 +65,7 @@ img{max-width:100%;display:block}
   border-radius:var(--r);border:1px solid var(--line);background:var(--panel);
   transition:background .15s,border-color .15s,transform .08s;
 }
-.row .e{flex:none;width:44px;height:44px;border-radius:12px;background:var(--panel-2);display:grid;place-items:center;font-size:1.5rem;line-height:1}
+.row .e{flex:none;width:38px;display:grid;place-items:center;font-size:1.75rem;line-height:1}
 .row .tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
 .row .t{font-weight:700;font-size:1.05rem;line-height:1.2}
 .row .s{font-size:.8rem;color:var(--mut);line-height:1.25}
@@ -75,7 +75,7 @@ img{max-width:100%;display:block}
 .row.on{background:linear-gradient(135deg,rgba(255,61,82,.22),rgba(144,97,249,.20));border-color:var(--red)}
 .row.on .ck{border-color:var(--red);background:radial-gradient(circle,var(--red) 0 42%,transparent 48%)}
 @media (hover:hover){.row:hover{border-color:rgba(255,255,255,.24)}}
-@media (max-height:780px){.list.many .s{display:none}.list.many .row{min-height:46px}.list.many .e{width:38px;height:38px;font-size:1.3rem}.page{gap:10px}}
+@media (max-height:780px){.list.many .s{display:none}.list.many .row{min-height:46px}.list.many .e{width:32px;font-size:1.45rem}.page{gap:10px}}
 @media (min-width:900px){#stage{max-width:620px}.brand{font-size:1.05rem}}
 
 /* bottoni azione */
@@ -153,7 +153,7 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",
 const strip=s=>{const d=document.createElement("div");d.innerHTML=s||"";return d.textContent||"";};
 
 /* ---------- Dati ---------- */
-const CATS=[["film","🎬","Film","Dal grande cinema"],["serie","📺","Serie TV","Dal piccolo schermo"],["anime","⛩️","Anime","Serie e film giapponesi"],["cartoni","🧸","Cartoni","Animazione per tutti"]];
+const CATS=[["film","🎬","Film","Dal grande cinema"],["serie","📺","Serie TV","Dal piccolo schermo"],["anime","⛩️","Anime","Serie e film giapponesi"],["cartoni","🎨","Cartoni","Film e serie animate di ogni tipo"]];
 const MOOD=[
   ["feelgood","😊","Leggero","Niente pensieri"],["laugh","😂","Ridere","Una bella commedia"],
   ["love","❤️","Amore","Una storia romantica"],["cry","🥺","Lacrime","Mi voglio commuovere"],
@@ -164,7 +164,7 @@ const TIME_BY_CAT={
   film:[["short","⏱️","Corto","Sotto 90 minuti"],["mid","🎬","Normale","Circa 90–120 minuti"],["long","🍿","Lungo","Oltre 2 ore"],["any","🔥","Non importa","Qualsiasi durata"]],
   serie:[["short","⏱️","Un episodio","Una puntata e basta"],["mid","🎬","2–4 episodi","Una serata piena"],["long","🍿","Binge","Maratona"],["any","🔥","Non importa","Qualsiasi durata"]],
   anime:[["short","🎬","Un film","Si chiude stasera"],["mid","📺","Una stagione","Circa 12–26 episodi"],["long","🍿","Saga lunga","Tanti episodi"],["any","🔥","Non importa","Film o serie"]],
-  cartoni:[["short","⏱️","Corto","Sotto 90 minuti"],["mid","🎬","Normale","Circa 90–120 minuti"],["long","🍿","Lungo","Oltre 2 ore"],["any","🔥","Non importa","Qualsiasi durata"]]
+  cartoni:[["short","⏱️","Veloce","Un film corto o un episodio"],["mid","🎬","Normale","Un film o qualche episodio"],["long","🍿","Lungo","Film lungo o maratona"],["any","🔥","Non importa","Film o serie"]]
 };
 const STYLE=[["safe","🛋️","Sul sicuro","Titoli famosi e amati"],["balanced","🍿","Equilibrato","Un mix di noti e meno noti"],["surprise","🎲","Osa un po'","Qualcosa di inaspettato"]];
 const RISK={safe:20,balanced:55,surprise:85};
@@ -177,10 +177,10 @@ const JID={"Action":1,"Adventure":2,"Comedy":4,"Drama":8,"Fantasy":10,"Horror":1
 const MOOD_TXT={feelgood:"qualcosa di leggero",laugh:"ridere",love:"una storia d'amore",cry:"commuoverti",scare:"avere paura",thrill:"azione e adrenalina",mindbend:"un colpo di scena assurdo",epic:"un'avventura epica"};
 
 /* ---------- Stato ---------- */
-const S={cat:"film",mood:"feelgood",time:"any",style:"balanced",step:0,seen:[],cands:[],cur:null,a:null};
+const S={cat:"",mood:"",time:"",style:"",step:0,seen:[],cands:[],cur:null,a:null};
 const buildA=()=>({
-  cat:S.cat,mood:S.mood,time:S.time,effort:"1",who:"solo",avoid:[],risk:RISK[S.style],
-  fmt:S.cat==="cartoni"?"movie":S.cat==="anime"?(S.time==="short"?"movie":S.time==="any"?"any":null):null
+  cat:S.cat,mood:S.mood,time:S.time,effort:"1",who:"solo",avoid:[],risk:RISK[S.style]||55,
+  fmt:S.cat==="anime"?(S.time==="short"?"movie":S.time==="any"?"any":null):null
 });
 const stage=$("stage"), barhost=$("barhost");
 function swap(h,anim){stage.innerHTML=h;if(anim!==false){stage.classList.remove("in");void stage.offsetWidth;stage.classList.add("in");stage.scrollTop=0;}}
@@ -205,7 +205,7 @@ function home(anim){
   let lock=false;
   stage.querySelectorAll('.row').forEach(b=>{b.onclick=()=>{
     if(lock)return;lock=true;tap();
-    const g=b.dataset.g,v=b.dataset.v;S[g]=v;if(g==="cat")S.time="any";
+    const g=b.dataset.g,v=b.dataset.v;S[g]=v;if(g==="cat")S.time="";
     stage.querySelectorAll('.row').forEach(x=>{const on=x===b;x.classList.toggle('on',on);x.setAttribute('aria-pressed',on?'true':'false');});
     setTimeout(()=>{if(S.step<STEPS.length-1){S.step++;home();}else{S.seen=[];S.cands=[];run(false,true);}},170);
   };});
@@ -241,13 +241,17 @@ function fj(url,ms,opts){const c=new AbortController(),t=setTimeout(()=>c.abort(
 const fjr=(url,ms,o)=>fj(url,ms,o).catch(e=>e&&e.retry?sleep(1000).then(()=>fj(url,ms,o)):Promise.reject(e));
 function tier(list,tests){let last=[];for(const t of tests){const r=list.filter(t);if(r.length>=5)return r;if(r.length)last=r;}return last.length?last:list;}
 const wsum=t=>fjr("https://it.wikipedia.org/api/rest_v1/page/summary/"+encodeURIComponent(t.trim().replace(/\s+/g,"_")),8000);
-async function enrich(title,kind){const ok=r=>r&&r.extract&&r.type!=='disambiguation'&&KW.test(r.extract.slice(0,300));const out=r=>({extract:r.extract,thumb:r.thumbnail&&r.thumbnail.source});try{const r=await wsum(title);if(ok(r))return out(r);}catch(e){}try{const s=await fjr("https://it.wikipedia.org/w/api.php?action=query&list=search&format=json&origin=*&srlimit=3&srsearch="+encodeURIComponent(title+" "+kind),8000);for(const x of (s.query&&s.query.search)||[]){try{const r=await wsum(x.title);if(ok(r))return out(r);}catch(e){}}}catch(e){}return null;}
+const normT=s=>String(s||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/\(.*?\)/g," ").replace(/[^a-z0-9]+/g," ").trim();
+const sameTitle=(a,b)=>{const x=normT(a),y=normT(b);return !!x&&x===y;};
+async function enrich(title,kind){const ok=r=>r&&r.extract&&r.type!=='disambiguation'&&KW.test(r.extract.slice(0,300))&&sameTitle(r.title,title);const out=r=>({extract:r.extract,thumb:r.thumbnail&&r.thumbnail.source});try{const r=await wsum(title);if(ok(r))return out(r);}catch(e){}try{const s=await fjr("https://it.wikipedia.org/w/api.php?action=query&list=search&format=json&origin=*&srlimit=3&srsearch="+encodeURIComponent(title+" "+kind),8000);for(const x of (s.query&&s.query.search)||[]){try{const r=await wsum(x.title);if(ok(r))return out(r);}catch(e){}}}catch(e){}return null;}
 async function sparql(q){const d=await fj("https://query.wikidata.org/sparql?format=json&query="+encodeURIComponent(q),30000);return(d.results&&d.results.bindings)||[];}
 async function wdFilms(a,strict,anim){const wn=without("film",a);let genres=(G.film.mood[a.mood]||["drama film"]).filter(x=>wn.indexOf(x)<0&&x!=="animated film");if(!anim&&!genres.length)genres=["drama film","comedy film"];const useMood=anim?(strict&&genres.length>0):true;const minL=Math.max(2,Math.round((a.risk<30?40:a.risk<60?18:a.risk<80?8:3)/(strict?1:3)/(anim?2:1)));const AN='?film wdt:P136 ?ga. ?ga rdfs:label "animated film"@en. ';const q="SELECT ?film ?filmLabel ?sl ?d ?rt ?img WHERE{"+(useMood?"VALUES ?gl{"+VALS(genres)+"} ?g rdfs:label ?gl. ?film wdt:P136 ?g. ":"")+"?film wdt:P31 wd:Q11424; wikibase:sitelinks ?sl. FILTER(?sl>="+minL+") "+(anim?AN+"FILTER NOT EXISTS{?film wdt:P495 wd:Q17} ":"FILTER NOT EXISTS{"+AN+"} ")+(strict&&wn.length?"FILTER NOT EXISTS{?film wdt:P136 ?b. ?b rdfs:label ?bl. VALUES ?bl{"+VALS(wn)+"}} ":"")+"OPTIONAL{?film wdt:P577 ?d} OPTIONAL{?film wdt:P2047 ?rt} OPTIONAL{?film wdt:P18 ?img} SERVICE wikibase:label{bd:serviceParam wikibase:language \"it,en\"}} LIMIT 200";const seen={},out=[];(await sparql(q)).forEach(b=>{const id=b.film.value.split("/").pop(),t=b.filmLabel&&b.filmLabel.value;if(seen[id]||!t||/^Q\d+$/.test(t))return;seen[id]=1;out.push({id,title:t,year:b.d?b.d.value.slice(0,4):"",sl:+b.sl.value,runtime:b.rt?Math.round(+b.rt.value):null,img:b.img?b.img.value.replace(/^http:/,"https:")+"?width=500":null,genres:useMood?genres:[],movie:true});});return out;}
 async function wpFilms(a,anim){const wn=without("film",a),term=anim?'"film d\'animazione" -giapponese':MOOD_TXT[a.mood]+(wn.indexOf("horror film")>=0?" -horror":"");const url="https://it.wikipedia.org/w/api.php?action=query&generator=search&format=json&origin=*&gsrnamespace=0&gsrlimit=30&gsroffset="+rand(200)+"&gsrsearch="+encodeURIComponent('hastemplate:Film "è un film" '+term)+"&prop=extracts|pageimages&exintro=1&explaintext=1&exsentences=4&exlimit=30&piprop=thumbnail&pithumbsize=500";const d=await fj(url,12000),p=d.query&&d.query.pages?Object.values(d.query.pages):[];return p.filter(x=>x.extract&&/film/i.test(x.extract.slice(0,200))).map(x=>({id:"wp"+x.pageid,title:x.title.replace(/\s*\(film.*\)$/,""),year:(x.extract.match(/\b(19|20)\d\d\b/)||[""])[0],sl:10,runtime:null,genres:[],movie:true,pre:{extract:x.extract,thumb:x.thumbnail&&x.thumbnail.source}}));}
 async function filmDiscover(a,anim){let list=[],err=null;try{list=await wdFilms(a,true,anim);const rtMin=a.time==="mid"?85:a.time==="long"?115:0,rtMax=a.time==="short"?95:a.time==="mid"?125:999,ym=0;list=tier(list,[m=>(!m.runtime||(m.runtime>=rtMin&&m.runtime<=rtMax))&&(!ym||!m.year||+m.year>=ym),()=>true]);}catch(e){err=e;}if(list.length<5){try{list=list.concat(await wdFilms(a,false,anim));}catch(e){err=err||e;}}if(list.length<3){try{list=list.concat(await wpFilms(a,anim));}catch(e){err=err||e;}}if(!list.length&&err)throw err;return list;}
 async function wdMeta(id){if(!/^Q\d+$/.test(id))return{};try{const q='SELECT ?gl ?dl WHERE{OPTIONAL{wd:'+id+' wdt:P136 ?g. ?g rdfs:label ?gl. FILTER(LANG(?gl)="it")} OPTIONAL{wd:'+id+' wdt:P57 ?dr. ?dr rdfs:label ?dl. FILTER(LANG(?dl)="en")}}';const rows=await Promise.race([sparql(q),sleep(8000).then(()=>{throw new Error("t");})]);const gl=[],dr=[];rows.forEach(b=>{if(b.gl)gl.push(b.gl.value.replace(/^film\s+(di\s+|d['’]\s*)?/i,""));if(b.dl)dr.push(b.dl.value);});return{glist:uniq(gl).slice(0,4),dir:uniq(dr).slice(0,2).join(", ")};}catch(e){return{};}}
-async function filmDetails(c){const [w,meta]=await Promise.all([c.pre?Promise.resolve(c.pre):enrich(c.title,"film"),wdMeta(c.id)]);const gl=meta.glist&&meta.glist.length?meta.glist:uniq((c.genres||[]).map(x=>x));return{movie:true,title:c.title,year:c.year,runtime:c.runtime,dir:meta.dir||"",glist:gl,gt:gl.join(" · "),overview:(w&&w.extract)||"Trama non ancora disponibile su Wikipedia in italiano.",it:!!(w&&w.extract),poster:(w&&w.thumb)||c.img,rl:"Wikidata",rv:null,pop:c.sl};}
+async function itTitleOf(qid){try{const d=await fjr("https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&origin=*&props=sitelinks&sitefilter=itwiki&ids="+qid,8000);const e=d.entities&&d.entities[qid];return e&&e.sitelinks&&e.sitelinks.itwiki?e.sitelinks.itwiki.title:null;}catch(e){return null;}}
+async function enrichFilm(c){if(!/^Q\d+$/.test(String(c.id)))return null;const t=await itTitleOf(c.id);if(!t)return null;try{const r=await wsum(t);if(r&&r.extract&&r.type!=="disambiguation")return{extract:r.extract,thumb:r.thumbnail&&r.thumbnail.source};}catch(e){}return null;}
+async function filmDetails(c){const [w,meta]=await Promise.all([c.pre?Promise.resolve(c.pre):enrichFilm(c),wdMeta(c.id)]);const gl=meta.glist&&meta.glist.length?meta.glist:uniq((c.genres||[]).map(x=>x));return{movie:true,title:c.title,year:c.year,runtime:c.runtime,dir:meta.dir||"",glist:gl,gt:gl.join(" · "),overview:(w&&w.extract)||"Trama non ancora disponibile su Wikipedia in italiano.",it:!!(w&&w.extract),poster:(w&&w.thumb)||c.img,rl:"Wikidata",rv:null,pop:c.sl};}
 
 async function tvDiscover(a,anim){const wn=without("serie",a),want=G.serie.mood[a.mood]||["Drama","Comedy"],ym=0;const pages=uniq(Array.from({length:anim?14:6},()=>rand(240)));const lists=await Promise.all(pages.map(p=>fjr("https://api.tvmaze.com/shows?page="+p,9000).catch(()=>[])));const all=[].concat(...lists);if(!all.length)throw new Error("rete/TVmaze non raggiungibile");const items=all.filter(s=>(anim?s.type==="Animation":s.type!=="Animation")&&(s.genres||[]).indexOf("Anime")<0&&(anim||(s.genres&&s.genres.length))).map(s=>({id:s.id,src:"tv",anim:anim,title:s.name,year:s.premiered?s.premiered.slice(0,4):"",genres:s.genres||[],rating:s.rating&&s.rating.average||0,runtime:s.averageRuntime||30,image:s.image&&s.image.original||null,summary:strip(s.summary||""),lang:s.language||""}));const ov=m=>m.genres.some(x=>want.indexOf(x)>=0),bad=m=>m.genres.some(x=>wn.indexOf(x)>=0);return tier(items,[m=>ov(m)&&!bad(m)&&(!ym||!m.year||+m.year>=ym)&&m.rating>=6.5&&(anim||a.risk>=60||m.lang==="English"||m.lang==="Italian"),m=>ov(m)&&!bad(m)&&(!m.rating||m.rating>=5.5),m=>ov(m)&&!bad(m),m=>ov(m),()=>true]);}
 async function tvDetails(c){const w=await enrich(c.title,c.anim?"serie animata":"serie televisiva");return{title:c.title,year:c.year,runtime:c.runtime,overview:(w&&w.extract)||c.summary||"Trama non disponibile.",it:!!(w&&w.extract),poster:c.image||(w&&w.thumb),rl:"TVmaze",rv:c.rating,glist:itg(c.genres),gt:itg(c.genres).join(" · ")};}
@@ -257,7 +261,7 @@ const itg=a=>uniq((a||[]).map(x=>GIT[x]||x));
 function fmtMin(m){return m>=60?Math.floor(m/60)+" h"+(m%60?" "+String(m%60).padStart(2,'0'):""):m+" min";}
 const mainstream=(cat,m)=>m.sl!=null?Math.max(0,Math.min(1,Math.log10(Math.max(2,m.sl))/2.6)):m.rating?Math.max(0,Math.min(1,(m.rating-4)/5)):.4;
 const hit=(g,w)=>g&&w&&g.some(x=>w.indexOf(x)>=0)?1:0;
-function score(cat,m,a){const g=m.genres||[],gs=G[gkey(cat,a)],ms=mainstream(cat,m),e=+a.effort;const heavy=g.some(x=>gs.heavy.indexOf(x)>=0)||(m.rating||0)>=8.3,light=g.some(x=>gs.light.indexOf(x)>=0);return 45*hit(g,gs.mood[a.mood])+20*(e===2?(heavy?1:.3):e===0?(light?1:.3):.75)+20*Math.max(0,1-Math.abs((1-ms)*100-a.risk)/70)+15*(m.sl!=null?ms:m.rating?Math.max(0,Math.min(1,(m.rating-5)/4)):.5)+Math.random()*6;}
+function score(cat,m,a){const g=m.genres||[],gs=G[cat==="cartoni"?(m.sl!=null?"film":"serie"):gkey(cat,a)],ms=mainstream(cat,m),e=+a.effort;const heavy=g.some(x=>gs.heavy.indexOf(x)>=0)||(m.rating||0)>=8.3,light=g.some(x=>gs.light.indexOf(x)>=0);return 45*hit(g,gs.mood[a.mood])+20*(e===2?(heavy?1:.3):e===0?(light?1:.3):.75)+20*Math.max(0,1-Math.abs((1-ms)*100-a.risk)/70)+15*(m.sl!=null?ms:m.rating?Math.max(0,Math.min(1,(m.rating-5)/4)):.5)+Math.random()*6;}
 const pct=s=>Math.round(Math.min(98,52+46*Math.pow(Math.max(0,s)/100,1.3)));
 
 function parseDur(d){if(!d)return null;const h=/(\d+)\s*hr/.exec(d),m=/(\d+)\s*min/.exec(d);const v=(h?+h[1]*60:0)+(m?+m[1]:0);return v||null;}
@@ -304,8 +308,14 @@ async function animeDiscover(a){
 }
 async function animeDetails(c){const w=await enrich(c.title,c.movie?"film anime":"anime");return{movie:!!c.movie,title:c.title,year:c.year,runtime:c.runtime,episodes:c.episodes,overview:(w&&w.extract)||c.summary||"Trama non disponibile.",it:!!(w&&w.extract),poster:c.image||(w&&w.thumb),rl:"Jikan",rv:c.rating,glist:itg(c.genres),gt:itg(c.genres).join(" · ")};}
 const detailsOf=c=>c.sl!=null?filmDetails(c):c.src==="tv"?tvDetails(c):animeDetails(c);
-const SRC={film:a=>filmDiscover(a,false),serie:a=>tvDiscover(a,false),anime:a=>animeDiscover(a),cartoni:a=>filmDiscover(a,true)};
-async function rank(a){const list=await SRC[S.cat](a);if(!list||!list.length)throw new Error("EMPTY");return list.map(m=>({m,s:score(S.cat,m,a)})).sort((x,y)=>y.s-x.s);}
+const SRC={film:a=>filmDiscover(a,false),serie:a=>tvDiscover(a,false),anime:a=>animeDiscover(a),cartoni:async a=>{const r=await Promise.allSettled([filmDiscover(a,true),tvDiscover(a,true)]);const list=[];let err=null;r.forEach(x=>{if(x.status==="fulfilled")list.push(...x.value);else err=err||x.reason;});if(!list.length&&err)throw err;return list;}};
+async function rank(a){const list=await SRC[S.cat](a);if(!list||!list.length)throw new Error("EMPTY");const out=list.map(m=>({m,s:score(S.cat,m,a)})).sort((x,y)=>y.s-x.s);
+  if(S.cat!=="cartoni")return out;
+  const f=out.filter(x=>x.m.sl!=null),t=out.filter(x=>x.m.sl==null);
+  if(!f.length||!t.length)return out;
+  const first=Math.random()<.5?[f,t]:[t,f],mix=[];
+  for(let i=0;i<Math.max(f.length,t.length);i++){first.forEach(l=>{if(l[i])mix.push(l[i]);});}
+  return mix;}
 const pickFrom=(r,sur)=>{const p=r.filter(x=>S.seen.indexOf(x.m.id)<0);if(!p.length)return null;return sur?pick(p.slice(0,10)):p[0];};
 
 async function run(surprise,fresh){
@@ -334,7 +344,7 @@ async function run(surprise,fresh){
 /* ---------- Risultato ---------- */
 function fbPoster(t,y){const h=Array.from(t).reduce((a,ch)=>((a*31+ch.charCodeAt(0))%360),0);return '<div class="poster fb" style="background:linear-gradient(135deg,hsl('+h+' 68% 42%),hsl('+((h+55)%360)+' 58% 30%))"><small>Stasera</small><h3>'+esc(t)+'</h3><small>'+esc(y||'')+'</small></div>';}
 function why(r,sur){
-  const a=S.a,d=r.d,m=r.m,g=m.genres||[],gs=G[gkey(S.cat,a)],o=[];
+  const a=S.a,d=r.d,m=r.m,g=m.genres||[],gs=G[S.cat==="cartoni"?(m.sl!=null?"film":"serie"):gkey(S.cat,a)],o=[];
   if(sur)o.push('È una scelta volutamente fuori dalla tua comfort zone.');
   if(hit(g,gs.mood[a.mood]))o.push('Cercavi '+MOOD_TXT[a.mood]+(d.glist&&d.glist.length?" e i suoi generi ("+d.glist.slice(0,3).join(', ')+") vanno in quella direzione.":"."));
   else o.push('Non è il genere più ovvio per chi cerca '+MOOD_TXT[a.mood]+(d.glist&&d.glist.length?" ("+d.glist.slice(0,3).join(', ')+")":"")+': lo propongo per gli altri criteri.');
