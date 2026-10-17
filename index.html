@@ -204,7 +204,10 @@ a.more{display:inline-block;margin-top:14px;font-size:.82rem;color:var(--gold);t
 #lb.on{display:block}
 #lb .bg{position:absolute;inset:0;background:rgba(5,3,10,.92);opacity:0;transition:opacity .6s ease;will-change:opacity}
 #lb.show .bg{opacity:1}
-#lb .card2{position:absolute;left:0;top:0;transform-origin:0 0;border-radius:var(--r2);overflow:hidden;box-shadow:0 24px 50px rgba(0,0,0,.6),0 0 40px rgba(143,98,248,.25);touch-action:none;will-change:transform,border-radius;isolation:isolate;-webkit-backface-visibility:hidden;backface-visibility:hidden;-webkit-mask-image:-webkit-radial-gradient(white,black)}
+@property --ms{syntax:'<length>';inherits:false;initial-value:0px}
+@property --ml{syntax:'<length>';inherits:false;initial-value:0px}
+@property --ma{syntax:'<number>';inherits:false;initial-value:1}
+#lb .card2{position:absolute;left:0;top:0;transform-origin:0 0;border-radius:var(--r2);overflow:hidden;box-shadow:0 24px 50px rgba(0,0,0,.6),0 0 40px rgba(143,98,248,.25);touch-action:none;will-change:transform,border-radius;isolation:isolate;-webkit-backface-visibility:hidden;backface-visibility:hidden;-webkit-mask-image:linear-gradient(rgba(0,0,0,var(--ma)) var(--ms),#000 calc(var(--ms) + var(--ml)));mask-image:linear-gradient(rgba(0,0,0,var(--ma)) var(--ms),#000 calc(var(--ms) + var(--ml)))}
 #lb .card2 img{width:100%;height:100%;object-fit:cover}
 #lb .card2 .poster{width:100%;height:100%;border-radius:0;box-shadow:none;cursor:default;border:0}
 .poster.lbhide{background:transparent!important;border-color:transparent!important}
@@ -818,10 +821,12 @@ function rad(el){const r=parseFloat(getComputedStyle(el).borderTopLeftRadius);re
 function rectOf(el){const t=el.style.transition,f=el.style.transform;el.style.transition="none";el.style.transform="none";const r=el.getBoundingClientRect();el.style.transform=f;el.style.transition=t;return r;}
 const EDGE_C="rgba(255,255,255,.18)";
 // campiona l'animazione: a ogni istante raggio e cornice sono divisi per la scala, quindi a schermo restano costanti (uguali a locandina piccola)
-function kfs(f,t,R,N,edge,clip,opening){const o=[];for(let i=0;i<=N;i++){const p=i/N,s=f.s+(t.s-f.s)*p,x=f.x+(t.x-f.x)*p,y=f.y+(t.y-f.y)*p;
+function kfs(f,t,R,N,edge,clip,opening,M){const o=[];for(let i=0;i<=N;i++){const p=i/N,s=f.s+(t.s-f.s)*p,x=f.x+(t.x-f.x)*p,y=f.y+(t.y-f.y)*p;
   const sm=v=>{v=Math.max(0,Math.min(1,v));return v*v*(3-2*v);},q=opening?1-sm(p/.4):sm((p-.6)/.4);
-  o.push(edge?{offset:p,boxShadow:"inset 0 0 0 "+(1/s)+"px "+EDGE_C}:{offset:p,transform:"translate("+x+"px,"+y+"px) scale("+s+")",borderRadius:(R/s)+"px",padding:(1/s)+"px",clipPath:clip?"inset("+[clip.t,clip.r,clip.b,clip.l].map(c=>(c*q/s)+"px").join(" ")+")":"none"});}return o;}
+  o.push(edge?{offset:p,boxShadow:"inset 0 0 0 "+(1/s)+"px "+EDGE_C}:{offset:p,transform:"translate("+x+"px,"+y+"px) scale("+s+")",borderRadius:(R/s)+"px",padding:(1/s)+"px",...(M?{"--ms":((M.st-(M.ty+y))/s)+"px","--ml":(14/s)+"px","--ma":1-q}:{}),clipPath:clip?"inset("+[clip.t,clip.r,clip.b,clip.l].map(c=>(c*q/s)+"px").join(" ")+")":"none"});}return o;}
 // parte della locandina visibile (tagliata dal contenitore con scroll): la card in animazione deve avere lo stesso taglio
+// lo stage sfuma i primi 14px in alto: se la locandina è lì vicino, la card in animazione sfuma allo stesso modo
+function fadeM(sr,T){const st=$("stage").getBoundingClientRect().top;return sr.top<st+14?{st:st,ty:T.y}:null;}
 function visClip(el,sr){let t=sr.top,b=sr.bottom,l=sr.left,r=sr.right;
   for(let n=el.parentElement;n&&n!==document.documentElement;n=n.parentElement){const cs=getComputedStyle(n);
     if(/(hidden|auto|scroll|clip)/.test(cs.overflowY+cs.overflowX)){const q=n.getBoundingClientRect();t=Math.max(t,q.top);b=Math.min(b,q.bottom);l=Math.max(l,q.left);r=Math.min(r,q.right);}}
@@ -867,7 +872,7 @@ function openLb(el){
   const D=RM()?1:780;
   const F0={x:sr.left-T.x,y:sr.top-T.y,s:k},F1={x:0,y:0,s:1};
   const VC=visClip(el,sr);
-  const oa=card.animate(kfs(F0,F1,R,24,false,VC,true),{duration:D,easing:EASE});
+  const oa=card.animate(kfs(F0,F1,R,24,false,VC,true,fadeM(sr,T)),{duration:D,easing:EASE});
   OA=oa;
   if(edge)edge.animate(kfs(F0,F1,R,24,true),{duration:D,easing:EASE});
   if(ring)ring.animate([{opacity:1},{opacity:0,offset:.35},{opacity:0}],{duration:D,easing:"linear",fill:"forwards"});
@@ -897,7 +902,7 @@ function doCloseLb(){
   let m0;try{m0=new DOMMatrix(cur&&cur!=="none"?cur:"none");}catch(e){m0=new DOMMatrix();}
   const C0={x:m0.e,y:m0.f,s:m0.a||1},C1={x:sr.left-L.T.x,y:sr.top-L.T.y,s:k};
   const VC=visClip(L.el,sr);
-  const a=L.card.animate(kfs(C0,C1,L.R,24,false,VC,false),{duration:D,easing:EASE,fill:"forwards"});
+  const a=L.card.animate(kfs(C0,C1,L.R,24,false,VC,false,fadeM(sr,L.T)),{duration:D,easing:EASE,fill:"forwards"});
   if(L.ring){L.ring.getAnimations().forEach(x=>x.cancel());L.ring.animate([{opacity:0},{opacity:0,offset:.6},{opacity:1}],{duration:D,easing:"linear",fill:"forwards"});}
   if(L.edge){L.edge.getAnimations().forEach(x=>x.cancel());L.edge.animate(kfs(C0,C1,L.R,24,true),{duration:D,easing:EASE,fill:"forwards"});}
   PEND=fin;a.onfinish=fin;setTimeout(fin,1000);
