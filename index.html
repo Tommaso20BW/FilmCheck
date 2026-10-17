@@ -433,10 +433,13 @@ const buildA=()=>({
 const stage=$("stage");
 
 /* ---------- UI: stage, barra alta, dock ---------- */
+/* regole: tra due domande, avanti e indietro = stessa dissolvenza. Altrove: scorrimento solo per tornare indietro, in avanti dissolvenza */
+let SWQ=false;
 function swap(h,anim,dx){
   const old=stage.innerHTML,app=$("app");
+  const prevQ=!!stage.querySelector(".opts"),toQ=SWQ;SWQ=false;
   document.querySelectorAll(".ghost").forEach(g=>g.remove());
-  const fade=dx==="fade"||(typeof dx==="number"&&dx<0),move=anim!==false&&!RM()&&!fade;
+  const back=typeof dx==="number"&&dx<0,fade=dx==="fade"||(prevQ&&toQ)||!back,move=anim!==false&&!RM()&&!fade;
   let ghost=null;
   if(move&&old.trim()){
     const ar=app.getBoundingClientRect(),sr=stage.getBoundingClientRect();
@@ -535,6 +538,7 @@ function home(anim){
   if(S.step>ST.length-1)S.step=ST.length-1;
   const dx=DIR*100;DIR=1;
   const st=ST[S.step],items=st.get(),n=items.length,q=typeof st.q==="function"?st.q():st.q;
+  SWQ=true;
   swap('<div class="page"><h1>'+esc(q)+'</h1><div class="opts n'+n+'" role="group" aria-label="'+esc(q)+'">'+items.map((o,i)=>opt(st.k,o,S[st.k]===o[0],i)).join('')+'</div></div>',anim,dx);
   const acts={back:()=>{if(S.step>0){S.step--;DIR=-1;home();}},sur:surpriseAll,logout:doLogout,search:searchPage};
   if(S.step===0)delete acts.back;
