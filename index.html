@@ -84,6 +84,8 @@ body::after{right:-60vmax;bottom:-75vmax;background:radial-gradient(closest-side
 #dock{flex:none;position:relative;z-index:6;padding:12px var(--gut) calc(max(0px,var(--sab) - var(--bandb))*.55 + 16px)}
 .dock-in{display:flex;gap:8px}
 .dock-in .btn{padding:0 6px;font-size:.95rem;border-radius:18px}
+.dock-in .btn.v{flex-direction:column;gap:3px;font-size:.8rem;line-height:1.1}
+.dock-in .btn.v svg{width:21px;height:21px}
 .btn.primary{border-color:transparent;background:var(--grad);color:#fff;box-shadow:0 10px 26px rgba(255,61,82,.3)}
 .btn.primary::after{content:"";position:absolute;inset:0;background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,.3) 50%,transparent 60%);transform:translateX(-120%);animation:sweep 3.8s 1.2s ease-in-out 2;pointer-events:none}
 @keyframes sweep{0%{transform:translateX(-120%)}35%,100%{transform:translateX(120%)}}
@@ -264,6 +266,7 @@ const IC={
   x:sv('<path d="M6 6l12 12M18 6L6 18"/>'),
   share:sv('<path d="M12 15V3M7.5 7.5L12 3l4.5 4.5M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/>'),
   dice:sv('<rect x="3.5" y="3.5" width="17" height="17" rx="4.5"/><circle cx="8.5" cy="8.5" r="1.2" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.2" fill="currentColor"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/><circle cx="15.5" cy="8.5" r="1.2" fill="currentColor"/><circle cx="8.5" cy="15.5" r="1.2" fill="currentColor"/>'),
+  restart:sv('<path d="M3 12a9 9 0 109-9 9.7 9.7 0 00-6.7 2.8L3 8"/><path d="M3 3v5h5"/>'),
   next:sv('<path d="M5 12h14M13 6l6 6-6 6"/>'),
   play:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13a1 1 0 001.5.86l11-6.5a1 1 0 000-1.72l-11-6.5A1 1 0 008 5.5z"/></svg>',
   expand:sv('<path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/>'),
@@ -388,7 +391,7 @@ function home(anim){
   ui({
     l:S.step>0?tbtn('back','back','Indietro'):'',
     r:'<span class="cnt"><b>'+(S.step+1)+'</b>/'+ST.length+'</span>',
-    d:bb('sur','Sorprendimi','primary'),
+    d:bb('sur',IC.dice+'Sorprendimi','primary'),
     p:[ST.length,S.step],
     a:{back:()=>{if(S.step>0){S.step--;DIR=-1;home();}},sur:surpriseAll}
   });
@@ -860,7 +863,7 @@ function show(r,sur){
   ui({
     l:tbtn('back','back','Modifica risposte'),
     r:tbtn('share','share','Condividi'),
-    d:bb('re','Ricomincia')+bb('sur','Sorprendimi')+bb('oth','Un altro','primary'),
+    d:bb('re',IC.restart+'Ricomincia','v')+bb('sur',IC.dice+'Sorprendimi','v')+bb('oth',IC.next+'Un altro','v primary'),
     a:{back:()=>{DIR=-1;home();},share,re:restart,sur:()=>run(true,false),oth:()=>run(false,false)}
   });
 }
