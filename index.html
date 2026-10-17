@@ -27,9 +27,10 @@
   color-scheme:dark;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;margin:0;overflow:hidden;overscroll-behavior:none;background:var(--bg);-webkit-text-size-adjust:100%}
+html{height:100%;margin:0;background:var(--bg);-webkit-text-size-adjust:100%}
+html,body{overflow:hidden;overscroll-behavior:none}
 body{
-  position:fixed;top:0;right:0;bottom:0;left:0;display:flex;flex-direction:column;
+  margin:0;position:relative;height:var(--app-h,100%);display:flex;flex-direction:column;
   font:16px/1.45 var(--fb);color:var(--fg);
   background:radial-gradient(800px 420px at 90% -10%,rgba(144,97,249,.22),transparent 60%) no-repeat,
              radial-gradient(600px 360px at -10% 105%,rgba(255,61,82,.14),transparent 65%) no-repeat,var(--bg);
@@ -45,7 +46,7 @@ img{max-width:100%;display:block}
 .brand i{font-style:normal;color:var(--red)}
 #stage{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;
   width:100%;max-width:560px;margin:0 auto;padding:4px max(16px,env(safe-area-inset-left)) 12px max(16px,env(safe-area-inset-right))}
-#barhost{flex:none}
+#barhost{flex:none;position:relative;z-index:5}
 .bar{border-top:1px solid var(--line);background:rgba(11,9,17,.96);
   padding:12px max(16px,env(safe-area-inset-right)) calc(14px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left))}
 .bar-in{max-width:560px;margin:0 auto;display:grid;gap:10px;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr)}
@@ -71,7 +72,7 @@ img{max-width:100%;display:block}
 .row .s{font-size:.8rem;color:var(--mut);line-height:1.25}
 .row .ck{flex:none;width:22px;height:22px;border-radius:50%;border:2px solid var(--line);transition:border-color .15s,background .15s}
 .list:not(.many) .row{max-height:116px}
-.row:active{transform:scale(.985)}
+.row:active{filter:brightness(1.25)}
 .row.on{background:linear-gradient(135deg,rgba(255,61,82,.22),rgba(144,97,249,.20));border-color:var(--red)}
 .row.on .ck{border-color:var(--red);background:radial-gradient(circle,var(--red) 0 42%,transparent 48%)}
 @media (hover:hover){.row:hover{border-color:rgba(255,255,255,.24)}}
@@ -82,9 +83,9 @@ img{max-width:100%;display:block}
 .btn{
   min-width:0;min-height:54px;border-radius:var(--r);border:1px solid var(--line);background:var(--panel-2);
   display:flex;align-items:center;justify-content:center;gap:8px;padding:0 12px;
-  font-weight:700;font-size:.98rem;text-align:center;white-space:nowrap;transition:transform .08s,filter .15s;
+  font-weight:700;font-size:clamp(.82rem,4.2vw,.98rem);text-align:center;white-space:nowrap;overflow:hidden;transition:transform .08s,filter .15s;
 }
-.btn:active{transform:scale(.97)}
+.btn:active{filter:brightness(1.2)}
 .btn.primary{background:linear-gradient(135deg,var(--red),#b92fd8);border-color:transparent;color:#fff;box-shadow:0 8px 22px rgba(255,61,82,.28)}
 .btn.ico{font-size:1.4rem;padding:0}
 
@@ -184,7 +185,20 @@ const buildA=()=>({
 });
 const stage=$("stage"), barhost=$("barhost");
 function swap(h,anim){stage.innerHTML=h;if(anim!==false){stage.classList.remove("in");void stage.offsetWidth;stage.classList.add("in");stage.scrollTop=0;}}
-function setBar(h){barhost.innerHTML=h;}
+let ACT={};
+function setBar(h,acts){barhost.innerHTML=h;ACT=acts||{};}
+function fireBar(e){
+  const b=e.target&&e.target.closest?e.target.closest('button[data-act]'):null;
+  if(!b||b.disabled)return;
+  const now=Date.now();
+  if(e.type==="pointerup")fireBar.p=now;
+  else if(now-(fireBar.p||0)<700)return;   /* il click che segue lo stesso tocco: già gestito */
+  const f=ACT[b.dataset.act];if(f){try{f();}catch(x){}}
+}
+barhost.addEventListener('pointerup',fireBar);
+barhost.addEventListener('click',fireBar);
+const bb=(act,label,cls)=>'<button type="button" class="btn'+(cls?' '+cls:'')+'" data-act="'+act+'">'+label+'</button>';
+const barHtml=(...b)=>'<div class="bar"><div class="bar-in">'+b.join('')+'</div></div>';
 
 function gkey(cat,a){cat=cat==="cartoni"?(a&&a.fmt==="movie"?"film":"serie"):cat; return cat==="film"?"film":cat==="anime"?"anime":"serie";}
 const without=(cat,a)=>{cat=gkey(cat,a);let w=[];(a.avoid||[]).forEach(k=>{if(G[cat].avoid[k]) w=w.concat(G[cat].avoid[k]);}); if(a.who==="family") w=w.concat(cat==="film"?["horror film","erotic film","war film"]:cat==="anime"?["Horror","Ecchi","Hentai"]:["Horror","War","Crime"]); return uniq(w);};
@@ -201,7 +215,12 @@ function row(g,o,on){return '<button type="button" class="row'+(on?' on':'')+'" 
 function home(anim){
   const st=STEPS[S.step],items=st.get();
   swap('<div class="page"><div class="prog" aria-hidden="true">'+STEPS.map((_,i)=>'<i class="'+(i<=S.step?'on':'')+'"></i>').join('')+'</div><h1>'+esc(st.q)+'</h1><div class="list'+(items.length>5?' many':'')+'" role="group" aria-label="'+esc(st.q)+'">'+items.map(o=>row(st.k,o,S[st.k]===o[0])).join('')+'</div></div>',anim);
-  setBar('<div class="bar"><div class="bar-in">'+(S.step===0?'<button type="button" class="btn" id="side-btn">🎲 Sorprendimi</button>':'<button type="button" class="btn" id="side-btn">← Indietro</button>')+'</div></div>');
+  setBar(barHtml(S.step===0?bb('side','🎲 Sorprendimi'):bb('side','← Indietro')),{side:()=>{
+    tap();
+    if(S.step>0){S.step--;home();return;}
+    S.cat=pick(CATS)[0];S.mood=pick(MOOD)[0];S.time="any";S.style="surprise";S.step=STEPS.length-1;
+    S.seen=[];S.cands=[];run(true,true);
+  }});
   let lock=false;
   stage.querySelectorAll('.row').forEach(b=>{b.onclick=()=>{
     if(lock)return;lock=true;tap();
@@ -209,17 +228,11 @@ function home(anim){
     stage.querySelectorAll('.row').forEach(x=>{const on=x===b;x.classList.toggle('on',on);x.setAttribute('aria-pressed',on?'true':'false');});
     setTimeout(()=>{if(S.step<STEPS.length-1){S.step++;home();}else{S.seen=[];S.cands=[];run(false,true);}},170);
   };});
-  $('side-btn').onclick=()=>{
-    tap();
-    if(S.step>0){S.step--;home();return;}
-    S.cat=pick(CATS)[0];S.mood=pick(MOOD)[0];S.time="any";S.style="surprise";S.step=STEPS.length-1;
-    S.seen=[];S.cands=[];run(true,true);
-  };
 }
 
 function loading(){
   const t=["Cerco un titolo adatto a te...","Controllo i tuoi gusti...","Ci siamo quasi..."];
-  setBar('');
+  setBar(barHtml(bb('cancel','Annulla')),{cancel:()=>{tap();RUN++;home();}});
   swap('<div class="load"><div class="spin" aria-hidden="true"></div><p id="lt">'+esc(t[0])+'</p></div>');
   let i=0;const iv=setInterval(()=>{i=(i+1)%t.length;const p=$('lt');if(p)p.textContent=t[i];},1300);
   return ()=>clearInterval(iv);
@@ -229,9 +242,9 @@ function showError(e){
   const off=navigator.onLine===false, empty=e&&e.message==="EMPTY";
   const msg=off?"Sembra che il telefono sia offline: controlla la connessione e riprova.":empty?"Nessun titolo trovato con queste regole. Prova a cambiare qualcosa.":"Non riesco a trovare un risultato adesso.";
   swap('<div class="err"><h2>Qualcosa non va</h2><p>'+esc(msg)+'</p>'+(empty||off?'':'<small style="word-break:break-all">Dettaglio: '+esc(e&&e.message||'errore')+'</small>')+'</div>');
-  setBar('<div class="bar"><div class="bar-in"><button type="button" class="btn" id="back-btn">Modifica</button><button type="button" class="btn primary" id="retry-btn">Riprova</button></div></div>');
-  $('retry-btn').onclick=()=>{tap();S.seen=[];S.cands=[];run(false,true);};
-  $('back-btn').onclick=()=>{tap();home();};
+  setBar(barHtml(bb('back','Modifica'),bb('retry','Riprova','primary')),{
+    retry:()=>{tap();S.seen=[];S.cands=[];run(false,true);},
+    back:()=>{tap();home();}});
 }
 
 /* ---------- Fonti dati (logica invariata) ---------- */
@@ -318,7 +331,9 @@ async function rank(a){const list=await SRC[S.cat](a);if(!list||!list.length)thr
   return mix;}
 const pickFrom=(r,sur)=>{const p=r.filter(x=>S.seen.indexOf(x.m.id)<0);if(!p.length)return null;return sur?pick(p.slice(0,10)):p[0];};
 
+let RUN=0;
 async function run(surprise,fresh){
+  const my=++RUN;
   const stop=loading();const wait=sleep(1200);
   try{
     S.a=buildA();
@@ -337,8 +352,8 @@ async function run(surprise,fresh){
       const pool=ranked||S.cands,nx=pickFrom(pool,false);
       if(!nx)break;cand=nx;
     }
-    await wait;stop();show({d,m:cand.m,s:cand.s},surprise);
-  }catch(e){await wait;stop();showError(e);}
+    await wait;stop();if(my!==RUN)return;show({d,m:cand.m,s:cand.s},surprise);
+  }catch(e){await wait;stop();if(my!==RUN)return;showError(e);}
 }
 
 /* ---------- Risultato ---------- */
@@ -368,12 +383,22 @@ function show(r,sur){
     '<section class="block"><h3>Trama</h3><p class="clamp" id="plot" style="cursor:pointer">'+esc(d.overview||'Trama non disponibile.')+'</p></section>'+
   '</div>';
   swap(h);
-  setBar('<div class="bar"><div class="bar-in"><button type="button" class="btn" id="rst">← Modifica</button><button type="button" class="btn" id="sur">🎲 Sorprendi</button><button type="button" class="btn primary" id="oth">Un altro</button></div></div>');
   const pl=$('plot');if(pl)pl.onclick=()=>pl.classList.toggle('clamp');
-  $('oth').onclick=()=>{tap();run(false,false);};
-  $('sur').onclick=()=>{tap();run(true,false);};
-  $('rst').onclick=()=>{tap();home();};
+  setBar(barHtml(bb('rst','← Modifica'),bb('sur','🎲 Sorprendi'),bb('oth','Un altro','primary')),{
+    oth:()=>{tap();run(false,false);},
+    sur:()=>{tap();run(true,false);},
+    rst:()=>{tap();home();}});
 }
+
+/* ---------- Altezza reale dello schermo (webapp iOS) ---------- */
+function fit(){
+  const vv=window.visualViewport,h=Math.round(Math.max(window.innerHeight||0,vv&&vv.height||0,document.documentElement.clientHeight||0));
+  if(h>200)document.documentElement.style.setProperty('--app-h',h+'px');
+}
+fit();
+["resize","orientationchange","pageshow"].forEach(ev=>addEventListener(ev,()=>{fit();setTimeout(fit,250);}));
+if(window.visualViewport)window.visualViewport.addEventListener("resize",fit);
+setTimeout(fit,300);
 
 /* ---------- Icona app (iOS) ---------- */
 try{
