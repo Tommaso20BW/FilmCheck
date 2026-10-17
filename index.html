@@ -878,17 +878,10 @@ try{
 /* ---------- Altezza reale dell'app (iOS: a volte la pagina finisce sopra il bordo basso) ---------- */
 const isApp=()=>{try{return navigator.standalone===true||matchMedia("(display-mode: standalone)").matches||matchMedia("(display-mode: fullscreen)").matches;}catch(e){return false;}};
 function fit(){
-  const a=$("app");a.style.bottom="0px";
-  if(!isApp())return;
-  const portrait=innerHeight>=innerWidth,sh=portrait?Math.max(screen.width,screen.height):Math.min(screen.width,screen.height);
-  const gap=Math.round(sh-a.getBoundingClientRect().bottom);
-  if(gap>6&&gap<140)a.style.bottom=(-gap)+"px";
+  /* l'altezza reale la decide iOS: estendere la pagina oltre l'area visibile taglia il tasto, quindi non forziamo nulla */
+  $("app").style.bottom="0px";
 }
-fit();[120,500,1500].forEach(t=>setTimeout(fit,t));
-addEventListener("resize",fit);addEventListener("pageshow",fit);addEventListener("load",fit);
-document.addEventListener("visibilitychange",()=>{if(!document.hidden){fit();setTimeout(fit,300);}});
-if(window.visualViewport)visualViewport.addEventListener("resize",fit);
-addEventListener("orientationchange",()=>setTimeout(fit,300));
+fit();
 
 /* ---------- Avvio e installazione ---------- */
 home();
