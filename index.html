@@ -239,11 +239,11 @@ body.locked #app,body.locked #bd{visibility:hidden}
 @keyframes shake{0%,100%{transform:none}20%{transform:translateX(-9px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(3px)}}
 .lgc.bad .lgi{animation:shake .45s ease;border-color:var(--red)}
 /* sfondo vivo del login: macchie colorate che si muovono lentamente */
-.lgbg{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.lgbg{position:fixed;left:0;right:0;top:-60vh;bottom:-60vh;z-index:0;overflow:hidden;pointer-events:none}
 .lgbg i{position:absolute;border-radius:50%;filter:blur(70px);will-change:transform}
-.lgbg i:nth-child(1){width:46vmax;height:46vmax;left:-14vmax;top:12vmax;background:#c13bd9;opacity:.38;animation:fA 22s ease-in-out infinite alternate}
-.lgbg i:nth-child(2){width:40vmax;height:40vmax;right:-14vmax;bottom:-16vmax;background:#8f62f8;opacity:.42;animation:fB 26s ease-in-out infinite alternate}
-.lgbg i:nth-child(3){width:26vmax;height:26vmax;right:6%;top:22%;background:#ff3d52;opacity:.16;animation:fC 18s ease-in-out infinite alternate}
+.lgbg i:nth-child(1){width:46vmax;height:46vmax;left:-14vmax;top:calc(60vh + 12vmax);background:#c13bd9;opacity:.38;animation:fA 22s ease-in-out infinite alternate}
+.lgbg i:nth-child(2){width:40vmax;height:40vmax;right:-14vmax;bottom:calc(60vh - 16vmax);background:#8f62f8;opacity:.42;animation:fB 26s ease-in-out infinite alternate}
+.lgbg i:nth-child(3){width:26vmax;height:26vmax;right:6%;top:calc(60vh + 22vh);background:#ff3d52;opacity:.16;animation:fC 18s ease-in-out infinite alternate}
 @keyframes fA{to{transform:translate3d(9vmax,7vmax,0) scale(1.12)}}
 @keyframes fB{to{transform:translate3d(-8vmax,-6vmax,0) scale(1.1)}}
 @keyframes fC{to{transform:translate3d(-6vmax,9vmax,0) scale(.9)}}
@@ -1124,17 +1124,12 @@ async function authHash(u,p){
 const isAuthed=()=>{try{return localStorage.getItem(AUTH_KEY)===AUTH_HASH;}catch(e){return false;}};
 const lg=$("lg");
 function lockApp(){
-  document.body.classList.add("locked");lg.hidden=false;lgFit();
+  document.body.classList.add("locked");lg.hidden=false;lg.style.top=lg.style.bottom=lg.style.height="";
   $("lgu").value="";$("lgp").value="";$("lge").textContent="";$("lgb").disabled=false;
   const c=$("lgf");c.classList.remove("bad","busy");
   if(!RM()&&lg.animate)lg.animate([{opacity:0,filter:"blur(14px)"},{opacity:1,filter:"blur(0)"}],{duration:600,easing:"cubic-bezier(.22,1,.36,1)"});
   setTimeout(()=>{try{$("lgu").focus();}catch(e){}},50);
 }
-function lgFit(){
-  if(lg.hidden||!window.visualViewport)return;
-  const v=visualViewport;lg.style.top=v.offsetTop+"px";lg.style.bottom="auto";lg.style.height=v.height+"px";
-}
-if(window.visualViewport){visualViewport.addEventListener("resize",lgFit);visualViewport.addEventListener("scroll",lgFit);}
 function resetScroll(){try{scrollTo(0,0);document.documentElement.scrollTop=0;document.body.scrollTop=0;}catch(e){}}
 function unlockApp(){
   document.body.classList.remove("locked");
