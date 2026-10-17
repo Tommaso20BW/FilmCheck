@@ -200,7 +200,7 @@ a.more{display:inline-block;margin-top:14px;font-size:.82rem;color:var(--gold);t
 .tmdbl{text-align:center;margin:0}
 /* ricerca manuale */
 .sin{-webkit-user-select:text;user-select:text;-webkit-appearance:none;appearance:none;flex:none}
-.sres{display:flex;flex-direction:column;gap:10px;padding-bottom:46vh}
+.sres{display:flex;flex-direction:column;gap:10px}
 .sr{display:flex;align-items:center;gap:14px;width:100%;padding:8px 14px 8px 8px;text-align:left;border-radius:var(--r2);border:1px solid var(--line);background:linear-gradient(160deg,var(--s2),var(--s1));transition:transform .1s}
 .sr:active{transform:scale(.98)}
 .sr .th{flex:none;width:46px;aspect-ratio:2/3;border-radius:10px;overflow:hidden;background:var(--s3);display:grid;place-items:center;font-size:1.3rem}
@@ -545,6 +545,8 @@ function searchPage(){
   inp.addEventListener("input",()=>{SQ=inp.value.trim();clearTimeout(t);t=setTimeout(()=>doSearch(SQ),350);});
   inp.addEventListener("keydown",e=>{if(e.key==="Enter"){clearTimeout(t);SQ=inp.value.trim();doSearch(SQ);inp.blur();}});
   box.onclick=e=>{const b=e.target.closest&&e.target.closest("[data-i]");if(!b)return;tap();openSearched(SLIST[+b.dataset.i]);};
+  // scorrendo l'elenco la tastiera si chiude, così l'ultimo risultato resta raggiungibile senza spazio vuoto in fondo
+  box.addEventListener("touchmove",()=>{if(document.activeElement===inp)inp.blur();},{passive:true});
   if(SQ.length>=2)doSearch(SQ);
   // niente focus durante lo scorrimento: farebbe saltare la pagina a metà animazione
   setTimeout(()=>{try{if($("sq")===inp)inp.focus({preventScroll:true});}catch(e){}},780);
