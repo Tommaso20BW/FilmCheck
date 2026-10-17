@@ -35,7 +35,7 @@
   color-scheme:dark;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html{height:100%;margin:0;background:var(--bg);-webkit-text-size-adjust:100%}
+html{height:100%;margin:0;background:#09070f linear-gradient(#000,#09070f 150px) no-repeat;-webkit-text-size-adjust:100%}
 html,body{overflow:hidden;overscroll-behavior:none;touch-action:pan-x pan-y}
 body{margin:0;height:100%;font:16px/1.45 var(--fb);color:var(--fg);background:transparent;
   -webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
@@ -46,7 +46,7 @@ img{display:block;max-width:100%}
 
 /* sfondo ambientale */
 body::before,body::after{content:"";position:absolute;z-index:-1;pointer-events:none;width:110vmax;height:110vmax;border-radius:50%;}
-body::before{left:-60vmax;top:-48vmax;background:radial-gradient(closest-side,rgba(143,98,248,.24),transparent)}
+body::before{left:-60vmax;top:-10vmax;background:radial-gradient(closest-side,rgba(143,98,248,.24),transparent)}
 body::after{right:-60vmax;bottom:-75vmax;background:radial-gradient(closest-side,rgba(255,61,82,.17),transparent)}
 
 /* backdrop sfocato (solo nel risultato) */
