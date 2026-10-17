@@ -151,8 +151,6 @@ body::after{right:-60vmax;bottom:-75vmax;background:radial-gradient(closest-side
 .poster img.ld{opacity:1;transform:none}
 .poster::before{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.34) 50%,transparent 65%);transform:translateX(-120%);animation:psweep 1.1s .7s ease-out forwards}
 @keyframes psweep{to{transform:translateX(120%)}}
-.zoom{position:absolute;right:8px;bottom:8px;z-index:3;width:30px;height:30px;border-radius:10px;display:grid;place-items:center;background:rgba(0,0,0,.65)}
-.zoom svg{width:16px;height:16px}
 .poster.fb{display:flex;flex-direction:column;justify-content:space-between;padding:.9em;color:#fff;border:0;font-size:16px}
 .poster.fb h3{margin:0;font-family:var(--fd);font-size:1.25em;line-height:1.1}
 .poster.fb small{opacity:.8;font-size:.7em;letter-spacing:.1em;text-transform:uppercase}
@@ -795,6 +793,10 @@ const bigUrl=u=>String(u||"").replace("/t/p/w500/","/t/p/w780/").replace(/\?widt
 function rad(el){const r=parseFloat(getComputedStyle(el).borderTopLeftRadius);return isNaN(r)?16:r;}
 // misura la locandina "a riposo" (ignora l'effetto di pressione scale(.97))
 function rectOf(el){const t=el.style.transition,f=el.style.transform;el.style.transition="none";el.style.transform="none";const r=el.getBoundingClientRect();el.style.transform=f;el.style.transition=t;return r;}
+const EDGE_C="rgba(255,255,255,.18)";
+// campiona l'animazione: a ogni istante raggio e cornice sono divisi per la scala, quindi a schermo restano costanti (uguali a locandina piccola)
+function kfs(f,t,R,N,edge){const o=[];for(let i=0;i<=N;i++){const p=i/N,s=f.s+(t.s-f.s)*p,x=f.x+(t.x-f.x)*p,y=f.y+(t.y-f.y)*p;
+  o.push(edge?{offset:p,boxShadow:"inset 0 0 0 "+(1/s)+"px "+EDGE_C}:{offset:p,transform:"translate("+x+"px,"+y+"px) scale("+s+")",borderRadius:(R/s)+"px",padding:(1/s)+"px"});}return o;}
 function fromTo(sr,T){const k=sr.width/T.w;return "translate("+(sr.left-T.x)+"px,"+(sr.top-T.y)+"px) scale("+k+")";}
 
 function openLb(el){
@@ -820,7 +822,6 @@ function openLb(el){
     // "cornice": bordo sottile + icona zoom della locandina piccola. Visibile solo quando la card è piccola.
     ring=document.createElement("div");
     ring.style.cssText="position:absolute;left:0;top:0;width:"+(sr.width-2)+"px;height:"+(sr.height-2)+"px;transform:scale("+ik+");transform-origin:0 0;border-radius:"+R+"px;pointer-events:none";
-    const zc=el.querySelector(".zoom");if(zc)ring.appendChild(zc.cloneNode(true));
     card.appendChild(ring);
     edge=document.createElement("div");
     edge.style.cssText="position:absolute;left:0;top:0;right:0;bottom:0;border-radius:inherit;pointer-events:none;z-index:3;box-shadow:inset 0 0 0 1px rgba(255,255,255,.18)";
@@ -835,12 +836,10 @@ function openLb(el){
   el.getAnimations().forEach(x=>x.cancel());
   el.animate([{boxShadow:SH1},{boxShadow:SH0}],{duration:RM()?1:560,easing:"ease-out",fill:"forwards"});
   const D=RM()?1:780;
-  const oa=card.animate([
-    {transform:fromTo(sr,T),borderRadius:(R/k)+"px",padding:ik+"px"},
-    {transform:"translate(0,0) scale(1)",borderRadius:R+"px",padding:"1px"}
-  ],{duration:D,easing:EASE});
+  const F0={x:sr.left-T.x,y:sr.top-T.y,s:k},F1={x:0,y:0,s:1};
+  const oa=card.animate(kfs(F0,F1,R,24),{duration:D,easing:EASE});
   OA=oa;
-  if(edge)edge.animate([{boxShadow:"inset 0 0 0 "+ik+"px rgba(255,255,255,.18)"},{boxShadow:"inset 0 0 0 1px rgba(255,255,255,.18)"}],{duration:D,easing:EASE});
+  if(edge)edge.animate(kfs(F0,F1,R,24,true),{duration:D,easing:EASE});
   if(ring)ring.animate([{opacity:1},{opacity:0,offset:.35},{opacity:0}],{duration:D,easing:"linear",fill:"forwards"});
   try{history.pushState({lb:1},"");}catch(e){}
 }
@@ -865,12 +864,11 @@ function doCloseLb(){
   const D=RM()?1:640;
   L.el.getAnimations().forEach(x=>x.cancel());
   L.el.animate([{boxShadow:SH0},{boxShadow:SH0,offset:.3},{boxShadow:SH1}],{duration:D,easing:"ease-in-out"});
-  const a=L.card.animate([
-    {transform:(cur&&cur!=="none")?cur:"translate(0,0) scale(1)",borderRadius:L.R+"px",padding:"1px"},
-    {transform:fromTo(sr,L.T),borderRadius:(L.R/k)+"px",padding:(1/k)+"px"}
-  ],{duration:D,easing:EASE,fill:"forwards"});
+  let m0;try{m0=new DOMMatrix(cur&&cur!=="none"?cur:"none");}catch(e){m0=new DOMMatrix();}
+  const C0={x:m0.e,y:m0.f,s:m0.a||1},C1={x:sr.left-L.T.x,y:sr.top-L.T.y,s:k};
+  const a=L.card.animate(kfs(C0,C1,L.R,24),{duration:D,easing:EASE,fill:"forwards"});
   if(L.ring){L.ring.getAnimations().forEach(x=>x.cancel());L.ring.animate([{opacity:0},{opacity:0,offset:.6},{opacity:1}],{duration:D,easing:"linear",fill:"forwards"});}
-  if(L.edge){L.edge.getAnimations().forEach(x=>x.cancel());L.edge.animate([{boxShadow:"inset 0 0 0 1px rgba(255,255,255,.18)"},{boxShadow:"inset 0 0 0 "+(1/k)+"px rgba(255,255,255,.18)"}],{duration:D,easing:EASE,fill:"forwards"});}
+  if(L.edge){L.edge.getAnimations().forEach(x=>x.cancel());L.edge.animate(kfs(C0,C1,L.R,24,true),{duration:D,easing:EASE,fill:"forwards"});}
   PEND=fin;a.onfinish=fin;setTimeout(fin,1000);
 }
 (function(){
@@ -939,7 +937,7 @@ function polish(p,r){
 function show(r,sur){
   S.cur=r;const d=r.d;let p=pct(r.s);if(sur)p=Math.max(60,p-6);
   const poster=d.poster
-    ?'<div class="poster" role="button" tabindex="0" aria-label="Ingrandisci la locandina"><img src="'+esc(d.poster)+'" alt="Locandina di '+esc(d.title)+'" referrerpolicy="no-referrer"><span class="zoom">'+IC.expand+'</span></div>'
+    ?'<div class="poster" role="button" tabindex="0" aria-label="Ingrandisci la locandina"><img src="'+esc(d.poster)+'" alt="Locandina di '+esc(d.title)+'" referrerpolicy="no-referrer"></div>'
     :fbPoster(d.title,d.year);
   const chips=[];
   if(d.year)chips.push('<span class="chip">'+esc(d.year)+'</span>');
