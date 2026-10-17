@@ -616,6 +616,18 @@ const cname=c=>{try{return RN?RN.of(c):c;}catch(e){return c;}};
 const lname=c=>{try{return LN?LN.of(c):c;}catch(e){return c;}};
 const fdate=s=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(s||"");return m?m[3]+"/"+m[2]+"/"+m[1]:"";};
 const STAT={"Returning Series":"In corso","Ended":"Conclusa","Canceled":"Cancellata","In Production":"In produzione","Planned":"Pianificata","Pilot":"Pilot"};
+// loghi "puliti" dei servizi: i canali Prime/Apple hanno nel logo la scritta "prime video | channels", quindi uso il logo del servizio originale
+let PLOGO=null;
+async function provLogos(){
+  if(PLOGO)return PLOGO;
+  const m={};
+  try{
+    const rs=await Promise.all([tm("/3/watch/providers/movie",{language:"it-IT"}),tm("/3/watch/providers/tv",{language:"it-IT"})]);
+    rs.forEach(r=>(r.results||[]).forEach(p=>{if(p.logo_path&&!CH_RE.test(p.provider_name||"")){const k=provKey(p.provider_name);if(!m[k])m[k]=p.logo_path;}}));
+  }catch(e){}
+  if(Object.keys(m).length)PLOGO=m;
+  return m;
+}
 async function tmdbDetails(c){
   const base="/3/"+(c.movie?"movie":"tv")+"/"+c.tid;
   let d={};
@@ -625,6 +637,10 @@ async function tmdbDetails(c){
   const gl=itg((d.genres||[]).map(g=>g.name)).slice(0,4);
   const wpAll=d["watch/providers"],wp=wpAll&&wpAll.results&&wpAll.results.IT;
   const prov=wp?{link:wp.link||"",flat:wp.flatrate||[],ads:wp.ads||[],rent:wp.rent||[],buy:wp.buy||[]}:null;
+  if(prov&&["flat","ads","rent","buy"].some(g=>prov[g].some(p=>CH_RE.test(p.provider_name||"")))){
+    const L=await provLogos();
+    ["flat","ads","rent","buy"].forEach(g=>{prov[g]=prov[g].map(p=>CH_RE.test(p.provider_name||"")?Object.assign({},p,{logo_path:L[provKey(p.provider_name)]||null}):p);});
+  }
   let cert="";
   try{
     if(c.movie){const x=((d.release_dates&&d.release_dates.results)||[]).find(r=>r.iso_3166_1==="IT");const y=x&&(x.release_dates||[]).find(z=>z.certification);cert=y?y.certification:"";}
