@@ -198,7 +198,8 @@ a.more{display:inline-block;margin-top:14px;font-size:.82rem;color:var(--gold);t
 .info{display:grid;grid-template-columns:auto minmax(0,1fr);gap:9px 16px;margin:0;font-size:.88rem}
 .info dt{color:var(--mut)}
 .info dd{margin:0}
-.attr{margin:0;font-size:.62rem;line-height:1.4;color:var(--mut);opacity:.65;text-align:center;padding:2px 8px 8px}
+.attr{margin:0;font-size:min(.62rem,calc((100vw - 52px)/44));line-height:1.5;color:var(--mut);opacity:.65;text-align:center;padding:2px 0 8px}
+.attr span{display:block;white-space:nowrap}
 .tmdbl{text-align:center;margin:0}
 /* ricerca manuale */
 .sin{-webkit-user-select:text;user-select:text;-webkit-appearance:none;appearance:none;flex:none}
@@ -1009,9 +1010,8 @@ function infoHtml(d){
   return '<section class="card"><h3>Scheda</h3><dl class="info">'+rows.map(x=>'<dt>'+esc(x[0])+'</dt><dd>'+esc(x[1])+'</dd>').join('')+'</dl></section>';
 }
 function attrTxt(d){
-  if(d.rl==='TMDB')
-    return 'Dati e immagini: TMDB'+(d.provKnown?' · Dove guardarlo: JustWatch':'')+'.<br>Questo prodotto usa le API di TMDB ma non è approvato né certificato da TMDB.';
-  return 'Fonti: '+d.rl+(d.it?' · Wikipedia':'')+'.<br>TMDB non utilizzato per questo risultato.';
+  if(d.rl==='TMDB')return 'Dati e immagini: TMDB'+(d.provKnown?' · Dove guardarlo: JustWatch':'')+'.\nQuesto prodotto usa le API di TMDB ma non è approvato né certificato da TMDB.';
+  return 'Fonti: '+d.rl+(d.it?' · Wikipedia':'')+'.\nTMDB non utilizzato per questo risultato.';
 }
 
 /* ---------- Trailer: apre l'app YouTube se installata ---------- */
@@ -1225,7 +1225,7 @@ function show(r,sur,man,quiet){
     '<section class="card'+(long?' tap':'')+'" id="plotcard"'+(long?' role="button" tabindex="0" aria-expanded="false"':'')+'><h3>Trama</h3><p class="'+(long?'clamp':'')+'" id="plot">'+esc(d.overview||'Trama non disponibile.')+'</p>'+(long?'<button type="button" class="lnk-btn" id="pmore">Leggi tutto</button>':'')+'</section>'+
     (d.castList&&d.castList.length?'<button type="button" class="card castbtn" data-act="cast"><h3>Cast</h3><span class="cav">'+d.castList.slice(0,5).map(x=>x.img?'<img src="'+PIMG+esc(x.img)+'" alt="" loading="lazy" referrerpolicy="no-referrer">':'<i>👤</i>').join('')+'</span><span class="cgo">Vedi tutto il cast →</span></button>':'')+
     infoHtml(d)+
-    '<p class="attr">'+esc(attrTxt(d))+'</p>'+
+    '<p class="attr">'+attrTxt(d).split('\n').map(l=>'<span>'+esc(l)+'</span>').join('')+'</p>'+
   '</div>';
   const sy=stage.scrollTop;
   stage.classList.toggle('q',!!quiet);
