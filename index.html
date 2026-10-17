@@ -751,14 +751,19 @@ function provUrl(name,title,fb){
   if(/google play/.test(n))return "https://play.google.com/store/search?c=movies&q="+q;
   return fb||("https://www.justwatch.com/it/cerca?q="+q);
 }
+// stesso servizio venduto anche come "canale" dentro Prime Video / Apple TV (es. Paramount+, Paramount+ Amazon Channel, Paramount Plus Apple TV Channel): un solo logo
+const CH_RE=/\s+(Apple\s*TV|Amazon|Prime\s*Video)(\s+Amazon)?\s+Channel$/i;
+const provBase=n=>String(n||"").replace(CH_RE,"").trim();
+const provKey=n=>provBase(n).toLowerCase().replace(/\+/g,"plus").replace(/[^a-z0-9]+/g,"");
+function dedupeProv(arr){const m=new Map();arr.forEach(p=>{const k=provKey(p.provider_name),ch=CH_RE.test(p.provider_name||"");const o=m.get(k);if(!o)m.set(k,{p,ch});else if(o.ch&&!ch)m.set(k,{p,ch});});return Array.from(m.values()).map(x=>x.p);}
 function provHtml(d){
   if(d.rl!=="TMDB"||!d.provKnown)return "";
   const groups=[["flat","In abbonamento"],["ads","Gratis con pubblicità"],["rent","Noleggio"],["buy","Acquisto"]];
   let h="";
   groups.forEach(g=>{
-    const arr=(d.prov&&d.prov[g[0]])||[];if(!arr.length)return;
+    const arr=dedupeProv((d.prov&&d.prov[g[0]])||[]);if(!arr.length)return;
     h+='<div class="pg"><small>'+g[1]+'</small><div class="pl">'+arr.map(p=>{
-      const nm=esc(p.provider_name),k=pkey(p.provider_name);
+      const nm=esc(provBase(p.provider_name)),k=pkey(p.provider_name);
       return '<span class="pv'+(p.logo_path?'':' t')+'" title="'+nm+'" role="img" aria-label="'+nm+'">'+(p.logo_path?'<img src="https://image.tmdb.org/t/p/w92'+esc(p.logo_path)+'" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentNode.classList.add(\'t\');this.parentNode.textContent=this.parentNode.title.slice(0,2);">':nm.slice(0,2))+'</span>';
     }).join('')+'</div></div>';
   });
