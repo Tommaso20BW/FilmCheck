@@ -165,6 +165,8 @@ body::after{right:-60vmax;bottom:-75vmax;background:radial-gradient(closest-side
 .card h3{margin:0 0 12px;font:700 .7rem var(--fb);letter-spacing:.16em;text-transform:uppercase;color:var(--mut)}
 .card p{margin:0;font-size:.95rem}
 .card p.clamp{display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.card.tap{cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .2s}
+.card.tap:active{filter:brightness(1.08)}
 .card.compat{display:flex;align-items:center;gap:16px}
 .ringw{position:relative;flex:none;width:68px;height:68px}
 .ringw svg{width:100%;height:100%;transform:rotate(-90deg)}
@@ -196,14 +198,14 @@ a.more{display:inline-block;margin-top:14px;font-size:.82rem;color:var(--gold);t
 /* lightbox locandina */
 #lb{position:fixed;inset:0;z-index:100;display:none}
 #lb.on{display:block}
-#lb .bg{position:absolute;inset:0;background:rgba(5,3,10,.92);opacity:0;transition:opacity .4s ease;will-change:opacity}
+#lb .bg{position:absolute;inset:0;background:rgba(5,3,10,.92);opacity:0;transition:opacity .6s ease;will-change:opacity}
 #lb.show .bg{opacity:1}
 #lb .card2{position:absolute;left:0;top:0;transform-origin:0 0;border-radius:var(--r2);overflow:hidden;box-shadow:0 24px 50px rgba(0,0,0,.6),0 0 40px rgba(143,98,248,.25);touch-action:none;will-change:transform,border-radius;isolation:isolate;-webkit-backface-visibility:hidden;backface-visibility:hidden;-webkit-mask-image:-webkit-radial-gradient(white,black)}
 #lb .card2 img{width:100%;height:100%;object-fit:cover}
 #lb .card2 .poster{width:100%;height:100%;border-radius:0;box-shadow:none;cursor:default;border:0}
-#lb .x{position:absolute;top:calc(var(--sat) + 12px);right:14px;opacity:0;transition:opacity .4s .15s}
+#lb .x{position:absolute;top:calc(var(--sat) + 12px);right:14px;opacity:0;transition:opacity .5s .2s}
 #lb.show .x{opacity:1}
-#lb .hint{position:absolute;left:0;right:0;bottom:calc(var(--sab) + 22px);text-align:center;font-size:.8rem;color:var(--mut);opacity:0;transition:opacity .4s .25s}
+#lb .hint{position:absolute;left:0;right:0;bottom:calc(var(--sab) + 22px);text-align:center;font-size:.8rem;color:var(--mut);opacity:0;transition:opacity .5s .3s}
 #lb.show .hint{opacity:1}
 
 /* animazioni */
@@ -780,7 +782,7 @@ async function share(){
 
 /* ---------- Locandina grande (lightbox con animazione di ingrandimento) ---------- */
 let LB=null,PEND=null,OA=null;
-const EASE="cubic-bezier(.32,.72,0,1)";
+const EASE="cubic-bezier(.25,.8,.25,1)";
 const bigUrl=u=>String(u||"").replace("/t/p/w500/","/t/p/w780/").replace(/\?width=\d+$/,"?width=900");
 function rad(el){const r=parseFloat(getComputedStyle(el).borderTopLeftRadius);return isNaN(r)?16:r;}
 // misura la locandina "a riposo" (ignora l'effetto di pressione scale(.97))
@@ -818,7 +820,7 @@ function openLb(el){
   LB={el,T,card,lb,moved:false,R,ring};
   lb.classList.add("on");void lb.offsetWidth;lb.classList.add("show");
   el.style.visibility="hidden";   // scambio invisibile: card e locandina sono identiche
-  const D=RM()?1:520;
+  const D=RM()?1:780;
   const oa=card.animate([
     {transform:fromTo(sr,T),borderRadius:(R/k)+"px"},
     {transform:"translate(0,0) scale(1)",borderRadius:R+"px"}
@@ -844,13 +846,13 @@ function doCloseLb(){
     L.el.style.visibility="";                       // locandina e card identiche: nessun salto
     try{L.card.getAnimations().forEach(x=>x.cancel());}catch(e){}
     L.lb.classList.remove("on");L.card.innerHTML="";L.card.style.transform="";};
-  const D=RM()?1:440;
+  const D=RM()?1:640;
   const a=L.card.animate([
     {transform:(cur&&cur!=="none")?cur:"translate(0,0) scale(1)",borderRadius:L.R+"px"},
     {transform:fromTo(sr,L.T),borderRadius:(L.R/k)+"px"}
   ],{duration:D,easing:EASE,fill:"forwards"});
   if(L.ring){L.ring.getAnimations().forEach(x=>x.cancel());L.ring.animate([{opacity:0},{opacity:0,offset:.6},{opacity:1}],{duration:D,easing:"linear",fill:"forwards"});}
-  PEND=fin;a.onfinish=fin;setTimeout(fin,700);
+  PEND=fin;a.onfinish=fin;setTimeout(fin,1000);
 }
 (function(){
   const lb=$("lb"),card=$("lbc"),bg=lb.querySelector(".bg");
@@ -894,7 +896,26 @@ function polish(p,r){
   const pe=stage.querySelector('.poster');
   if(pe){pe.onclick=()=>{tap();openLb(pe);};pe.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();openLb(pe);}};}
   const pl=$('plot'),pm=$('pmore');
-  if(pl&&pm)pm.onclick=()=>{const c=pl.classList.toggle('clamp');pm.textContent=c?'Leggi tutto':'Riduci';};
+  const pc=$('plotcard');
+  if(pl&&pm&&pc){
+    let busy=null;
+    const toggle=()=>{
+      if(window.getSelection&&String(window.getSelection()).length>0)return;   // non chiudere mentre si seleziona testo
+      const h0=pl.getBoundingClientRect().height,opening=pl.classList.contains('clamp');
+      if(busy){busy.cancel();busy=null;}
+      pl.classList.toggle('clamp',!opening);
+      const h1=pl.getBoundingClientRect().height;
+      pm.textContent=opening?'Riduci':'Leggi tutto';pc.setAttribute('aria-expanded',opening);
+      if(!RM()&&Math.abs(h1-h0)>1){
+        pl.style.overflow='hidden';
+        const a=pl.animate([{height:h0+'px'},{height:h1+'px'}],{duration:480,easing:'cubic-bezier(.25,.8,.25,1)'});
+        busy=a;const end=()=>{if(busy===a){busy=null;}pl.style.overflow='';};
+        a.onfinish=end;a.oncancel=end;
+      }
+    };
+    pc.onclick=toggle;
+    pc.onkeydown=e=>{if(e.target===pc&&(e.key==='Enter'||e.key===' ')){e.preventDefault();toggle();}};
+  }
 }
 function show(r,sur){
   S.cur=r;const d=r.d;let p=pct(r.s);if(sur)p=Math.max(60,p-6);
@@ -915,7 +936,7 @@ function show(r,sur){
     '<section class="card compat"><div class="ringw"><svg viewBox="0 0 64 64"><defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f6c653"/><stop offset="1" stop-color="#ff3d52"/></linearGradient></defs><circle class="bgc" cx="32" cy="32" r="27"/><circle class="fgc" cx="32" cy="32" r="27"/></svg><div class="pn"><span><span id="pn">0</span>%</span></div></div><div><b>Compatibilità</b><span class="sub">Quanto combacia con le tue risposte</span></div></section>'+
     '<section class="card"><h3>Perché fa per te</h3><ul class="why">'+why(r,sur).map(x=>'<li><b>✓</b><span>'+esc(x)+'</span></li>').join('')+'</ul></section>'+
     provHtml(d)+
-    '<section class="card"><h3>Trama</h3><p class="'+(long?'clamp':'')+'" id="plot">'+esc(d.overview||'Trama non disponibile.')+'</p>'+(long?'<button type="button" class="lnk-btn" id="pmore">Leggi tutto</button>':'')+'</section>'+
+    '<section class="card'+(long?' tap':'')+'" id="plotcard"'+(long?' role="button" tabindex="0" aria-expanded="false"':'')+'><h3>Trama</h3><p class="'+(long?'clamp':'')+'" id="plot">'+esc(d.overview||'Trama non disponibile.')+'</p>'+(long?'<button type="button" class="lnk-btn" id="pmore">Leggi tutto</button>':'')+'</section>'+
     infoHtml(d)+
     (d.tmdbUrl?'<p class="tmdbl"><a class="more" style="margin:0" href="'+esc(d.tmdbUrl)+'" target="_blank" rel="noopener">Scheda completa su TMDB ↗</a></p>':'')+
     '<p class="attr">'+esc(attrTxt(d))+'</p>'+
