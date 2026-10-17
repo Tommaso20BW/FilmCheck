@@ -55,7 +55,7 @@ body::after{right:-60vmax;bottom:-75vmax;background:radial-gradient(closest-side
 #bd i{position:absolute;inset:-10%;background-size:cover;background-position:center top;filter:blur(34px) saturate(1.5) brightness(.55);transform:scale(1.2)}
 
 /* struttura */
-#app{position:fixed;inset:0;z-index:1;display:flex;flex-direction:column;max-width:560px;margin:0 auto;overflow:hidden}
+#app{position:fixed;inset:0;z-index:1;display:flex;flex-direction:column;max-width:560px;margin:0 auto;overflow-x:clip}
 .top{flex:none;padding-top:max(10px,calc(var(--sat) - 10px));position:relative;z-index:5}
 /* barra alta: trasparente, nessun riquadro, un'unica linea continua di progresso */
 .top-in{height:52px;display:grid;grid-template-columns:64px 1fr 64px;align-items:center;padding:0 6px}
@@ -74,16 +74,20 @@ body::after{right:-60vmax;bottom:-75vmax;background:radial-gradient(closest-side
 .prog b{display:block;height:100%;width:0;border-radius:inherit;background:var(--grad);box-shadow:0 0 10px rgba(255,61,82,.6);transition:width .6s var(--ease)}
 
 /* il contenuto sfuma sotto la barra: nessun taglio netto */
-#stage{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:10px var(--gut) 20px;
+#stage{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:10px var(--gut) 20px;
   -webkit-mask-image:linear-gradient(transparent,#000 14px);mask-image:linear-gradient(transparent,#000 14px)}
 #stage::-webkit-scrollbar{display:none}
+.ghost{position:absolute;z-index:1;box-sizing:border-box;overflow:hidden;padding:10px var(--gut) 20px;pointer-events:none;will-change:transform;-webkit-mask-image:linear-gradient(transparent,#000 14px);mask-image:linear-gradient(transparent,#000 14px)}
 
 /* dock inferiore: resta SOPRA la zona della home-indicator, così i tasti si toccano sempre */
 #dock{flex:none;position:relative;z-index:6;padding:12px var(--gut) calc(var(--sab)*.55 + 14px)}
 #dock::before{content:"";position:absolute;left:0;right:0;top:-26px;height:26px;pointer-events:none;background:linear-gradient(transparent,var(--bg))}
 #dock{background:var(--bg)}
 .dock-in{display:flex;gap:8px}
-.dock-in .btn{padding:0 6px;font-size:.92rem;border-radius:16px}
+.dock-in .btn{padding:0 6px;font-size:.95rem;border-radius:18px}
+.btn.primary{border-color:transparent;background:var(--grad);color:#fff;box-shadow:0 10px 26px rgba(255,61,82,.3)}
+.btn.primary::after{content:"";position:absolute;inset:0;background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,.3) 50%,transparent 60%);transform:translateX(-120%);animation:sweep 3.8s 1.2s ease-in-out infinite;pointer-events:none}
+@keyframes sweep{0%{transform:translateX(-120%)}35%,100%{transform:translateX(120%)}}
 .btn{position:relative;overflow:hidden;flex:1;min-width:0;height:56px;border-radius:18px;display:flex;align-items:center;justify-content:center;gap:9px;padding:0 14px;
   border:1px solid var(--line2);background:var(--s2);font-weight:700;font-size:1rem;white-space:nowrap;text-decoration:none;color:var(--fg);transition:transform .1s,filter .15s}
 .btn:active{transform:scale(.96);filter:brightness(1.2)}
@@ -201,18 +205,12 @@ a.more{display:inline-block;margin-top:14px;font-size:.82rem;color:var(--gold);t
 #lb.show .hint{opacity:1}
 
 /* animazioni */
-.in{animation:slide .45s var(--ease) backwards}
-.out{animation:outx .2s cubic-bezier(.5,0,.9,.5) forwards}
-@keyframes slide{from{opacity:0;transform:translate3d(var(--dx,100%),0,0)}}
 @keyframes rise{from{opacity:0;transform:translate3d(var(--dx,0px),var(--dy,16px),0) scale(.985)}}
-@keyframes outx{to{opacity:0;transform:translate3d(var(--ox,-100%),0,0)}}
 @keyframes rowIn{from{opacity:0;transform:translateY(16px) scale(.96)}}
 @keyframes up{from{opacity:0;transform:translateY(18px) scale(.98)}}
 @keyframes chipIn{from{opacity:0;transform:translateY(6px) scale(.6)}}
 @keyframes pop{from{transform:scale(.4);opacity:0}}
 @keyframes sel{0%{box-shadow:0 0 0 0 rgba(255,61,82,.55)}100%{box-shadow:0 0 0 16px rgba(255,61,82,0)}}
-.in .page h1{animation:rowIn .5s var(--ease) .04s backwards}
-.in .opt{animation:rowIn .5s var(--ease) backwards;animation-delay:calc(var(--i,0)*50ms + 70ms)}
 .opt.hit{animation:sel .5s ease-out}
 .opt.on .ck{animation:pop .4s cubic-bezier(.3,1.6,.5,1)}
 .in .res>*{animation:up .6s var(--ease) backwards;animation-delay:calc(var(--k,0)*70ms + 40ms)}
@@ -314,7 +312,26 @@ const buildA=()=>({
 const stage=$("stage");
 
 /* ---------- UI: stage, barra alta, dock ---------- */
-function swap(h,anim,dx){stage.innerHTML=h;stage.classList.remove("out");if(anim!==false){stage.style.setProperty('--dx',(dx==null?100:dx)+'%');stage.classList.remove("in");void stage.offsetWidth;stage.classList.add("in");stage.scrollTop=0;}}
+function swap(h,anim,dx){
+  const old=stage.innerHTML,app=$("app");
+  document.querySelectorAll(".ghost").forEach(g=>g.remove());
+  const move=anim!==false&&!RM();
+  let ghost=null;
+  if(move&&old.trim()){
+    const ar=app.getBoundingClientRect(),sr=stage.getBoundingClientRect();
+    ghost=document.createElement("div");ghost.className="ghost";ghost.setAttribute("aria-hidden","true");
+    ghost.style.cssText="left:"+(sr.left-ar.left)+"px;top:"+(sr.top-ar.top)+"px;width:"+sr.width+"px;height:"+sr.height+"px";
+    ghost.innerHTML=old.replace(/ id="[^"]*"/g,"");
+    app.insertBefore(ghost,stage);ghost.scrollTop=stage.scrollTop;
+  }
+  stage.innerHTML=h;stage.classList.remove("out");
+  if(anim===false)return;
+  stage.classList.remove("in");void stage.offsetWidth;stage.classList.add("in");stage.scrollTop=0;
+  if(!move)return;
+  const d=dx==null?100:dx,o={duration:650,easing:"cubic-bezier(.45,.05,.2,1)"};
+  stage.animate([{transform:"translate3d("+d+"%,0,0)"},{transform:"none"}],o);
+  if(ghost){const g=ghost;g.animate([{transform:"none"},{transform:"translate3d("+(-d)+"%,0,0)"}],Object.assign({fill:"forwards"},o)).onfinish=()=>g.remove();setTimeout(()=>g.remove(),1000);}
+}
 let ACT={};
 const tbtn=(act,ic,label)=>'<button type="button" class="tb" data-act="'+act+'" aria-label="'+label+'">'+IC[ic]+'</button>';
 const bb=(act,label,cls)=>'<button type="button" class="btn'+(cls?' '+cls:'')+'" data-act="'+act+'">'+label+'</button>';
@@ -372,7 +389,7 @@ function home(anim){
   ui({
     l:S.step>0?tbtn('back','back','Indietro'):'',
     r:'<span class="cnt"><b>'+(S.step+1)+'</b>/'+ST.length+'</span>',
-    d:bb('sur','Sorprendimi'),
+    d:bb('sur','Sorprendimi','primary'),
     p:[ST.length,S.step],
     a:{back:()=>{if(S.step>0){S.step--;DIR=-1;home();}},sur:surpriseAll}
   });
@@ -382,8 +399,7 @@ function home(anim){
     const g=b.dataset.g,v=b.dataset.v;S[g]=v;if(g==="cat"){S.time="";S.fmt="";}if(g==="fmt")S.time="";
     stage.querySelectorAll('.opt').forEach(x=>{const on=x===b;x.classList.toggle('on',on);x.setAttribute('aria-pressed',on?'true':'false');});
     b.classList.add('hit');
-    setTimeout(()=>{stage.style.setProperty('--ox','-100%');stage.classList.remove('in');stage.classList.add('out');},160);
-    setTimeout(()=>{if(S.step<steps().length-1){S.step++;home();}else{S.seen=[];S.cands=[];run(false,true);}},380);
+        setTimeout(()=>{if(S.step<steps().length-1){S.step++;home();}else{S.seen=[];S.cands=[];run(false,true);}},230);
   };});
 }
 
@@ -403,7 +419,7 @@ function showError(e){
   const msg=off?"Sembra che il telefono sia offline: controlla la connessione e riprova.":empty?"Nessun titolo trovato con queste regole. Prova ad allargare qualche filtro (epoca o durata).":"Non riesco a trovare un risultato adesso.";
   swap('<div class="err"><h2>Qualcosa non va</h2><p>'+esc(msg)+'</p>'+(empty||off?'':'<small style="word-break:break-all">Dettaglio: '+esc(e&&e.message||'errore')+'</small>')+'</div>');
   const back=()=>{DIR=-1;home();};
-  ui({l:tbtn('back','back','Modifica'),r:'',d:bb('back','Modifica')+bb('retry','Riprova'),a:{back,retry:()=>{S.seen=[];S.cands=[];run(false,true);}}});
+  ui({l:tbtn('back','back','Modifica'),r:'',d:bb('back','Modifica')+bb('retry','Riprova','primary'),a:{back,retry:()=>{S.seen=[];S.cands=[];run(false,true);}}});
 }
 
 /* ---------- Fonti dati ---------- */
@@ -845,7 +861,7 @@ function show(r,sur){
   ui({
     l:tbtn('back','back','Modifica risposte'),
     r:tbtn('share','share','Condividi'),
-    d:bb('re','Ricomincia')+bb('sur','Sorprendimi')+bb('oth','Un altro'),
+    d:bb('re','Ricomincia')+bb('sur','Sorprendimi')+bb('oth','Un altro','primary'),
     a:{back:()=>{DIR=-1;home();},share,re:restart,sur:()=>run(true,false),oth:()=>run(false,false)}
   });
 }
