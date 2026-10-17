@@ -812,8 +812,9 @@ function openLb(el){
   lb.classList.add("on");void lb.offsetWidth;lb.classList.add("show");
   // NON nascondo la locandina originale: resta sotto la card (ombra e bordo non "scattano" mai)
   const oa=card.animate([
-    {transform:fromTo(sr,T),borderRadius:(R/k)+"px"},
-    {transform:"translate(0,0) scale(1)",borderRadius:R+"px"}
+    {transform:fromTo(sr,T),borderRadius:(R/k)+"px",opacity:0,offset:0},
+    {opacity:1,offset:.12},
+    {transform:"translate(0,0) scale(1)",borderRadius:R+"px",opacity:1,offset:1}
   ],{duration:RM()?1:640,easing:EASE});
   OA=oa;
   try{history.pushState({lb:1},"");}catch(e){}
@@ -838,8 +839,9 @@ function doCloseLb(){
     if(L.zi){void L.zi.offsetWidth;L.zi.style.transition="opacity .22s ease";L.zi.style.opacity="";setTimeout(()=>{L.zi.style.transition="";},300);}
     L.lb.classList.remove("on");L.card.innerHTML="";L.card.style.transform="";};
   const a=L.card.animate([
-    {transform:(cur&&cur!=="none")?cur:"translate(0,0) scale(1)",borderRadius:L.R+"px"},
-    {transform:fromTo(sr,L.T),borderRadius:(L.R/k)+"px"}
+    {transform:(cur&&cur!=="none")?cur:"translate(0,0) scale(1)",borderRadius:L.R+"px",opacity:1,offset:0},
+    {opacity:1,offset:.7},
+    {transform:fromTo(sr,L.T),borderRadius:(L.R/k)+"px",opacity:0,offset:1}
   ],{duration:RM()?1:520,easing:EASE,fill:"forwards"});
   PEND=fin;a.onfinish=fin;setTimeout(fin,800);
 }
