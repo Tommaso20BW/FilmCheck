@@ -1009,8 +1009,8 @@ function infoHtml(d){
   return '<section class="card"><h3>Scheda</h3><dl class="info">'+rows.map(x=>'<dt>'+esc(x[0])+'</dt><dd>'+esc(x[1])+'</dd>').join('')+'</dl></section>';
 }
 function attrTxt(d){
-  if(d.rl==='TMDB')return 'Dati e immagini: TMDB'+(d.provKnown?' · Dove guardarlo: JustWatch':'')+'. Questo prodotto usa le API di TMDB ma non è approvato né certificato da TMDB.';
-  return 'Fonti: '+d.rl+(d.it?' · Wikipedia':'')+'. TMDB non utilizzato per questo risultato.';
+  if(d.rl==='TMDB')return 'Dati e immagini: TMDB'+(d.provKnown?' · Dove guardarlo: JustWatch':'')+'.\nQuesto prodotto usa le API di TMDB ma non è approvato né certificato da TMDB.';
+  return 'Fonti: '+d.rl+(d.it?' · Wikipedia':'')+'.\nTMDB non utilizzato per questo risultato.';
 }
 
 /* ---------- Trailer: apre l'app YouTube se installata ---------- */
