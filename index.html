@@ -83,7 +83,7 @@ body::after{right:-60vmax;bottom:-75vmax;background:radial-gradient(closest-side
 /* dock inferiore: resta SOPRA la zona della home-indicator, così i tasti si toccano sempre */
 #dock{flex:none;position:relative;z-index:6;padding:12px var(--gut) calc(max(0px,var(--sab) - var(--bandb))*.55 + 16px)}
 .dock-in{display:flex;gap:8px}
-.dock-in .btn{padding:0 6px;font-size:.95rem;border-radius:18px}
+.dock-in .btn{padding:0 6px;font-size:.95rem;border-radius:999px}
 .dock-in .btn.v{flex-direction:column;gap:3px;font-size:.8rem;line-height:1.1}
 .dock-in .btn.v svg{width:21px;height:21px}
 .btn.primary{border-color:transparent;background:var(--grad);color:#fff;box-shadow:0 10px 26px rgba(255,61,82,.3)}
