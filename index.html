@@ -15,7 +15,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="format-detection" content="telephone=no">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="Stasera">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -238,6 +238,30 @@ body.locked #app,body.locked #bd{visibility:hidden}
 #lg .btn:disabled{opacity:.6}
 @keyframes shake{0%,100%{transform:none}20%{transform:translateX(-9px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(3px)}}
 .lgc.bad .lgi{animation:shake .45s ease;border-color:var(--red)}
+/* sfondo vivo del login: macchie colorate che si muovono lentamente */
+.lgbg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.lgbg i{position:absolute;border-radius:50%;filter:blur(70px);will-change:transform}
+.lgbg i:nth-child(1){width:46vmax;height:46vmax;left:-14vmax;top:-18vmax;background:#c13bd9;opacity:.5;animation:fA 22s ease-in-out infinite alternate}
+.lgbg i:nth-child(2){width:40vmax;height:40vmax;right:-14vmax;bottom:-16vmax;background:#8f62f8;opacity:.42;animation:fB 26s ease-in-out infinite alternate}
+.lgbg i:nth-child(3){width:26vmax;height:26vmax;right:6%;top:10%;background:#ff3d52;opacity:.22;animation:fC 18s ease-in-out infinite alternate}
+@keyframes fA{to{transform:translate3d(9vmax,7vmax,0) scale(1.12)}}
+@keyframes fB{to{transform:translate3d(-8vmax,-6vmax,0) scale(1.1)}}
+@keyframes fC{to{transform:translate3d(-6vmax,9vmax,0) scale(.9)}}
+.lgc{position:relative;z-index:1}
+/* sfumatura nera in alto: unisce lo sfondo alla barra di stato, niente taglio netto */
+.lgbg::after,#tf{content:"";position:fixed;left:0;right:0;top:0;height:90px;pointer-events:none;background:linear-gradient(#000,rgba(0,0,0,.55) 35%,transparent)}
+#tf{z-index:0}
+/* logo: leggero galleggiamento; durante l'accesso pulsa con un anello che si espande */
+.lgbrand .mark{position:relative;animation:mkFloat 5s ease-in-out infinite}
+.lgbrand .mark::after{content:"";position:absolute;inset:0;border-radius:inherit;border:2px solid #ff3d52;opacity:0;pointer-events:none}
+.lgc.busy .mark{animation:mkBeat .9s ease-in-out infinite}
+.lgc.busy .mark::after{animation:mkRing .9s ease-out infinite}
+@keyframes mkFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes mkBeat{0%,100%{transform:scale(1);box-shadow:0 3px 12px rgba(255,61,82,.45)}50%{transform:scale(1.16);box-shadow:0 8px 34px rgba(255,61,82,.8)}}
+@keyframes mkRing{0%{transform:scale(1);opacity:.85}100%{transform:scale(1.9);opacity:0}}
+/* sfondo dell'app: le due luci si muovono piano */
+body::before{animation:fA 28s ease-in-out infinite alternate}
+body::after{animation:fB 32s ease-in-out infinite alternate}
 
 /* animazioni */
 @keyframes rise{from{opacity:0;transform:translate3d(var(--dx,0px),var(--dy,16px),0) scale(.985)}}
@@ -257,6 +281,7 @@ body.locked #app,body.locked #bd{visibility:hidden}
 </head>
 <body>
 <div id="bd"><i></i></div>
+<div id="tf" aria-hidden="true"></div>
 <div id="app">
   <header class="top">
     <div class="top-in">
@@ -278,6 +303,7 @@ body.locked #app,body.locked #bd{visibility:hidden}
   </div>
 </div>
 <div id="lg" hidden>
+  <div class="lgbg" aria-hidden="true"><i></i><i></i><i></i></div>
   <form class="lgc" id="lgf" autocomplete="on">
     <div class="lgbrand"><span class="mark"><svg viewBox="0 0 12 12"><path d="M1 0l11 6L1 12z" fill="#fff"/></svg></span>Stasera</div>
     <input class="lgi" id="lgu" name="username" type="text" placeholder="Nome utente" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" required>
@@ -1104,7 +1130,7 @@ const lg=$("lg");
 function lockApp(){
   document.body.classList.add("locked");lg.hidden=false;
   $("lgu").value="";$("lgp").value="";$("lge").textContent="";$("lgb").disabled=false;
-  const c=lg.firstElementChild;c.classList.remove("bad");
+  const c=$("lgf");c.classList.remove("bad","busy");
   if(!RM()&&lg.animate)lg.animate([{opacity:0,filter:"blur(14px)"},{opacity:1,filter:"blur(0)"}],{duration:600,easing:"cubic-bezier(.22,1,.36,1)"});
   setTimeout(()=>{try{$("lgu").focus();}catch(e){}},50);
 }
@@ -1126,13 +1152,14 @@ function doLogout(){
 let lgBusy=false;
 $("lgf").addEventListener("submit",async e=>{
   e.preventDefault();if(lgBusy)return;lgBusy=true;
-  const c=lg.firstElementChild,er=$("lge"),btn=$("lgb");btn.disabled=true;er.textContent="";c.classList.remove("bad");
+  const c=$("lgf"),er=$("lge"),btn=$("lgb");btn.disabled=true;er.textContent="";c.classList.remove("bad");c.classList.add("busy");const t0=Date.now();
   let ok=false,fail="";
   try{ok=(await authHash($("lgu").value,$("lgp").value))===AUTH_HASH;}
   catch(x){fail="Impossibile verificare l'accesso su questa connessione.";}
+  await sleep(Math.max(0,1300-(Date.now()-t0)));   // il logo pulsa almeno un attimo, così si vede che sta entrando
   lgBusy=false;
   if(ok){try{localStorage.setItem(AUTH_KEY,AUTH_HASH);}catch(x){}unlockApp();return;}
-  btn.disabled=false;er.textContent=fail||"Nome utente o password non corretti.";
+  c.classList.remove("busy");btn.disabled=false;er.textContent=fail||"Nome utente o password non corretti.";
   void c.offsetWidth;c.classList.add("bad");$("lgp").value="";try{$("lgp").focus();}catch(x){}
 });
 if(isAuthed())home();else lockApp();
