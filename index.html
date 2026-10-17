@@ -29,8 +29,9 @@
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{height:100%;margin:0;background:var(--bg);-webkit-text-size-adjust:100%}
 html,body{overflow:hidden;overscroll-behavior:none}
+/* il corpo è fisso a tutto schermo: la barra azioni resta sempre in basso e cliccabile */
 body{
-  margin:0;position:relative;height:var(--app-h,100%);display:flex;flex-direction:column;
+  margin:0;position:fixed;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;
   font:16px/1.45 var(--fb);color:var(--fg);
   background:radial-gradient(800px 420px at 90% -10%,rgba(144,97,249,.22),transparent 60%) no-repeat,
              radial-gradient(600px 360px at -10% 105%,rgba(255,61,82,.14),transparent 65%) no-repeat,var(--bg);
@@ -46,22 +47,22 @@ img{max-width:100%;display:block}
 .brand i{font-style:normal;color:var(--red)}
 #stage{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;
   width:100%;max-width:560px;margin:0 auto;padding:4px max(16px,env(safe-area-inset-left)) 12px max(16px,env(safe-area-inset-right))}
-#barhost{flex:none;position:relative;z-index:5}
-.bar{border-top:1px solid var(--line);background:rgba(11,9,17,.96);
+#barhost{flex:none;position:relative;z-index:20}
+.bar{border-top:1px solid var(--line);background:rgba(11,9,17,.97);
   padding:12px max(16px,env(safe-area-inset-right)) calc(14px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left))}
 .bar-in{max-width:560px;margin:0 auto;display:grid;gap:10px;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr)}
 
-/* pagina di scelta: una domanda, opzioni in elenco, riempie lo spazio senza scroll */
-.page{height:100%;min-height:400px;display:flex;flex-direction:column;gap:14px}
-.prog{flex:none;display:flex;gap:6px}
+/* pagina di scelta: una domanda, opzioni in elenco; riempie lo spazio, se non basta scorre */
+.page{min-height:100%;display:flex;flex-direction:column;gap:14px}
+.prog{flex:none;display:flex;gap:5px}
 .prog i{flex:1;height:4px;border-radius:4px;background:var(--line);transition:background .2s}
 .prog i.on{background:linear-gradient(90deg,var(--red),var(--vio))}
 .page h1{margin:0;flex:none;font-family:var(--fd);font-weight:800;font-size:clamp(1.7rem,6.5vw,2.3rem);line-height:1.05;letter-spacing:-.035em}
-.list{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px;padding-bottom:4px}
+.list{flex:1;display:flex;flex-direction:column;gap:10px;padding-bottom:4px}
 
 /* UN SOLO tipo di riga di scelta */
 .row{
-  flex:1 1 0;min-height:50px;max-height:96px;width:100%;
+  flex:1 1 0;min-height:52px;max-height:104px;width:100%;
   display:flex;align-items:center;gap:14px;padding:0 16px;text-align:left;
   border-radius:var(--r);border:1px solid var(--line);background:var(--panel);
   transition:background .15s,border-color .15s,transform .08s;
@@ -77,6 +78,7 @@ img{max-width:100%;display:block}
 .row.on .ck{border-color:var(--red);background:radial-gradient(circle,var(--red) 0 42%,transparent 48%)}
 @media (hover:hover){.row:hover{border-color:rgba(255,255,255,.24)}}
 @media (max-height:780px){.list.many .s{display:none}.list.many .row{min-height:46px}.list.many .e{width:32px;font-size:1.45rem}.page{gap:10px}}
+@media (max-height:700px){.top{padding-top:calc(env(safe-area-inset-top,0px) + 8px)}.row{min-height:46px}}
 @media (min-width:900px){#stage{max-width:620px}.brand{font-size:1.05rem}}
 
 /* bottoni azione */
@@ -90,11 +92,11 @@ img{max-width:100%;display:block}
 .btn.ico{font-size:1.4rem;padding:0}
 
 /* caricamento / errore */
-.load{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;text-align:center}
+.load{min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;text-align:center}
 .spin{width:52px;height:52px;border-radius:50%;border:4px solid var(--line);border-top-color:var(--red);animation:sp .9s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
 .load p{margin:0;font-family:var(--fd);font-weight:700;font-size:1.3rem}
-.err{height:100%;display:flex;flex-direction:column;justify-content:center;gap:12px;padding:0 4px}
+.err{min-height:100%;display:flex;flex-direction:column;justify-content:center;gap:12px;padding:0 4px}
 .err h2{margin:0;font-family:var(--fd);font-size:1.9rem;line-height:1.05}
 .err p,.err small{margin:0;color:var(--mut)}
 
@@ -108,9 +110,11 @@ img{max-width:100%;display:block}
 .poster.fb small{opacity:.8;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase}
 .meta{display:flex;flex-direction:column;gap:10px;min-width:0}
 .meta h2{margin:0;font-family:var(--fd);font-weight:800;font-size:clamp(1.4rem,6vw,1.9rem);line-height:1.05;letter-spacing:-.03em;word-break:break-word}
+.tag{margin:-4px 0 0;font-size:.82rem;color:var(--mut);font-style:italic}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .chip{padding:4px 10px;border-radius:999px;border:1px solid var(--line);background:var(--panel);font-size:.74rem;color:var(--mut);font-weight:600}
 .chip.r{color:var(--gold);border-color:rgba(245,196,81,.4)}
+a.chip.lnk{color:var(--fg);text-decoration:none;border-color:rgba(255,61,82,.5);background:rgba(255,61,82,.12)}
 .compat b{font:700 .74rem var(--fd);letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
 .meter{height:8px;margin-top:6px;background:var(--panel-2);border-radius:99px;overflow:hidden}
 .meter span{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--red));border-radius:inherit}
@@ -121,7 +125,17 @@ img{max-width:100%;display:block}
 .why{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px;font-size:.9rem}
 .why li{display:flex;gap:10px;align-items:flex-start}
 .why li b{color:var(--gold)}
-.attr{margin:0;font-size:.7rem;line-height:1.4;color:var(--mut);text-align:center;padding:2px 8px 8px}
+.pg+.pg{margin-top:12px}
+.pg small{display:block;margin-bottom:6px;font-size:.72rem;color:var(--mut);font-weight:600}
+.pl{display:flex;flex-wrap:wrap;gap:10px}
+.pv{width:60px;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}
+.pv img{width:44px;height:44px;border-radius:10px;border:1px solid var(--line);background:var(--panel-2)}
+.pv em{font-style:normal;font-size:.62rem;line-height:1.15;color:var(--mut);max-width:100%;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+a.more{display:inline-block;margin-top:12px;font-size:.8rem;color:var(--gold);text-decoration:none;font-weight:600}
+.info{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px 14px;margin:0;font-size:.88rem}
+.info dt{color:var(--mut)}
+.info dd{margin:0}
+.attr{margin:0;font-size:.62rem;line-height:1.4;color:var(--mut);opacity:.65;text-align:center;padding:2px 8px 8px}
 .in{animation:rise .22s both}
 @keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
@@ -168,8 +182,14 @@ const TIME_BY_CAT={
   anime:[["short","🎬","Un film","Si chiude stasera"],["mid","📺","Una stagione","Circa 12–26 episodi"],["long","🍿","Saga lunga","Tanti episodi"],["any","🔥","Non importa","Film o serie"]],
   cartoni:[["short","⏱️","Veloce","Un film corto o un episodio"],["mid","🎬","Normale","Un film o qualche episodio"],["long","🍿","Lungo","Film lungo o maratona"],["any","🔥","Non importa","Film o serie"]]
 };
+const WHO=[["solo","🧍","Da solo","Decido solo io"],["couple","💑","In coppia","Serata a due"],["friends","🍻","Con amici","Da vedere in compagnia"],["family","👨‍👩‍👧","In famiglia","Adatto anche ai ragazzi"]];
+const EFFORT=[["0","🛋️","Zero sforzo","Da guardare rilassato"],["1","🙂","Normale","Una storia che coinvolga"],["2","🧐","Concentrato","Qualcosa di profondo"]];
+const ERA=[["new","🆕","Recente","Dal 2015 a oggi"],["mid","📼","2000–2014","Né vecchio né nuovo"],["old","🎞️","Classico","Prima del 2000"],["any","🔥","Non importa","Qualsiasi epoca"]];
+const PROV=[["any","🔥","Ovunque","Qualsiasi piattaforma"],["8","🟥","Netflix","Incluso nell'abbonamento"],["119","📦","Prime Video","Incluso nell'abbonamento"],["337","🏰","Disney+","Incluso nell'abbonamento"],["39","📡","NOW","Incluso nell'abbonamento"],["531","⛰️","Paramount+","Incluso nell'abbonamento"],["350","🍎","Apple TV+","Incluso nell'abbonamento"]];
 const STYLE=[["safe","🛋️","Sul sicuro","Titoli famosi e amati"],["balanced","🍿","Equilibrato","Un mix di noti e meno noti"],["surprise","🎲","Osa un po'","Qualcosa di inaspettato"]];
 const RISK={safe:20,balanced:55,surprise:85};
+const ERA_R={new:[2015,9999],mid:[2000,2014],old:[0,1999],any:[0,9999]};
+const eraOk=(y,a)=>{if(!a.era||a.era==="any"||!y)return true;const r=ERA_R[a.era];return +y>=r[0]&&+y<=r[1];};
 const G={
  film:{mood:{feelgood:["comedy film","family film"],laugh:["comedy film","romantic comedy film","romantic comedy"],love:["romance film","romantic drama film","romantic comedy film"],cry:["drama film","romance film"],scare:["horror film"],thrill:["action film","thriller film","adventure film"],mindbend:["mystery film","psychological thriller film","science fiction film"],epic:["fantasy film","science fiction film","adventure film"]},avoid:{},heavy:["drama film","mystery film","war film"],light:["comedy film","family film","adventure film"]},
  serie:{mood:{feelgood:["Comedy","Family"],laugh:["Comedy"],love:["Romance"],cry:["Drama","Romance"],scare:["Horror"],thrill:["Action","Thriller","Crime"],mindbend:["Mystery","Thriller","Science-Fiction"],epic:["Fantasy","Science-Fiction","Adventure"]},avoid:{},heavy:["Drama","Mystery","War"],light:["Comedy","Family","Adventure"]},
@@ -179,9 +199,10 @@ const JID={"Action":1,"Adventure":2,"Comedy":4,"Drama":8,"Fantasy":10,"Horror":1
 const MOOD_TXT={feelgood:"qualcosa di leggero",laugh:"ridere",love:"una storia d'amore",cry:"commuoverti",scare:"avere paura",thrill:"azione e adrenalina",mindbend:"un colpo di scena assurdo",epic:"un'avventura epica"};
 
 /* ---------- Stato ---------- */
-const S={cat:"",mood:"",time:"",style:"",step:0,seen:[],cands:[],cur:null,a:null};
+const S={cat:"",mood:"",time:"",who:"",effort:"",era:"",prov:"",style:"",step:0,seen:[],cands:[],cur:null,a:null};
 const buildA=()=>({
-  cat:S.cat,mood:S.mood,time:S.time,effort:"1",who:"solo",avoid:[],risk:RISK[S.style]||55,
+  cat:S.cat,mood:S.mood,time:S.time,effort:S.effort||"1",who:S.who||"solo",avoid:[],risk:RISK[S.style]||55,
+  era:S.era||"any",prov:"",
   fmt:S.cat==="anime"?(S.time==="short"?"movie":S.time==="any"?"any":null):null
 });
 const stage=$("stage"), barhost=$("barhost");
@@ -210,16 +231,21 @@ const STEPS=[
   {k:"cat",q:"Cosa guardi stasera?",get:()=>CATS},
   {k:"mood",q:"Che voglia hai?",get:()=>MOOD},
   {k:"time",q:"Quanto tempo hai?",get:()=>TIME_BY_CAT[S.cat]||TIME_BY_CAT.film},
+  {k:"who",q:"Con chi guardi?",get:()=>WHO},
+  {k:"effort",q:"Che testa hai?",get:()=>EFFORT},
+  {k:"era",q:"Di che epoca?",get:()=>ERA},
   {k:"style",q:"Quanto vuoi osare?",get:()=>STYLE}
 ];
+const steps=()=>STEPS.filter(s=>!(s.skip&&s.skip()));
 function row(g,o,on){return '<button type="button" class="row'+(on?' on':'')+'" data-g="'+g+'" data-v="'+o[0]+'" aria-pressed="'+(on?'true':'false')+'"><span class="e">'+o[1]+'</span><span class="tx"><span class="t">'+esc(o[2])+'</span>'+(o[3]?'<span class="s">'+esc(o[3])+'</span>':'')+'</span><span class="ck" aria-hidden="true"></span></button>';}
 function home(anim){
-  const st=STEPS[S.step],items=st.get();
-  swap('<div class="page"><div class="prog" aria-hidden="true">'+STEPS.map((_,i)=>'<i class="'+(i<=S.step?'on':'')+'"></i>').join('')+'</div><h1>'+esc(st.q)+'</h1><div class="list'+(items.length>5?' many':'')+'" role="group" aria-label="'+esc(st.q)+'">'+items.map(o=>row(st.k,o,S[st.k]===o[0])).join('')+'</div></div>',anim);
+  const ST=steps();if(S.step>ST.length-1)S.step=ST.length-1;
+  const st=ST[S.step],items=st.get();
+  swap('<div class="page"><div class="prog" aria-hidden="true">'+ST.map((_,i)=>'<i class="'+(i<=S.step?'on':'')+'"></i>').join('')+'</div><h1>'+esc(st.q)+'</h1><div class="list'+(items.length>5?' many':'')+'" role="group" aria-label="'+esc(st.q)+'">'+items.map(o=>row(st.k,o,S[st.k]===o[0])).join('')+'</div></div>',anim);
   setBar(barHtml(S.step===0?bb('side','🎲 Sorprendimi'):bb('side','← Indietro')),{side:()=>{
     tap();
     if(S.step>0){S.step--;home();return;}
-    S.cat=pick(CATS)[0];S.mood=pick(MOOD)[0];S.time="any";S.style="surprise";S.step=STEPS.length-1;
+    S.cat=pick(CATS)[0];S.mood=pick(MOOD)[0];S.time="any";S.who="solo";S.effort="1";S.era="any";S.style="surprise";S.step=steps().length-1;
     S.seen=[];S.cands=[];run(true,true);
   }});
   let lock=false;
@@ -227,7 +253,7 @@ function home(anim){
     if(lock)return;lock=true;tap();
     const g=b.dataset.g,v=b.dataset.v;S[g]=v;if(g==="cat")S.time="";
     stage.querySelectorAll('.row').forEach(x=>{const on=x===b;x.classList.toggle('on',on);x.setAttribute('aria-pressed',on?'true':'false');});
-    setTimeout(()=>{if(S.step<STEPS.length-1){S.step++;home();}else{S.seen=[];S.cands=[];run(false,true);}},170);
+    setTimeout(()=>{if(S.step<ST.length-1){S.step++;home();}else{S.seen=[];S.cands=[];run(false,true);}},170);
   };});
 }
 
@@ -241,7 +267,7 @@ function loading(){
 
 function showError(e){
   const off=navigator.onLine===false, empty=e&&e.message==="EMPTY";
-  const msg=off?"Sembra che il telefono sia offline: controlla la connessione e riprova.":empty?"Nessun titolo trovato con queste regole. Prova a cambiare qualcosa.":"Non riesco a trovare un risultato adesso.";
+  const msg=off?"Sembra che il telefono sia offline: controlla la connessione e riprova.":empty?"Nessun titolo trovato con queste regole. Prova ad allargare qualche filtro (epoca o durata).":"Non riesco a trovare un risultato adesso.";
   swap('<div class="err"><h2>Qualcosa non va</h2><p>'+esc(msg)+'</p>'+(empty||off?'':'<small style="word-break:break-all">Dettaglio: '+esc(e&&e.message||'errore')+'</small>')+'</div>');
   setBar(barHtml(bb('back','Modifica'),bb('retry','Riprova','primary')),{
     retry:()=>{tap();S.seen=[];S.cands=[];run(false,true);},
@@ -268,14 +294,14 @@ async function enrichFilm(c){if(!/^Q\d+$/.test(String(c.id)))return null;const t
 async function filmDetails(c){const [w,meta]=await Promise.all([c.pre?Promise.resolve(c.pre):enrichFilm(c),wdMeta(c.id)]);const gl=meta.glist&&meta.glist.length?meta.glist:uniq((c.genres||[]).map(x=>x));return{movie:true,title:c.title,year:c.year,runtime:c.runtime,dir:meta.dir||"",glist:gl,gt:gl.join(" · "),overview:(w&&w.extract)||"Trama non ancora disponibile su Wikipedia in italiano.",it:!!(w&&w.extract),poster:(w&&w.thumb)||c.img,rl:"Wikidata",rv:null,pop:c.sl};}
 
 async function tvDiscover(a,anim){const wn=without("serie",a),want=G.serie.mood[a.mood]||["Drama","Comedy"],ym=0;const pages=uniq(Array.from({length:anim?14:6},()=>rand(240)));const lists=await Promise.all(pages.map(p=>fjr("https://api.tvmaze.com/shows?page="+p,9000).catch(()=>[])));const all=[].concat(...lists);if(!all.length)throw new Error("rete/TVmaze non raggiungibile");const items=all.filter(s=>(anim?s.type==="Animation":s.type!=="Animation")&&(s.genres||[]).indexOf("Anime")<0&&(anim||(s.genres&&s.genres.length))).map(s=>({id:s.id,src:"tv",anim:anim,title:s.name,year:s.premiered?s.premiered.slice(0,4):"",genres:s.genres||[],rating:s.rating&&s.rating.average||0,runtime:s.averageRuntime||30,image:s.image&&s.image.original||null,summary:strip(s.summary||""),lang:s.language||""}));const ov=m=>m.genres.some(x=>want.indexOf(x)>=0),bad=m=>m.genres.some(x=>wn.indexOf(x)>=0);return tier(items,[m=>ov(m)&&!bad(m)&&(!ym||!m.year||+m.year>=ym)&&m.rating>=6.5&&(anim||a.risk>=60||m.lang==="English"||m.lang==="Italian"),m=>ov(m)&&!bad(m)&&(!m.rating||m.rating>=5.5),m=>ov(m)&&!bad(m),m=>ov(m),()=>true]);}
-async function tvDetails(c){const w=await enrich(c.title,c.anim?"serie animata":"serie televisiva");return{title:c.title,year:c.year,runtime:c.runtime,overview:(w&&w.extract)||c.summary||"Trama non disponibile.",it:!!(w&&w.extract),poster:c.image||(w&&w.thumb),rl:"TVmaze",rv:c.rating,glist:itg(c.genres),gt:itg(c.genres).join(" · ")};}
+async function tvDetails(c){const w=await enrich(c.title,c.anim?"serie animata":"serie televisiva");return{movie:false,isTv:true,title:c.title,year:c.year,runtime:c.runtime,overview:(w&&w.extract)||c.summary||"Trama non disponibile.",it:!!(w&&w.extract),poster:c.image||(w&&w.thumb),rl:"TVmaze",rv:c.rating,glist:itg(c.genres),gt:itg(c.genres).join(" · ")};}
 
 const GIT={"Comedy":"Commedia","Drama":"Drammatico","Romance":"Sentimentale","Horror":"Horror","Action":"Azione","Adventure":"Avventura","Fantasy":"Fantasy","Science-Fiction":"Fantascienza","Sci-Fi":"Fantascienza","Mystery":"Mistero","Thriller":"Thriller","Suspense":"Suspense","Slice of Life":"Vita quotidiana","Psychological":"Psicologico","Family":"Famiglia","Crime":"Crimine"};
 const itg=a=>uniq((a||[]).map(x=>GIT[x]||x));
 function fmtMin(m){return m>=60?Math.floor(m/60)+" h"+(m%60?" "+String(m%60).padStart(2,'0'):""):m+" min";}
 const mainstream=(cat,m)=>m.vc!=null?Math.max(0,Math.min(1,Math.log10(Math.max(10,m.vc))/4.3)):m.sl!=null?Math.max(0,Math.min(1,Math.log10(Math.max(2,m.sl))/2.6)):m.rating?Math.max(0,Math.min(1,(m.rating-4)/5)):.4;
 const hit=(g,w)=>g&&w&&g.some(x=>w.indexOf(x)>=0)?1:0;
-function score(cat,m,a){const g=m.genres||[],gs=G[cat==="cartoni"?(isFilmItem(m)?"film":"serie"):gkey(cat,a)],ms=mainstream(cat,m),e=+a.effort;const heavy=g.some(x=>gs.heavy.indexOf(x)>=0)||(m.rating||0)>=8.3,light=g.some(x=>gs.light.indexOf(x)>=0);return 45*hit(g,gs.mood[a.mood])+20*(e===2?(heavy?1:.3):e===0?(light?1:.3):.75)+20*Math.max(0,1-Math.abs((1-ms)*100-a.risk)/70)+15*(m.sl!=null?ms:m.rating?Math.max(0,Math.min(1,(m.rating-5)/4)):.5)+Math.random()*6;}
+function score(cat,m,a){const g=m.genres||[],gs=G[cat==="cartoni"?(isFilmItem(m)?"film":"serie"):gkey(cat,a)],ms=mainstream(cat,m),e=+a.effort;const heavy=g.some(x=>gs.heavy.indexOf(x)>=0)||(m.rating||0)>=8.3,light=g.some(x=>gs.light.indexOf(x)>=0);const who=a.who==="couple"?hit(g,gs.mood.love.concat(gs.mood.laugh)):a.who==="friends"?hit(g,gs.mood.laugh.concat(gs.mood.thrill,gs.mood.scare)):0;return 45*hit(g,gs.mood[a.mood])+20*(e===2?(heavy?1:.3):e===0?(light?1:.3):.75)+20*Math.max(0,1-Math.abs((1-ms)*100-a.risk)/70)+15*(m.sl!=null?ms:m.rating?Math.max(0,Math.min(1,(m.rating-5)/4)):.5)+8*who+Math.random()*6;}
 const pct=s=>Math.round(Math.min(98,52+46*Math.pow(Math.max(0,s)/100,1.3)));
 
 function parseDur(d){if(!d)return null;const h=/(\d+)\s*hr/.exec(d),m=/(\d+)\s*min/.exec(d);const v=(h?+h[1]*60:0)+(m?+m[1]:0);return v||null;}
@@ -320,7 +346,7 @@ async function animeDiscover(a){
   if(!items.length&&err)throw err;
   return items.slice(0,40);
 }
-async function animeDetails(c){const w=await enrich(c.title,c.movie?"film anime":"anime");return{movie:!!c.movie,title:c.title,year:c.year,runtime:c.runtime,episodes:c.episodes,overview:(w&&w.extract)||c.summary||"Trama non disponibile.",it:!!(w&&w.extract),poster:c.image||(w&&w.thumb),rl:"Jikan",rv:c.rating,glist:itg(c.genres),gt:itg(c.genres).join(" · ")};}
+async function animeDetails(c){const w=await enrich(c.title,c.movie?"film anime":"anime");return{movie:!!c.movie,isTv:!c.movie,title:c.title,year:c.year,runtime:c.runtime,episodes:c.episodes,overview:(w&&w.extract)||c.summary||"Trama non disponibile.",it:!!(w&&w.extract),poster:c.image||(w&&w.thumb),rl:String(c.id).slice(0,2)==="al"?"AniList":"Jikan",rv:c.rating,glist:itg(c.genres),gt:itg(c.genres).join(" · ")};}
 /* ---------- TMDB (tramite proxy: la chiave NON è in questo file) ---------- */
 const TMDB_PROXY="https://stasera-tmdb.tommaso2000bw.workers.dev";   /* es. "https://stasera-tmdb.tuonome.workers.dev"  (vedi GUIDA-TMDB.md) */
 const TMDB_IMG="https://image.tmdb.org/t/p/w500";
@@ -334,12 +360,18 @@ const TM_ANIME={35:["Comedy"],18:["Drama"],10749:["Romance"],27:["Horror"],28:["
 const KWC={};
 async function tmKw(q){if(KWC[q]!==undefined)return KWC[q];try{const r=await tm("/3/search/keyword",{query:q,page:1});KWC[q]=(r.results&&r.results[0]&&r.results[0].id)||null;}catch(e){KWC[q]=null;}return KWC[q];}
 async function tmDiscover(kind,a,anim,ja){
-  const film=kind==="film",r=a.risk;
-  const minVotes=ja?(r<30?500:r<60?150:r<80?50:20):(r<30?2000:r<60?500:r<80?150:50),maxPage=r<30?4:r<60?10:r<80?18:30;
+  const film=kind==="film",r=a.risk,narrow=!!a.prov||(!!a.era&&a.era!=="any");
+  let minVotes=ja?(r<30?500:r<60?150:r<80?50:20):(r<30?2000:r<60?500:r<80?150:50),maxPage=r<30?4:r<60?10:r<80?18:30;
+  if(a.prov)minVotes=Math.floor(minVotes/3);
+  if(narrow)maxPage=Math.min(maxPage,5);
   const p={sort_by:"popularity.desc",include_adult:"false","vote_count.gte":minVotes,"vote_average.gte":6};
   const mood=(film?TM_MOOD_FILM:TM_MOOD_TV)[a.mood]||"18";
   if(anim){p.with_genres="16,"+pick(mood.split("|"));if(ja)p.with_original_language="ja";}
   else{p.with_genres=mood;p.without_genres="16";}
+  if(a.who==="family"){
+    const ex=(film?[27,10752,80]:[80,10768]).filter(x=>mood.split("|").indexOf(String(x))<0);
+    if(ex.length)p.without_genres=(p.without_genres?p.without_genres+"|":"")+ex.join("|");
+  }
   if(film){
     if(a.time==="short")p["with_runtime.lte"]=90;
     if(a.time==="mid"){p["with_runtime.gte"]=85;p["with_runtime.lte"]=125;}
@@ -348,6 +380,12 @@ async function tmDiscover(kind,a,anim,ja){
     const kw=a.mood==="scare"?await tmKw("horror"):a.mood==="love"?await tmKw("romance"):null;
     if(kw)p.with_keywords=kw;
   }
+  if(a.era&&a.era!=="any"){
+    const er=ERA_R[a.era],k=film?"primary_release_date":"first_air_date";
+    if(er[0])p[k+".gte"]=er[0]+"-01-01";
+    if(er[1]<9999)p[k+".lte"]=er[1]+"-12-31";
+  }
+  if(a.prov){p.with_watch_providers=a.prov;p.watch_region="IT";p.with_watch_monetization_types="flatrate";}
   const pages=uniq([1+rand(maxPage),1+rand(maxPage)]);
   const path="/3/discover/"+(film?"movie":"tv");
   let lists=await Promise.all(pages.map(pg=>tm(path,Object.assign({page:pg},p)).then(x=>x.results||[]).catch(()=>null)));
@@ -360,26 +398,60 @@ async function tmDiscover(kind,a,anim,ja){
     year:((film?m.release_date:m.first_air_date)||"").slice(0,4),genres:gen(m.genre_ids),
     rating:m.vote_average||0,vc:m.vote_count||0,image:m.poster_path?TMDB_IMG+m.poster_path:null,summary:m.overview}));
 }
+const RN=(()=>{try{return new Intl.DisplayNames(["it"],{type:"region"});}catch(e){return null;}})();
+const LN=(()=>{try{return new Intl.DisplayNames(["it"],{type:"language"});}catch(e){return null;}})();
+const cname=c=>{try{return RN?RN.of(c):c;}catch(e){return c;}};
+const lname=c=>{try{return LN?LN.of(c):c;}catch(e){return c;}};
+const fdate=s=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(s||"");return m?m[3]+"/"+m[2]+"/"+m[1]:"";};
+const STAT={"Returning Series":"In corso","Ended":"Conclusa","Canceled":"Cancellata","In Production":"In produzione","Planned":"Pianificata","Pilot":"Pilot"};
 async function tmdbDetails(c){
-  let d={};try{d=await tm("/3/"+(c.movie?"movie":"tv")+"/"+c.tid);}catch(e){}
+  const base="/3/"+(c.movie?"movie":"tv")+"/"+c.tid;
+  let d={};
+  try{d=await tm(base,{append_to_response:c.movie?"watch/providers,credits,videos,release_dates":"watch/providers,credits,videos,content_ratings",include_video_language:"it,en,null"});}
+  catch(e){try{d=await tm(base);}catch(x){}}
   const rt=c.movie?(d.runtime||null):((d.episode_run_time&&d.episode_run_time[0])||(d.last_episode_to_air&&d.last_episode_to_air.runtime)||null);
   const gl=itg((d.genres||[]).map(g=>g.name)).slice(0,4);
-  return{movie:c.movie,title:c.title,year:c.year,runtime:rt,seasons:c.movie?null:(d.number_of_seasons||null),
-    overview:d.overview||c.summary,it:true,poster:c.image,rl:"TMDB",rv:c.rating,glist:gl,gt:gl.join(" · ")};
+  const wpAll=d["watch/providers"],wp=wpAll&&wpAll.results&&wpAll.results.IT;
+  const prov=wp?{link:wp.link||"",flat:wp.flatrate||[],ads:wp.ads||[],rent:wp.rent||[],buy:wp.buy||[]}:null;
+  let cert="";
+  try{
+    if(c.movie){const x=((d.release_dates&&d.release_dates.results)||[]).find(r=>r.iso_3166_1==="IT");const y=x&&(x.release_dates||[]).find(z=>z.certification);cert=y?y.certification:"";}
+    else{const x=((d.content_ratings&&d.content_ratings.results)||[]).find(r=>r.iso_3166_1==="IT");cert=x?x.rating:"";}
+  }catch(e){}
+  const crew=(d.credits&&d.credits.crew)||[],cast=(d.credits&&d.credits.cast)||[];
+  const dir=c.movie?crew.filter(x=>x.job==="Director").map(x=>x.name).slice(0,2):(d.created_by||[]).map(x=>x.name).slice(0,2);
+  const vids=((d.videos&&d.videos.results)||[]).filter(v=>v.site==="YouTube"&&(v.type==="Trailer"||v.type==="Teaser"));
+  const tv=vids.find(v=>v.type==="Trailer"&&v.iso_639_1==="it")||vids.find(v=>v.type==="Trailer")||vids[0];
+  const orig=c.movie?d.original_title:d.original_name;
+  const countries=uniq((c.movie?(d.production_countries||[]).map(x=>x.iso_3166_1):(d.origin_country||[])).map(cname)).slice(0,3);
+  return{movie:c.movie,isTv:!c.movie,title:c.title,year:c.year,runtime:c.runtime||rt,seasons:c.movie?null:(d.number_of_seasons||null),episodes:c.movie?null:(d.number_of_episodes||null),
+    overview:d.overview||c.summary,it:true,poster:c.image,rl:"TMDB",rv:c.rating,vc:d.vote_count||c.vc||0,glist:gl,gt:gl.join(" · "),
+    tagline:d.tagline||"",orig:(orig&&!sameTitle(orig,c.title))?orig:"",dir:dir.join(", "),cast:cast.slice(0,6).map(x=>x.name).join(", "),
+    nets:c.movie?"":(d.networks||[]).map(x=>x.name).slice(0,2).join(", "),countries:countries.join(", "),lang:d.original_language?lname(d.original_language):"",
+    date:fdate(c.movie?d.release_date:d.first_air_date),status:c.movie?"":(STAT[d.status]||d.status||""),cert:cert,
+    trailer:tv?"https://www.youtube.com/watch?v="+tv.key:"",prov:prov,provKnown:!!wpAll,
+    tmdbUrl:"https://www.themoviedb.org/"+(c.movie?"movie":"tv")+"/"+c.tid};
 }
 async function animeNew(a){const kinds=a.fmt==='movie'?['film']:a.fmt==='any'?['film','tv']:['tv'];const r=await Promise.allSettled(kinds.map(k=>tmDiscover(k,a,true,true)));const list=[];r.forEach(x=>{if(x.status==='fulfilled')list.push(...x.value);});if(list.length<3)throw new Error('poche');return list;}
-async function viaTmdb(fn,fallback){if(!tmdbOn())return fallback();try{const l=await fn();if(l&&l.length>=3)return l;}catch(e){}return fallback();}
+async function viaTmdb(fn,fallback,a){
+  if(!tmdbOn())return fallback();
+  try{const l=await fn();if(l&&l.length>=(a.prov?1:3))return l;if(a.prov)throw new Error("EMPTY");}
+  catch(e){if(e&&e.message==="EMPTY")throw e;}
+  return fallback();
+}
 const isFilmItem=m=>m.sl!=null||(m.src==="tmdb"&&m.movie);
 const detailsOf=c=>c.src==="tmdb"?tmdbDetails(c):c.sl!=null?filmDetails(c):c.src==="tv"?tvDetails(c):animeDetails(c);
 async function cartoniOld(a){const r=await Promise.allSettled([filmDiscover(a,true),tvDiscover(a,true)]);const list=[];let err=null;r.forEach(x=>{if(x.status==="fulfilled")list.push(...x.value);else err=err||x.reason;});if(!list.length&&err)throw err;return list;}
 async function cartoniNew(a){const r=await Promise.allSettled([tmDiscover("film",a,true),tmDiscover("tv",a,true)]);const list=[];r.forEach(x=>{if(x.status==="fulfilled")list.push(...x.value);});if(list.length<3)throw new Error("poche");return list;}
 const SRC={
-  film:a=>viaTmdb(()=>tmDiscover("film",a,false),()=>filmDiscover(a,false)),
-  serie:a=>viaTmdb(()=>tmDiscover("tv",a,false),()=>tvDiscover(a,false)),
-  anime:a=>viaTmdb(()=>animeNew(a),()=>animeDiscover(a)),
-  cartoni:a=>viaTmdb(()=>cartoniNew(a),()=>cartoniOld(a))
+  film:a=>viaTmdb(()=>tmDiscover("film",a,false),()=>filmDiscover(a,false),a),
+  serie:a=>viaTmdb(()=>tmDiscover("tv",a,false),()=>tvDiscover(a,false),a),
+  anime:a=>viaTmdb(()=>animeNew(a),()=>animeDiscover(a),a),
+  cartoni:a=>viaTmdb(()=>cartoniNew(a),()=>cartoniOld(a),a)
 };
-async function rank(a){const list=await SRC[S.cat](a);if(!list||!list.length)throw new Error("EMPTY");const out=list.map(m=>({m,s:score(S.cat,m,a)})).sort((x,y)=>y.s-x.s);
+async function rank(a){let list=await SRC[S.cat](a);if(!list||!list.length)throw new Error("EMPTY");
+  if(a.era&&a.era!=="any"){const f=list.filter(m=>eraOk(m.year,a));if(f.length>=3)list=f;}
+  const out=list.map(m=>({m,s:score(S.cat,m,a)})).sort((x,y)=>y.s-x.s);
   if(S.cat!=="cartoni")return out;
   const f=out.filter(x=>isFilmItem(x.m)),t=out.filter(x=>!isFilmItem(x.m));
   if(!f.length||!t.length)return out;
@@ -420,26 +492,60 @@ function why(r,sur){
   if(sur)o.push('È una scelta volutamente fuori dalla tua comfort zone.');
   if(hit(g,gs.mood[a.mood]))o.push('Cercavi '+MOOD_TXT[a.mood]+(d.glist&&d.glist.length?" e i suoi generi ("+d.glist.slice(0,3).join(', ')+") vanno in quella direzione.":"."));
   else o.push('Non è il genere più ovvio per chi cerca '+MOOD_TXT[a.mood]+(d.glist&&d.glist.length?" ("+d.glist.slice(0,3).join(', ')+")":"")+': lo propongo per gli altri criteri.');
+  if(a.prov&&d.prov&&d.prov.flat.some(p=>String(p.provider_id)===a.prov)){const pn=(PROV.find(x=>x[0]===a.prov)||[])[2];o.push('Lo trovi in abbonamento su '+(pn||'questa piattaforma')+'.');}
+  if(a.who==="family")o.push('Escluso il materiale più adatto a un pubblico adulto.');
   if(d.runtime)o.push(d.movie===false?'Episodi da '+d.runtime+' min.':'Dura '+fmtMin(d.runtime)+'.');
   if(!d.runtime&&d.episodes)o.push(d.episodes+' episodi.');
   if(d.rv)o.push('Voto '+(+d.rv).toFixed(1)+' / 10.');
   if(a.risk>=70)o.push('È abbastanza fuori dagli schemi da risultare interessante.');
   return o.slice(0,4);
 }
+function provHtml(d){
+  if(d.rl!=="TMDB"||!d.provKnown)return "";
+  const groups=[["flat","In abbonamento"],["ads","Gratis con pubblicità"],["rent","Noleggio"],["buy","Acquisto"]];
+  let h="";
+  groups.forEach(g=>{
+    const arr=(d.prov&&d.prov[g[0]])||[];if(!arr.length)return;
+    h+='<div class="pg"><small>'+g[1]+'</small><div class="pl">'+arr.map(p=>'<span class="pv">'+(p.logo_path?'<img src="https://image.tmdb.org/t/p/w92'+esc(p.logo_path)+'" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">':'')+'<em>'+esc(p.provider_name)+'</em></span>').join('')+'</div></div>';
+  });
+  if(!h)h='<p>Al momento non risulta disponibile in Italia su piattaforme di streaming, noleggio o acquisto.</p>';
+  else if(d.prov&&d.prov.link)h+='<a class="more" href="'+esc(d.prov.link)+'" target="_blank" rel="noopener">Tutte le opzioni ↗</a>';
+  return '<section class="block"><h3>Dove guardarlo in Italia</h3>'+h+'</section>';
+}
+function infoHtml(d){
+  const eps=(d.seasons?d.seasons+(d.seasons>1?' stagioni':' stagione'):'')+(d.episodes?(d.seasons?' · ':'')+d.episodes+' episodi':'');
+  const rows=[
+    ["Generi",d.gt],["Titolo originale",d.orig],[d.isTv?"Ideata da":"Regia",d.dir],["Cast",d.cast],
+    ["Rete",d.nets],["Paese",d.countries],["Lingua originale",d.lang],[d.isTv?"Prima messa in onda":"Uscita",d.date],
+    ["Episodi",eps],["Stato",d.status],["Classificazione",d.cert],
+    ["Voto pubblico",d.rv?(+d.rv).toFixed(1)+' / 10'+(d.vc?' · '+d.vc.toLocaleString('it-IT')+' voti':''):'']
+  ].filter(x=>x[1]);
+  if(!rows.length)return "";
+  return '<section class="block"><h3>Scheda</h3><dl class="info">'+rows.map(x=>'<dt>'+esc(x[0])+'</dt><dd>'+esc(x[1])+'</dd>').join('')+'</dl></section>';
+}
+function attrTxt(d){
+  if(d.rl==='TMDB')return 'Dati e immagini: TMDB'+(d.provKnown?' · Dove guardarlo: JustWatch':'')+'. Questo prodotto usa le API di TMDB ma non è approvato né certificato da TMDB.';
+  return 'Fonti: '+d.rl+(d.it?' · Wikipedia':'')+'. TMDB non utilizzato per questo risultato.';
+}
 function show(r,sur){
   S.cur=r;const d=r.d;let p=pct(r.s);if(sur)p=Math.max(60,p-6);
   const poster=d.poster?'<div class="poster"><img src="'+esc(d.poster)+'" alt="Copertina di '+esc(d.title)+'" referrerpolicy="no-referrer"></div>':fbPoster(d.title,d.year);
   const h='<div class="res">'+
-    '<div class="hero">'+poster+'<div class="meta"><h2>'+esc(d.title)+'</h2><div class="chips">'+
+    '<div class="hero">'+poster+'<div class="meta"><h2>'+esc(d.title)+'</h2>'+(d.tagline?'<p class="tag">'+esc(d.tagline)+'</p>':'')+'<div class="chips">'+
       (d.year?'<span class="chip">'+esc(d.year)+'</span>':'')+
       (S.cat==='anime'||S.cat==='cartoni'?'<span class="chip">'+(d.movie?'Film':'Serie')+'</span>':'')+
       (d.seasons?'<span class="chip">'+d.seasons+(d.seasons>1?' stagioni':' stagione')+'</span>':'')+
-      (d.runtime?'<span class="chip">'+d.runtime+' min</span>':'')+
+      (d.runtime?'<span class="chip">'+d.runtime+' min'+(d.movie===false?' / ep.':'')+'</span>':'')+
+      (d.cert?'<span class="chip">'+esc(d.cert)+'</span>':'')+
       (d.rv?'<span class="chip r">★ '+(+d.rv).toFixed(1)+'</span>':'')+
+      (d.trailer?'<a class="chip lnk" href="'+esc(d.trailer)+'" target="_blank" rel="noopener">▶ Trailer</a>':'')+
     '</div><div class="compat"><b>Compatibilità '+p+'%</b><div class="meter"><span style="width:'+p+'%"></span></div></div></div></div>'+
-    '<section class="block"><h3>Perché fa per te</h3><ul class="why">'+why(r,sur).slice(0,3).map(x=>'<li><b>✓</b><span>'+esc(x)+'</span></li>').join('')+'</ul></section>'+
+    '<section class="block"><h3>Perché fa per te</h3><ul class="why">'+why(r,sur).slice(0,4).map(x=>'<li><b>✓</b><span>'+esc(x)+'</span></li>').join('')+'</ul></section>'+
+    provHtml(d)+
     '<section class="block"><h3>Trama</h3><p class="clamp" id="plot" style="cursor:pointer">'+esc(d.overview||'Trama non disponibile.')+'</p></section>'+
-    (d.rl==='TMDB'?'<p class="attr">Dati e immagini: TMDB. Questo prodotto usa le API di TMDB ma non è approvato né certificato da TMDB.</p>':'')+
+    infoHtml(d)+
+    (d.tmdbUrl?'<a class="more" style="text-align:center" href="'+esc(d.tmdbUrl)+'" target="_blank" rel="noopener">Scheda completa su TMDB ↗</a>':'')+
+    '<p class="attr">'+esc(attrTxt(d))+'</p>'+
   '</div>';
   swap(h);
   const pl=$('plot');if(pl)pl.onclick=()=>pl.classList.toggle('clamp');
@@ -448,16 +554,6 @@ function show(r,sur){
     sur:()=>{tap();run(true,false);},
     rst:()=>{tap();home();}});
 }
-
-/* ---------- Altezza reale dello schermo (webapp iOS) ---------- */
-function fit(){
-  const vv=window.visualViewport,h=Math.round(Math.max(window.innerHeight||0,vv&&vv.height||0,document.documentElement.clientHeight||0));
-  if(h>200)document.documentElement.style.setProperty('--app-h',h+'px');
-}
-fit();
-["resize","orientationchange","pageshow"].forEach(ev=>addEventListener(ev,()=>{fit();setTimeout(fit,250);}));
-if(window.visualViewport)window.visualViewport.addEventListener("resize",fit);
-setTimeout(fit,300);
 
 /* ---------- Icona app (iOS) ---------- */
 try{
