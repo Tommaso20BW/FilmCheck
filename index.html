@@ -783,11 +783,14 @@ let LB=null,PEND=null;
 const EASE="cubic-bezier(.2,.85,.25,1)";
 const bigUrl=u=>String(u||"").replace("/t/p/w500/","/t/p/w780/").replace(/\?width=\d+$/,"?width=900");
 function rad(el){const r=parseFloat(getComputedStyle(el).borderTopLeftRadius);return isNaN(r)?16:r;}
+// misura la locandina "a riposo" (ignora l'effetto di pressione scale(.97))
+function rectOf(el){const t=el.style.transition,f=el.style.transform;el.style.transition="none";el.style.transform="none";const r=el.getBoundingClientRect();el.style.transform=f;el.style.transition=t;return r;}
 function fromTo(sr,T){const k=sr.width/T.w;return "translate("+(sr.left-T.x)+"px,"+(sr.top-T.y)+"px) scale("+k+")";}
+const SH_ON="0 30px 80px rgba(0,0,0,.7),0 0 60px rgba(143,98,248,.3)",SH_OFF="0 24px 50px rgba(0,0,0,.6),0 0 40px rgba(143,98,248,.25)";
 function openLb(el){
   if(LB)return;
   if(PEND)PEND();
-  const lb=$("lb"),card=$("lbc"),sr=el.getBoundingClientRect();
+  const lb=$("lb"),card=$("lbc"),sr=rectOf(el);
   const vw=innerWidth,vh=innerHeight,padX=20,padT=76,padB=64;
   const maxW=vw-padX*2,maxH=vh-padT-padB;
   const w=Math.min(maxW,maxH*2/3,520),h=w*1.5,T={x:(vw-w)/2,y:padT+(maxH-h)/2,w,h};
@@ -804,13 +807,13 @@ function openLb(el){
     const cl=el.cloneNode(true);cl.style.fontSize=(16*T.w/Math.max(60,sr.width))+"px";
     card.innerHTML="";card.appendChild(cl);
   }
-  LB={el,T,card,lb,moved:false,R};
+  const zi=el.querySelector(".zoom");
+  LB={el,T,card,lb,moved:false,R,zi};
   lb.classList.add("on");void lb.offsetWidth;lb.classList.add("show");
-  el.style.visibility="hidden";
-  // scala UNIFORME (niente deformazione) + raggio angoli compensato (niente "taglio")
+  // NON nascondo la locandina originale: resta sotto la card (ombra e bordo non "scattano" mai)
   card.animate([
-    {transform:fromTo(sr,T),borderRadius:(R/k)+"px"},
-    {transform:"translate(0,0) scale(1)",borderRadius:R+"px"}
+    {transform:fromTo(sr,T),borderRadius:(R/k)+"px",boxShadow:SH_OFF},
+    {transform:"translate(0,0) scale(1)",borderRadius:R+"px",boxShadow:SH_ON}
   ],{duration:RM()?1:420,easing:EASE});
   try{history.pushState({lb:1},"");}catch(e){}
 }
@@ -822,22 +825,21 @@ function closeLb(){
 function doCloseLb(){
   if(!LB)return;
   const L=LB;LB=null;
-  const sr=L.el.getBoundingClientRect(),k=sr.width/L.T.w;
+  const sr=rectOf(L.el),k=sr.width/L.T.w;
   const cur=L.cur||getComputedStyle(L.card).transform;
   const bg=L.lb.querySelector(".bg");
   L.lb.classList.remove("show");bg.style.opacity="";
+  // l'icona zoom è coperta dalla card: la tengo spenta e la faccio comparire dolcemente alla fine
+  if(L.zi){L.zi.style.transition="none";L.zi.style.opacity="0";}
   let done=false;
-  const fin=()=>{if(done)return;done=true;PEND=null;try{L.card.getAnimations().forEach(x=>x.cancel());}catch(e){}
-    try{L.el.getAnimations().forEach(x=>x.cancel());}catch(e){}L.el.style.visibility="";L.lb.classList.remove("on");L.card.innerHTML="";L.card.style.transform="";};
-  const D=RM()?1:340,X=RM()?1:160;
-  // la locandina originale riappare con dissolvenza (niente "pop"), mentre la card si dissolve
-  L.el.style.visibility="";
-  L.el.animate([{opacity:0},{opacity:1}],{duration:X,delay:D-X,easing:"ease-out",fill:"both"});
+  const fin=()=>{if(done)return;done=true;PEND=null;
+    try{L.card.getAnimations().forEach(x=>x.cancel());}catch(e){}
+    if(L.zi){void L.zi.offsetWidth;L.zi.style.transition="opacity .22s ease";L.zi.style.opacity="";setTimeout(()=>{L.zi.style.transition="";},300);}
+    L.lb.classList.remove("on");L.card.innerHTML="";L.card.style.transform="";};
   const a=L.card.animate([
-    {transform:(cur&&cur!=="none")?cur:"translate(0,0) scale(1)",borderRadius:L.R+"px",opacity:1,offset:0},
-    {opacity:1,offset:1-X/D*0.9},
-    {transform:fromTo(sr,L.T),borderRadius:(L.R/k)+"px",opacity:0,offset:1}
-  ],{duration:D,easing:EASE,fill:"forwards"});
+    {transform:(cur&&cur!=="none")?cur:"translate(0,0) scale(1)",borderRadius:L.R+"px",boxShadow:SH_ON},
+    {transform:fromTo(sr,L.T),borderRadius:(L.R/k)+"px",boxShadow:SH_OFF}
+  ],{duration:RM()?1:340,easing:EASE,fill:"forwards"});
   PEND=fin;a.onfinish=fin;setTimeout(fin,600);
 }
 (function(){
